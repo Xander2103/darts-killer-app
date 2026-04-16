@@ -1,3 +1,4 @@
+<img width="537" height="1110" alt="Game" src="https://github.com/user-attachments/assets/64539d80-ba52-4473-a5d9-34c919377562" />
 🎯 Darts Killer App
 
 An interactive darts game built in JavaScript, focused on Killer mode gameplay, player state management, scoring logic, and dynamic UI updates.
@@ -6,11 +7,11 @@ This project was created to combine game logic, frontend interaction, and usabil
 
 📸 Preview
 
-Add screenshots of the game here
-
-Example:
-
+<img width="537" height="1110" alt="Game" src="https://github.com/user-attachments/assets/a8ad1b26-4b40-40d6-b0a0-085b13e5ea64" />
 <img width="537" height="1110" alt="Game" src="https://github.com/user-attachments/assets/f9e243d7-076d-43e5-948e-9ae90607a7ca" />
+<img width="542" height="1106" alt="Setup" src="https://github.com/user-attachments/assets/a4f3438b-25cd-4dbd-be44-5180467a45e6" />
+<img width="537" height="1113" alt="Settings" src="https://github.com/user-attachments/assets/50bd9557-4edf-4f2f-adc0-d0048cb27a6f" />
+
 
 
 
