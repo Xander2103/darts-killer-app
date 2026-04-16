@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Killer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="theme-neon">
+    <main class="container">
+        <!-- HOME SCREEN -->
+        <section id="homeScreen" class="home-screen">
+            <header class="home-header">
+                <div class="home-logo-wrap">
+                    <img id="homeLogo"  src="img/KillerDartsLogo.png" alt="Darts Logo" class="home-logo">
+                </div>
+            </header>
+
+            <section class="panel home-panel">
+                <div class="home-panel-header">
+                    <h2>Kies je mode</h2>
+                </div>
+
+                <div class="mode-grid">
+                    <button id="classicModeBtn" type="button" class="mode-card mode-card-classic">
+                        <div class="mode-card-top">
+                            <span class="mode-badge mode-badge-live">Live</span>
+                        </div>
+                        <div class="mode-card-body">
+                            <h3>Klassiek Killer</h3>
+                            <p>De standaard Killer mode met settings, undo en nummerkeuze.</p>
+                        </div>
+                    </button>
+
+                    <button id="chaosModeBtn" type="button" class="mode-card mode-card-disabled">
+                        <div class="mode-card-top">
+                            <span class="mode-badge mode-badge-progress">In progress</span>
+                        </div>
+                        <div class="mode-card-body">
+                            <h3>Chaos Mode</h3>
+                            <p>Random regels, boosts, punishment rounds en meer party chaos.</p>
+                        </div>
+                    </button>
+
+                    <button id="drinkModeBtn" type="button" class="mode-card mode-card-disabled">
+                        <div class="mode-card-top">
+                            <span class="mode-badge mode-badge-progress">In progress</span>
+                        </div>
+                        <div class="mode-card-body">
+                            <h3>Drink Mode</h3>
+                            <p>Party variant met drink challenges, penalties en fun events.</p>
+                        </div>
+                    </button>
+                </div>
+            </section>
+        </section>
+
+        <!-- CLASSIC SCREEN -->
+        <section id="classicScreen" class="hidden">
+            <header class="top-bar">
+                <button id="backToHomeButton" type="button" class="top-action-button">← Back</button>
+                <h1>KILLER</h1>
+                <button id="settingsButton" type="button" class="top-action-button">Settings</button>
+            </header>
+
+            <section id="setupPanel" class="panel">
+                <h2>Spelers toevoegen</h2>
+
+                <input type="text" id="playerName" class="player-name-input" placeholder="Naam speler">
+
+                <div class="number-mode-section">
+                    <p class="number-mode-title">Nummer toewijzing</p>
+
+                    <label class="mode-option">
+                        <input type="radio" name="numberMode" id="numberModeManual" value="manual" checked>
+                        <span>Zelf nummers ingeven</span>
+                    </label>
+
+                    <label class="mode-option">
+                        <input type="radio" name="numberMode" id="numberModeRandom" value="random">
+                        <span>Random nummers</span>
+                    </label>
+                </div>
+
+                <div id="setupError" class="setup-error hidden"></div>
+
+                <div class="lobby-actions">
+                    <button id="addPlayerBtn" class="action-btn action-btn-secondary" type="button">
+                        <span class="action-icon">+</span>
+                        Voeg speler toe
+                    </button>
+
+                    <button id="startGameBtn" class="action-btn action-btn-primary" type="button">
+                        <span class="action-icon">▶</span>
+                        Start spel
+                    </button>
+                </div>
+
+                <ol id="playerList" class="player-list"></ol>
+            </section>
+
+            <section id="gamePanel" class="panel hidden">
+                <div class="panel-header">
+                    <h2>Spelbord</h2>
+                    <button id="undoButton" type="button" class="small-action-button">↶ Undo</button>
+                </div>
+                <div id="gameBoard" class="game-board"></div>
+            </section>
+
+            <div id="settingsModal" class="settings-modal hidden">
+                <div class="settings-modal-content">
+                    <div class="settings-modal-header">
+                        <h2>Settings</h2>
+                        <button id="closeSettingsButton" type="button" class="small-action-button">Sluiten</button>
+                    </div>
+
+                    <div class="settings-group">
+                        <label for="themeSelect">Thema</label>
+                        <select id="themeSelect">
+                            <option value="theme-neon">Neon Darts</option>
+                            <option value="theme-pub">Pub Darts</option>
+                            <option value="theme-arcade">Arcade Color</option>
+                            <option value="theme-clean">Clean Sport</option>
+                        </select>
+                        <p class="setting-help standalone-help">Verandert de look en sfeer van de app.</p>
+
+                        <div class="setting-card clickable-setting" data-setting="immunity">
+                            <div class="setting-text">
+                                <div class="setting-title">Immuniteit aan</div>
+                                <p class="setting-help">Nieuwe spelers zijn eerst beschermd tegen aanvallen.</p>
+                            </div>
+                            <input type="checkbox" id="immunityToggle" checked>
+                        </div>
+
+                        <div class="setting-card clickable-setting" data-setting="killerForever">
+                            <div class="setting-text">
+                                <div class="setting-title">Killer blijft permanent</div>
+                                <p class="setting-help">Een speler die killer wordt, blijft killer ook als zijn score terug daalt.</p>
+                            </div>
+                            <input type="checkbox" id="killerForeverToggle" checked>
+                        </div>
+
+                        <div class="setting-card clickable-setting" data-setting="exactZero">
+                            <div class="setting-text">
+                                <div class="setting-title">Uit op exact 0</div>
+                                <p class="setting-help">Spelers vallen alleen uit als hun score exact op 0 komt.</p>
+                            </div>
+                            <input type="checkbox" id="exactZeroToggle">
+                        </div>
+
+                        <div class="setting-card clickable-setting" data-setting="recovery">
+                            <div class="setting-text">
+                                <div class="setting-title">Recovery vóór eigen beurt</div>
+                                <p class="setting-help">Een speler krijgt nog een kans om zichzelf te redden vóór hij echt uitvalt.</p>
+                            </div>
+                            <input type="checkbox" id="recoveryToggle" checked>
+                        </div>
+
+                        <div id="settingsError" class="settings-error hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- App confirm -->
+     <div id="appModal" class="app-modal hidden">
+  <div class="app-modal-backdrop" id="appModalBackdrop"></div>
+
+  <div class="app-modal-content" role="dialog" aria-modal="true" aria-labelledby="appModalTitle">
+    <h2 id="appModalTitle" class="app-modal-title">Titel</h2>
+    <p id="appModalMessage" class="app-modal-message">Bericht</p>
+
+    <div id="appModalActions" class="app-modal-actions">
+      <button id="appModalCancel" class="app-modal-button secondary">Annuleren</button>
+      <button id="appModalConfirm" class="app-modal-button primary">OK</button>
+    </div>
+  </div>
+</div>
+
+    <script src="killer-game.js"></script>
+    <script src="ui.js"></script>
+    <script src="main.js"></script>
+    <script src="settings.js"></script>
+</body>
+
+</html>
