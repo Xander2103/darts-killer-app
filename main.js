@@ -13,7 +13,12 @@ import { ImmunityOff } from "./chaos/modifiers/immunity-off.js";
 import { TripleTrouble } from "./chaos/modifiers/triple-trouble.js";
 import { TargetLock } from "./chaos/modifiers/target-lock.js";
 import { NoMiss } from "./chaos/modifiers/no-miss.js";
-import { AssassinsOnly } from "./chaos/modifiers/assassins-only.js";
+import { LastDartPressure } from "./chaos/modifiers/last-dart-pressure.js";
+import { DoubleDamage } from "./chaos/modifiers/double-damage.js";
+import { OneShot } from "./chaos/modifiers/one-shot.js";
+import { SafeZone } from "./chaos/modifiers/safe-zone.js";
+import { HotStreak } from "./chaos/modifiers/hot-streak.js";
+import { VampireMode } from "./chaos/modifiers/vampire-mode.js";
 
 // UI en settings
 import { initSettings } from "./settings.js";
@@ -36,7 +41,12 @@ chaosEngine.register(new BonusDarts());
 chaosEngine.register(new ImmunityOff());
 chaosEngine.register(new NoMiss());
 chaosEngine.register(new TargetLock());
-chaosEngine.register(new AssassinsOnly());
+chaosEngine.register(new LastDartPressure());
+chaosEngine.register(new DoubleDamage());
+chaosEngine.register(new OneShot());
+chaosEngine.register(new SafeZone());
+chaosEngine.register(new HotStreak());
+chaosEngine.register(new VampireMode());
 
 game.setChaosEngine(chaosEngine);
 
@@ -81,6 +91,7 @@ function resetGameToClassicSetup() {
     game.history = [];
     game.activeChaosModifier = null;
     game.activeChaosAnnouncementShown = false;
+    game.chaosSafeZonePlayerNumber = null;
 
     if (game.chaosEngine) {
         game.chaosEngine.activeModifier = null;
@@ -94,6 +105,8 @@ function resetGameToClassicSetup() {
         player.pendingElimination = false;
         player.number = null;
         player.tempIgnoreImmunity = false;
+        player.tempSafeZone = false;
+        player.tempTargetLockHit = false;
     });
 }
 
@@ -109,6 +122,7 @@ function resetGameCompletely() {
     game.activeChaosModifier = null;
     game.activeChaosAnnouncementShown = false;
     game.numberAssignmentMode = numberModeManual.checked ? "manual" : "random";
+    game.chaosSafeZonePlayerNumber = null;
     clearSetupError();
 
     if (game.chaosEngine) {

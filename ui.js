@@ -1,4 +1,7 @@
-// DOM elementen selecteren
+// =====================================================
+// DOM REFERENCES
+// =====================================================
+
 const setupPanel = document.getElementById("setupPanel");
 const gamePanel = document.getElementById("gamePanel");
 const playerNameInput = document.getElementById("playerName");
@@ -10,26 +13,30 @@ const playerList = document.getElementById("playerList");
 const undoButton = document.getElementById("undoButton");
 const backToHomeButton = document.getElementById("backToHomeButton");
 
-// Kleine sticky chaos header
+// Chaos header
 const chaosHeader = document.getElementById("chaosHeader");
 const chaosHeaderTitle = document.getElementById("chaosHeaderTitle");
 const chaosInfoButton = document.getElementById("chaosInfoButton");
 
-// Grote chaos intro modal
+// Chaos intro modal
 const chaosIntroModal = document.getElementById("chaosIntroModal");
 const chaosIntroTitle = document.getElementById("chaosIntroTitle");
 const chaosIntroDescription = document.getElementById("chaosIntroDescription");
 const chaosIntroConfirm = document.getElementById("chaosIntroConfirm");
 const chaosIntroBackdrop = document.getElementById("chaosIntroBackdrop");
+const chaosIntroExtra = document.getElementById("chaosIntroExtra");
 
-// Kleine info modal
+// Chaos info modal
 const chaosInfoModal = document.getElementById("chaosInfoModal");
 const chaosInfoTitle = document.getElementById("chaosInfoTitle");
 const chaosInfoDescription = document.getElementById("chaosInfoDescription");
 const chaosInfoClose = document.getElementById("chaosInfoClose");
 const chaosInfoBackdrop = document.getElementById("chaosInfoBackdrop");
 
-// 1 centrale render functie
+// =====================================================
+// MAIN RENDER
+// =====================================================
+
 function renderApp(game, actions = {}) {
     renderSetupPanel(game);
     renderGamePanel(game);
@@ -42,21 +49,18 @@ function renderApp(game, actions = {}) {
     maybeShowChaosIntro(game);
 }
 
-// Setup-paneel verbergen zodra het spel gestart is
+// =====================================================
+// PANELS / BASIC UI
+// =====================================================
+
 function renderSetupPanel(game) {
     if (!setupPanel) {
         return;
     }
 
-    if (game.isStarted) {
-        setupPanel.style.display = "none";
-        return;
-    }
-
-    setupPanel.style.display = "block";
+    setupPanel.style.display = game.isStarted ? "none" : "block";
 }
 
-// Hele spelbord-panel tonen/verbergen
 function renderGamePanel(game) {
     if (!gamePanel) {
         return;
@@ -69,7 +73,26 @@ function renderGamePanel(game) {
     }
 }
 
-// Kleine sticky chaos header tonen
+function updateUndoButton(game) {
+    if (!undoButton) {
+        return;
+    }
+
+    undoButton.disabled = game.history.length === 0;
+}
+
+function updateBackButton() {
+    if (!backToHomeButton) {
+        return;
+    }
+
+    backToHomeButton.textContent = "← Back";
+}
+
+// =====================================================
+// CHAOS HEADER
+// =====================================================
+
 function renderChaosHeader(game) {
     if (!chaosHeader || !chaosHeaderTitle || !chaosInfoButton) {
         return;
@@ -95,7 +118,10 @@ function renderChaosHeader(game) {
     }
 }
 
-// Grote intro popup tonen bij begin van nieuwe chaos beurt
+// =====================================================
+// CHAOS MODALS
+// =====================================================
+
 function maybeShowChaosIntro(game) {
     if (!chaosIntroModal || !chaosIntroTitle || !chaosIntroDescription || !chaosIntroConfirm) {
         return;
@@ -118,6 +144,17 @@ function maybeShowChaosIntro(game) {
 
     chaosIntroTitle.textContent = activeModifier.name;
     chaosIntroDescription.textContent = activeModifier.description;
+
+    if (chaosIntroExtra) {
+        if (activeModifier.name === "Safe Zone" && game.chaosSafeZonePlayerName) {
+            chaosIntroExtra.textContent = `Protected player: ${game.chaosSafeZonePlayerName}`;
+            chaosIntroExtra.classList.remove("hidden");
+        } else {
+            chaosIntroExtra.textContent = "";
+            chaosIntroExtra.classList.add("hidden");
+        }
+    }
+
     chaosIntroModal.classList.remove("hidden");
 
     const closeIntro = () => {
@@ -131,7 +168,6 @@ function maybeShowChaosIntro(game) {
     chaosIntroBackdrop?.addEventListener("click", closeIntro);
 }
 
-// Info knop bovenaan koppelen
 function bindChaosInfoButton(game) {
     if (!chaosInfoButton) {
         return;
@@ -146,11 +182,15 @@ function bindChaosInfoButton(game) {
 
         chaosInfoTitle.textContent = activeModifier.name;
         chaosInfoDescription.textContent = activeModifier.description;
+
+        if (activeModifier.name === "Safe Zone" && game.chaosSafeZonePlayerName) {
+            chaosInfoDescription.textContent += `\n\nProtected player: ${game.chaosSafeZonePlayerName}`;
+        }
+
         chaosInfoModal.classList.remove("hidden");
     };
 }
 
-// Kleine info popup sluiten
 if (chaosInfoClose && chaosInfoModal) {
     chaosInfoClose.addEventListener("click", () => {
         chaosInfoModal.classList.add("hidden");
@@ -163,7 +203,10 @@ if (chaosInfoBackdrop && chaosInfoModal) {
     });
 }
 
-// Voor de lijst van toegevoegde spelers vóór de start
+// =====================================================
+// SETUP PLAYER LIST
+// =====================================================
+
 function renderSetupPlayers(game, actions = {}) {
     if (!playerList) {
         return;
@@ -176,167 +219,137 @@ function renderSetupPlayers(game, actions = {}) {
         li.classList.add("player-list-item");
 
         if (game.numberAssignmentMode === "manual") {
-            const card = document.createElement("div");
-            card.classList.add("manual-player-card");
-
-            const leftSide = document.createElement("div");
-            leftSide.classList.add("manual-player-left");
-
-            const indexBadge = document.createElement("div");
-            indexBadge.classList.add("manual-player-index");
-            indexBadge.textContent = index + 1;
-
-            const nameSpan = document.createElement("div");
-            nameSpan.classList.add("manual-player-name");
-            nameSpan.textContent = player.name;
-
-            leftSide.appendChild(indexBadge);
-            leftSide.appendChild(nameSpan);
-
-            const rightSide = document.createElement("div");
-            rightSide.classList.add("manual-player-right");
-
-            const numberWrapper = document.createElement("div");
-            numberWrapper.classList.add("manual-number-wrapper");
-
-            const label = document.createElement("span");
-            label.classList.add("manual-number-label");
-            label.textContent = "Nr";
-
-            const manualInput = document.createElement("input");
-            manualInput.type = "number";
-            manualInput.min = "1";
-            manualInput.max = "20";
-            manualInput.classList.add("manual-number-input");
-            manualInput.placeholder = "1-20";
-            manualInput.value = player.manualNumber;
-
-            manualInput.addEventListener("input", event => {
-                game.setPlayerManualNumber(index, event.target.value);
-            });
-
-            numberWrapper.appendChild(label);
-            numberWrapper.appendChild(manualInput);
-
-            const actionButtons = document.createElement("div");
-            actionButtons.classList.add("manual-player-actions");
-
-            const editButton = document.createElement("button");
-            editButton.type = "button";
-            editButton.classList.add("manual-icon-button");
-            editButton.textContent = "✎";
-            editButton.title = "Naam aanpassen";
-            editButton.addEventListener("click", () => {
-                const newName = prompt("Nieuwe naam:", player.name);
-
-                if (newName !== null) {
-                    const trimmedName = newName.trim();
-
-                    if (trimmedName !== "") {
-                        player.name = trimmedName;
-                        renderApp(game, actions);
-                    }
-                }
-            });
-
-            const removeButton = document.createElement("button");
-            removeButton.type = "button";
-            removeButton.classList.add("manual-icon-button", "remove-button");
-            removeButton.textContent = "✕";
-            removeButton.title = "Speler verwijderen";
-            removeButton.addEventListener("click", () => {
-                game.players.splice(index, 1);
-                renderApp(game, actions);
-            });
-
-            actionButtons.appendChild(editButton);
-            actionButtons.appendChild(removeButton);
-
-            rightSide.appendChild(numberWrapper);
-            rightSide.appendChild(actionButtons);
-
-            card.appendChild(leftSide);
-            card.appendChild(rightSide);
-            li.appendChild(card);
+            li.appendChild(createManualSetupPlayerCard(game, player, index, actions));
         } else {
-            const row = document.createElement("div");
-            row.classList.add("manual-player-card");
-
-            const leftSide = document.createElement("div");
-            leftSide.classList.add("manual-player-left");
-
-            const indexBadge = document.createElement("div");
-            indexBadge.classList.add("manual-player-index");
-            indexBadge.textContent = index + 1;
-
-            const nameSpan = document.createElement("div");
-            nameSpan.classList.add("manual-player-name");
-            nameSpan.textContent = player.name;
-
-            leftSide.appendChild(indexBadge);
-            leftSide.appendChild(nameSpan);
-
-            const actionsWrapper = document.createElement("div");
-            actionsWrapper.classList.add("manual-player-actions");
-
-            const editButton = document.createElement("button");
-            editButton.type = "button";
-            editButton.classList.add("manual-icon-button");
-            editButton.textContent = "✎";
-            editButton.title = "Naam aanpassen";
-            editButton.addEventListener("click", () => {
-                const newName = prompt("Nieuwe naam:", player.name);
-
-                if (newName !== null) {
-                    const trimmedName = newName.trim();
-
-                    if (trimmedName !== "") {
-                        player.name = trimmedName;
-                        renderApp(game, actions);
-                    }
-                }
-            });
-
-            const removeButton = document.createElement("button");
-            removeButton.type = "button";
-            removeButton.classList.add("manual-icon-button", "remove-button");
-            removeButton.textContent = "✕";
-            removeButton.title = "Speler verwijderen";
-            removeButton.addEventListener("click", () => {
-                game.players.splice(index, 1);
-                renderApp(game, actions);
-            });
-
-            actionsWrapper.appendChild(editButton);
-            actionsWrapper.appendChild(removeButton);
-
-            row.appendChild(leftSide);
-            row.appendChild(actionsWrapper);
-            li.appendChild(row);
+            li.appendChild(createRandomSetupPlayerCard(game, player, index, actions));
         }
 
         playerList.appendChild(li);
     });
 }
 
-// Undo knop enkel actief maken als er history is
-function updateUndoButton(game) {
-    if (!undoButton) {
-        return;
-    }
+function createManualSetupPlayerCard(game, player, index, actions) {
+    const card = document.createElement("div");
+    card.classList.add("manual-player-card");
 
-    undoButton.disabled = game.history.length === 0;
+    const leftSide = document.createElement("div");
+    leftSide.classList.add("manual-player-left");
+
+    const indexBadge = document.createElement("div");
+    indexBadge.classList.add("manual-player-index");
+    indexBadge.textContent = index + 1;
+
+    const nameSpan = document.createElement("div");
+    nameSpan.classList.add("manual-player-name");
+    nameSpan.textContent = player.name;
+
+    leftSide.appendChild(indexBadge);
+    leftSide.appendChild(nameSpan);
+
+    const rightSide = document.createElement("div");
+    rightSide.classList.add("manual-player-right");
+
+    const numberWrapper = document.createElement("div");
+    numberWrapper.classList.add("manual-number-wrapper");
+
+    const label = document.createElement("span");
+    label.classList.add("manual-number-label");
+    label.textContent = "Nr";
+
+    const manualInput = document.createElement("input");
+    manualInput.type = "number";
+    manualInput.min = "1";
+    manualInput.max = "20";
+    manualInput.classList.add("manual-number-input");
+    manualInput.placeholder = "1-20";
+    manualInput.value = player.manualNumber;
+
+    manualInput.addEventListener("input", event => {
+        game.setPlayerManualNumber(index, event.target.value);
+    });
+
+    numberWrapper.appendChild(label);
+    numberWrapper.appendChild(manualInput);
+
+    const actionButtons = createSetupActionButtons(game, player, index, actions);
+
+    rightSide.appendChild(numberWrapper);
+    rightSide.appendChild(actionButtons);
+
+    card.appendChild(leftSide);
+    card.appendChild(rightSide);
+
+    return card;
 }
 
-function updateBackButton() {
-    if (!backToHomeButton) {
-        return;
-    }
+function createRandomSetupPlayerCard(game, player, index, actions) {
+    const row = document.createElement("div");
+    row.classList.add("manual-player-card");
 
-    backToHomeButton.textContent = "← Back";
+    const leftSide = document.createElement("div");
+    leftSide.classList.add("manual-player-left");
+
+    const indexBadge = document.createElement("div");
+    indexBadge.classList.add("manual-player-index");
+    indexBadge.textContent = index + 1;
+
+    const nameSpan = document.createElement("div");
+    nameSpan.classList.add("manual-player-name");
+    nameSpan.textContent = player.name;
+
+    leftSide.appendChild(indexBadge);
+    leftSide.appendChild(nameSpan);
+
+    const actionsWrapper = createSetupActionButtons(game, player, index, actions);
+
+    row.appendChild(leftSide);
+    row.appendChild(actionsWrapper);
+
+    return row;
 }
 
-// Scoreblokjes maken met 1 kleur per totale score
+function createSetupActionButtons(game, player, index, actions) {
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("manual-player-actions");
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.classList.add("manual-icon-button");
+    editButton.textContent = "✎";
+    editButton.title = "Edit name";
+    editButton.addEventListener("click", () => {
+        const newName = prompt("New name:", player.name);
+
+        if (newName !== null) {
+            const trimmedName = newName.trim();
+
+            if (trimmedName !== "") {
+                player.name = trimmedName;
+                renderApp(game, actions);
+            }
+        }
+    });
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.classList.add("manual-icon-button", "remove-button");
+    removeButton.textContent = "✕";
+    removeButton.title = "Remove player";
+    removeButton.addEventListener("click", () => {
+        game.players.splice(index, 1);
+        renderApp(game, actions);
+    });
+
+    wrapper.appendChild(editButton);
+    wrapper.appendChild(removeButton);
+
+    return wrapper;
+}
+
+// =====================================================
+// GAME BOARD HELPERS
+// =====================================================
+
 function createScoreBlocks(player) {
     const scoreWrapper = document.createElement("div");
     scoreWrapper.classList.add("score-blocks");
@@ -356,7 +369,6 @@ function createScoreBlocks(player) {
     return scoreWrapper;
 }
 
-// Statusbadge maken
 function createStatusBadge(player, game) {
     const statusBadge = document.createElement("div");
     statusBadge.classList.add("status-badge");
@@ -370,6 +382,9 @@ function createStatusBadge(player, game) {
     } else if (player.pendingElimination) {
         statusBadge.textContent = "⚠ Pending";
         statusBadge.classList.add("badge-pending");
+    } else if (player.tempSafeZone) {
+        statusBadge.innerHTML = "🛡 Safe Zone";
+        statusBadge.classList.add("badge-safezone");
     } else if (player.isKiller) {
         statusBadge.textContent = "🎯 Killer";
         statusBadge.classList.add("badge-killer");
@@ -395,12 +410,10 @@ function isThrowButtonDisabled(game, multiplier) {
         return false;
     }
 
-    // Double Trouble: alleen doubles tellen
     if (activeModifier.name === "Double Trouble") {
         return multiplier !== 2;
     }
 
-    // Triple Trouble: alleen triples tellen
     if (activeModifier.name === "Triple Trouble") {
         return multiplier !== 3;
     }
@@ -408,7 +421,10 @@ function isThrowButtonDisabled(game, multiplier) {
     return false;
 }
 
-// Volledig spelbord renderen
+// =====================================================
+// GAME BOARD
+// =====================================================
+
 function renderGameBoard(game, actions = {}) {
     const { resetGameCompletely, showHomeScreen } = actions;
 
@@ -431,7 +447,11 @@ function renderGameBoard(game, actions = {}) {
         const row = document.createElement("div");
         row.classList.add("game-row");
 
-        const isActivePlayer = game.isStarted && index === game.currentPlayerIndex && player.isAlive && !game.winner;
+        const isActivePlayer =
+            game.isStarted &&
+            index === game.currentPlayerIndex &&
+            player.isAlive &&
+            !game.winner;
 
         if (isActivePlayer) {
             row.classList.add("active-row");
@@ -449,6 +469,10 @@ function renderGameBoard(game, actions = {}) {
             row.classList.add("pending-row");
         } else if (player.isKiller && player.isAlive && game.winner !== player) {
             row.classList.add("killer-row");
+        }
+
+        if (player.tempSafeZone && player.isAlive) {
+            row.classList.add("safe-zone-row");
         }
 
         const topRow = document.createElement("div");
@@ -487,9 +511,10 @@ function renderGameBoard(game, actions = {}) {
         if (isActivePlayer) {
             extraInfo.classList.add("throw-info");
 
-            const throwsText = game.currentTurnThrows.length === 0
-                ? "No throws yet"
-                : game.currentTurnThrows.join(" • ");
+            const throwsText =
+                game.currentTurnThrows.length === 0
+                    ? "No throws yet"
+                    : game.currentTurnThrows.join(" • ");
 
             if (player.pendingElimination) {
                 extraInfo.textContent = `Score: ${player.score} • ${throwsText}`;

@@ -7,11 +7,17 @@ export class ImmunityOff extends ChaosModifier {
     }
 
     isAvailable(game) {
-        return game.players.some(player => {
+        const hasAliveKiller = game.players.some(player => {
+            return player.isAlive && player.isKiller;
+        });
+
+        const hasAliveImmunePlayer = game.players.some(player => {
             return player.isAlive && player.isImmune;
         });
-    }
 
+        return hasAliveKiller && hasAliveImmunePlayer;
+    }
+    
     onRoundStart(game) {
         game.players.forEach(player => {
             player.tempIgnoreImmunity = true;

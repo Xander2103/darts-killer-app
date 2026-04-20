@@ -987,6 +987,26 @@ button:disabled {
     border: 1px solid #b28704;
 }
 
+.badge-safe-zone {
+    background: rgba(255, 183, 0, 0.18);
+    color: #ffd76a;
+    border: 1px solid rgba(255, 183, 0, 0.28);
+}
+
+.badge-safezone {
+    background: linear-gradient(180deg, #ffd54a, #ffb300);
+    color: #1a1a1a;
+    font-weight: 800;
+    box-shadow: 0 0 10px rgba(255, 200, 0, 0.35);
+}
+
+.safe-zone-row {
+    box-shadow:
+        0 0 14px rgba(255, 200, 0, 0.22),
+        inset 0 0 0 1px rgba(255, 220, 120, 0.18);
+    border-color: rgba(255, 200, 0, 0.45);
+}
+
 /* =========================
    Scoreblokjes
    ========================= */
@@ -1353,6 +1373,27 @@ button:disabled {
         color: white;
     }
 
+    /* Zorg dat header zelf klikbaar is */
+    #chaosBanner {
+        position: relative;
+        z-index: 5;
+        pointer-events: auto;
+    }
+
+    /* Zorg dat de knop ALTIJD boven alles zit */
+    #chaosBanner button,
+    .chaos-info-button {
+        position: relative;
+        z-index: 10;
+        pointer-events: auto;
+    }
+
+    /* Dit is vaak de echte boosdoener */
+    #chaosBanner::before,
+    #chaosBanner::after {
+        pointer-events: none;
+    }
+
     /* chaos modal */
     .chaos-header {
         display: flex;
@@ -1362,34 +1403,45 @@ button:disabled {
         margin-bottom: 16px;
         padding: 12px 14px;
         border-radius: 18px;
-        background: linear-gradient(180deg, rgba(109, 42, 3, 0.95), rgba(217, 11, 4, 0.95));
-        border: 1px solid rgba(199, 179, 0, 0.4);
-        box-shadow: 0 0 16px rgba(56, 115, 255, 0.18);
+        background: linear-gradient(180deg, rgba(180, 28, 18, 0.95), rgba(224, 44, 18, 0.95));
+        border: 1px solid rgba(255, 166, 0, 0.45);
+        box-shadow: 0 0 16px rgba(255, 98, 0, 0.18);
+        position: relative;
+        z-index: 5;
     }
 
     .chaos-header-title {
-        font-size: 0.95rem;
+        font-size: 1rem;
         font-weight: 800;
-        color: #dce9ff;
+        color: #ffffff;
         letter-spacing: 0.02em;
     }
 
+    .chaos-header-left {
+        flex: 1;
+        min-width: 0;
+    }
+
     .chaos-info-button {
-        width: 38px;
-        height: 38px;
-        border: 1px solid rgba(100, 160, 255, 0.45);
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        border: 1px solid rgba(110, 170, 255, 0.45);
         border-radius: 999px;
-        background: linear-gradient(180deg, #2d6eff, #1d56d8);
+        background: linear-gradient(180deg, #3b7cff, #2662eb);
         color: #ffffff;
         font-size: 1rem;
         font-weight: 900;
         line-height: 1;
         cursor: pointer;
         box-shadow: 0 0 14px rgba(45, 110, 255, 0.22);
+        position: relative;
+        z-index: 6;
+        pointer-events: auto;
     }
 
     .chaos-info-button:hover {
-        background: linear-gradient(180deg, #3b7cff, #2662eb);
+        background: linear-gradient(180deg, #4a88ff, #2f6df1);
     }
 
     .chaos-info-button:disabled {
@@ -1409,6 +1461,13 @@ button:disabled {
         box-shadow:
             0 24px 60px rgba(0, 0, 0, 0.5),
             0 0 30px rgba(60, 110, 255, 0.08);
+    }
+
+    .chaos-modal-extra {
+        margin-top: 12px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #8db8ff;
     }
 
     .chaos-modal-badge {

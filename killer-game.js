@@ -11,6 +11,8 @@ export class KillerGame {
         this.history = [];
         this.currentTurnThrows = [];
         this.numberAssignmentMode = "manual";
+        this.chaosSafeZonePlayerNumber = null;
+        this.chaosSafeZonePlayerName = "";
 
         // huidige gamemode
         this.gameMode = "classic";
@@ -149,7 +151,9 @@ export class KillerGame {
             isImmune: true,
             isAlive: true,
             pendingElimination: false,
-            tempIgnoreImmunity: false
+            tempIgnoreImmunity: false,
+            tempSafeZone: false,
+            tempTargetLockHit: false,
         };
 
         this.players.push(player);
@@ -193,6 +197,8 @@ export class KillerGame {
         this.history = [];
         this.currentTurnThrows = [];
         this.playersWhoPlayedThisRound = [];
+        this.chaosSafeZonePlayerNumber = null;
+        this.chaosSafeZonePlayerName = "";
 
         this.players.forEach(player => {
             player.tempIgnoreImmunity = false;
@@ -289,11 +295,16 @@ export class KillerGame {
 
         // Throw context voor chaos modifiers
         let throwContext = {
+            game: this,
             player,
             targetNumber,
             multiplier,
+            currentThrow: this.currentThrow,
+            maxThrows: this.maxThrows,
+            turnHitCount: this.currentTurnThrows.length,
             cancelThrow: false,
-            message: ""
+            message: "",
+            pointsOverride: null
         };
 
         // Alleen chaos laten ingrijpen wanneer chaos mode actief is
@@ -317,7 +328,7 @@ export class KillerGame {
 
         // Als een chaos modifier de throw annuleert, telt de pijl wel als gegooid
         if (!throwContext.cancelThrow) {
-            this.processHit(player, targetNumber, multiplier);
+            this.processHit(player, targetNumber, multiplier, throwContext.pointsOverride);
         }
 
         // Na de worp naar volgende dart of speler gaan
@@ -351,8 +362,8 @@ export class KillerGame {
     }
 
     // SpelregelLogica: punten toekennen of afnemen, status van spelers bijwerken
-    processHit(player, targetNumber, multiplier) {
-        const points = this.getPoints(multiplier);
+    processHit(player, targetNumber, multiplier, pointsOverride = null) {
+        const points = pointsOverride ?? this.getPoints(multiplier);
 
         if (points === 0) {
             return;
@@ -495,7 +506,7 @@ export class KillerGame {
         }
     }
 
-    // TurnLogica
+    // Turn logic
     nextThrowOrPlayer() {
         // Als speler nog niet zijn maximum aantal worpen heeft gedaan, gaat hij door met de volgende worp
         if (this.currentThrow < this.maxThrows) {
@@ -514,6 +525,24 @@ export class KillerGame {
                 currentPlayer.isKiller = false;
                 currentPlayer.pendingElimination = false;
             }
+        }
+
+        // Target Lock penalty:
+        // als deze modifier actief is en de speler heeft in zijn hele beurt zijn eigen nummer niet geraakt
+        if (
+            this.gameMode === "chaos" &&
+            this.activeChaosModifier &&
+            this.activeChaosModifier.name === "Target Lock" &&
+            currentPlayer &&
+            currentPlayer.isAlive &&
+            !currentPlayer.tempTargetLockHit
+        ) {
+            this.applyTargetLockMissPenalty(currentPlayer);
+        }
+
+        // flag resetten voor volgende beurt
+        if (currentPlayer) {
+            currentPlayer.tempTargetLockHit = false;
         }
 
         // Na een eventuele eliminatie opnieuw winnaar checken
@@ -619,6 +648,38 @@ export class KillerGame {
         }
 
         return null;
+    }
+
+    applyTargetLockMissPenalty(player) {
+        if (!player || !player.isAlive) {
+            return;
+        }
+
+        player.score -= 1;
+
+        if (!this.settings.killerStaysForever && player.isKiller && player.score < 5) {
+            player.isKiller = false;
+        }
+
+        const shouldEliminateNow = this.isDeadlyScore(player.score);
+
+        if (this.settings.allowRecoveryBeforeTurn && shouldEliminateNow) {
+            player.pendingElimination = true;
+        } else if (shouldEliminateNow) {
+            player.isAlive = false;
+            player.isKiller = false;
+            player.pendingElimination = false;
+        }
+
+        if (
+            player.score < 0 &&
+            this.settings.eliminateOnExactZeroOnly &&
+            !player.pendingElimination
+        ) {
+            player.score = 0;
+        }
+
+        this.checkWinner();
     }
 
     assignManualNumbers() {

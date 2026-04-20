@@ -3,6 +3,8 @@ export class ChaosEngine {
         this.game = game;
         this.availableModifiers = [];
         this.activeModifier = null;
+        this.recentModifierNames = [];
+        this.modifierCooldownRounds = 5;
     }
 
     register(modifier) {
@@ -20,10 +22,25 @@ export class ChaosEngine {
             return null;
         }
 
-        const randomIndex = Math.floor(Math.random() * availableNow.length);
-        this.activeModifier = availableNow[randomIndex];
+        let selectableModifiers = availableNow.filter(modifier => {
+            return !this.recentModifierNames.includes(modifier.name);
+        });
+
+        // fallback: als door cooldown alles uitgesloten wordt, pak gewoon weer de beschikbare lijst
+        if (selectableModifiers.length === 0) {
+            selectableModifiers = availableNow;
+        }
+
+        const randomIndex = Math.floor(Math.random() * selectableModifiers.length);
+        this.activeModifier = selectableModifiers[randomIndex];
 
         this.activeModifier.onRoundStart(this.game);
+
+        this.recentModifierNames.push(this.activeModifier.name);
+
+        if (this.recentModifierNames.length > this.modifierCooldownRounds) {
+            this.recentModifierNames.shift();
+        }
 
         return this.activeModifier;
     }
