@@ -17,6 +17,7 @@ const backToHomeButton = document.getElementById("backToHomeButton");
 const chaosHeader = document.getElementById("chaosHeader");
 const chaosHeaderTitle = document.getElementById("chaosHeaderTitle");
 const chaosInfoButton = document.getElementById("chaosInfoButton");
+const chaosInfoExtra = document.getElementById("chaosInfoExtra");
 
 // Chaos intro modal
 const chaosIntroModal = document.getElementById("chaosIntroModal");
@@ -183,24 +184,30 @@ function bindChaosInfoButton(game) {
         chaosInfoTitle.textContent = activeModifier.name;
         chaosInfoDescription.textContent = activeModifier.description;
 
-        if (activeModifier.name === "Safe Zone" && game.chaosSafeZonePlayerName) {
-            chaosInfoDescription.textContent += `\n\nProtected player: ${game.chaosSafeZonePlayerName}`;
+        if (chaosInfoExtra) {
+            if (activeModifier.name === "Safe Zone" && game.chaosSafeZonePlayerName) {
+                chaosInfoExtra.textContent = `Protected player: ${game.chaosSafeZonePlayerName}`;
+                chaosInfoExtra.classList.remove("hidden");
+            } else {
+                chaosInfoExtra.textContent = "";
+                chaosInfoExtra.classList.add("hidden");
+            }
         }
 
         chaosInfoModal.classList.remove("hidden");
     };
-}
 
-if (chaosInfoClose && chaosInfoModal) {
-    chaosInfoClose.addEventListener("click", () => {
-        chaosInfoModal.classList.add("hidden");
-    });
-}
+    if (chaosInfoClose && chaosInfoModal) {
+        chaosInfoClose.addEventListener("click", () => {
+            chaosInfoModal.classList.add("hidden");
+        });
+    }
 
-if (chaosInfoBackdrop && chaosInfoModal) {
-    chaosInfoBackdrop.addEventListener("click", () => {
-        chaosInfoModal.classList.add("hidden");
-    });
+    if (chaosInfoBackdrop && chaosInfoModal) {
+        chaosInfoBackdrop.addEventListener("click", () => {
+            chaosInfoModal.classList.add("hidden");
+        });
+    }
 }
 
 // =====================================================

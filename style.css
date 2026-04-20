@@ -1,4 +1,34 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;700;800;900&display=swap');
+@font-face {
+    font-family: 'Inter';
+    src: url('./assets/fonts/inter-v20-latin-regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('./assets/fonts/inter-v20-latin-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Orbitron';
+    src: url('./assets/fonts/orbitron-v35-latin-regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Orbitron';
+    src: url('./assets/fonts/orbitron-v35-latin-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
 
 /* ==================================================
    Themes via body classes
@@ -250,16 +280,19 @@ body.theme-clean {
     margin-bottom: 0.35rem;
 }
 
+/* =========================
+   Game mode selection
+   ========================= */
 .mode-grid {
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
+    gap: 1rem;
 }
 
 .mode-card {
     width: 100%;
     text-align: left;
-    padding: 1rem;
+    padding: 1rem 1rem 1rem;
     border-radius: 18px;
     border: 1px solid var(--panel-border);
     background: linear-gradient(180deg, rgba(24, 31, 40, 0.98), rgba(15, 22, 29, 0.98));
@@ -288,23 +321,33 @@ body.theme-clean {
 .mode-card-top {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 0.65rem;
+    margin-bottom: 0.2rem;
+}
+
+.mode-card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 0;
 }
 
 .mode-card-body h3 {
-    margin: 0 0 0.35rem;
+    margin: 0 0 0.45rem;
     font-family: 'Orbitron', Arial, sans-serif;
-    font-size: 1.1rem;
+    font-size: 2rem;
     font-weight: 800;
-    letter-spacing: 0.5px;
+    line-height: 1.05;
+    letter-spacing: 0.3px;
 }
 
 .mode-card-body p {
     margin: 0;
     font-family: 'Inter', Arial, sans-serif;
-    font-size: 0.95rem;
+    font-size: 1rem;
     line-height: 1.45;
     color: var(--text-soft);
+    max-width: 24ch;
+    padding: 0;
 }
 
 .mode-badge {
@@ -1468,6 +1511,7 @@ button:disabled {
         font-size: 0.95rem;
         font-weight: 700;
         color: #8db8ff;
+        text-shadow: 0 0 8px rgba(80, 140, 255, 0.18);
     }
 
     .chaos-modal-badge {
@@ -1515,5 +1559,58 @@ button:disabled {
         min-height: 48px;
         border-radius: 16px;
         font-weight: 800;
+    }
+
+    /* =========================
+       Clean theme overrides titels enzo zichtbaar maken 
+       ========================= */
+    /* =========================
+/* CLEAN THEME - force readable text in dark cards */
+    body.theme-clean .mode-card,
+    body.theme-clean .setting-card,
+    body.theme-clean .clickable-setting {
+        color: #f5f7fa !important;
+    }
+
+    body.theme-clean .mode-card *,
+    body.theme-clean .setting-card *,
+    body.theme-clean .clickable-setting * {
+        color: #f5f7fa !important;
+        -webkit-text-fill-color: #f5f7fa !important;
+        text-shadow: none !important;
+    }
+
+    /* keep badges readable */
+    body.theme-clean .mode-badge {
+        color: #f5f7fa !important;
+        -webkit-text-fill-color: #f5f7fa !important;
+    }
+
+    /* top bar and light surfaces stay dark text */
+    body.theme-clean .top-bar h1,
+    body.theme-clean .top-action-button,
+    body.theme-clean .small-action-button,
+    body.theme-clean .home-panel-header h2,
+    body.theme-clean #setupPanel>h2,
+    body.theme-clean .panel-header h2,
+    body.theme-clean .settings-modal-content>.settings-modal-header h2,
+    body.theme-clean .settings-group>label,
+    body.theme-clean .standalone-help,
+    body.theme-clean .number-mode-title,
+    body.theme-clean .setup-error,
+    body.theme-clean .settings-error,
+    body.theme-clean select,
+    body.theme-clean option {
+        color: #1f2933 !important;
+        -webkit-text-fill-color: #1f2933 !important;
+        text-shadow: none !important;
+    }
+
+    /* buttons in clean theme */
+    body.theme-clean .top-action-button,
+    body.theme-clean .small-action-button {
+        background: linear-gradient(180deg, #ffffff 0%, #f3f7f4 100%) !important;
+        border: 1px solid #cfd8d3 !important;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08) !important;
     }
 }
