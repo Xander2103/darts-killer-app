@@ -159,14 +159,14 @@ export class KillerGame {
         if (this.players.length < 2) {
             return {
                 success: false,
-                message: "Je moet minstens 2 spelers toevoegen."
+                message: "You need at least 2 players."
             };
         }
 
         if (!this.numberAssignmentMode) {
             return {
                 success: false,
-                message: "Kies eerst hoe de nummers toegewezen worden."
+                message: "Choose first how the numbers will be assigned."
             };
         }
 
@@ -339,7 +339,14 @@ export class KillerGame {
         // State opslaan voor undo
         this.saveState();
 
+        const player = this.getCurrentPlayer();
+
         this.currentTurnThrows.push("Mis");
+
+        if (this.gameMode === "chaos" && this.chaosEngine && player) {
+            this.chaosEngine.handleMiss(player);
+        }
+
         this.nextThrowOrPlayer();
     }
 
@@ -595,17 +602,17 @@ export class KillerGame {
             const rawValue = String(player.manualNumber).trim();
 
             if (rawValue === "") {
-                return "Geef voor elke speler een nummer in.";
+                return "Enter a number for each player.";
             }
 
             const number = Number(rawValue);
 
             if (!Number.isInteger(number) || number < 1 || number > 20) {
-                return "Alle nummers moeten unieke gehele getallen tussen 1 en 20 zijn.";
+                return "All numbers must be unique numbers between 1 and 20.";
             }
 
             if (usedNumbers.has(number)) {
-                return "Elke speler moet een uniek nummer krijgen.";
+                return "Each player must have a unique number`.";
             }
 
             usedNumbers.add(number);

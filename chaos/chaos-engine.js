@@ -9,14 +9,20 @@ export class ChaosEngine {
         this.availableModifiers.push(modifier);
     }
 
+    // Nieuwe chaos-ronde starten
     startNewRound() {
-        if (this.availableModifiers.length === 0) {
+        const availableNow = this.availableModifiers.filter(modifier => {
+            return modifier.isAvailable(this.game);
+        });
+
+        if (availableNow.length === 0) {
             this.activeModifier = null;
             return null;
         }
 
-        const randomIndex = Math.floor(Math.random() * this.availableModifiers.length);
-        this.activeModifier = this.availableModifiers[randomIndex];
+        const randomIndex = Math.floor(Math.random() * availableNow.length);
+        this.activeModifier = availableNow[randomIndex];
+
         this.activeModifier.onRoundStart(this.game);
 
         return this.activeModifier;
@@ -40,5 +46,15 @@ export class ChaosEngine {
 
     getActiveModifier() {
         return this.activeModifier;
+    }
+
+    handleMiss(player) {
+        if (!this.activeModifier) {
+            return;
+        }
+
+        if (this.activeModifier.onMiss) {
+            this.activeModifier.onMiss(this.game, player);
+        }
     }
 }

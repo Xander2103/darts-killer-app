@@ -2,7 +2,7 @@ import { ChaosModifier } from "../chaos-modifier.js";
 
 export class BonusDarts extends ChaosModifier {
     constructor() {
-        super("Bonus Darts", "Iedereen krijgt 4 pijlen deze ronde.");
+        super("Bonus Darts", "Everyone gets 4 throws this round.");
     }
 
     onRoundStart(game) {

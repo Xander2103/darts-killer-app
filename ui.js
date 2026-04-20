@@ -362,10 +362,10 @@ function createStatusBadge(player, game) {
     statusBadge.classList.add("status-badge");
 
     if (!player.isAlive) {
-        statusBadge.textContent = "Uit";
+        statusBadge.textContent = "Out";
         statusBadge.classList.add("badge-out");
     } else if (game.winner === player) {
-        statusBadge.textContent = "WINNAAR";
+        statusBadge.textContent = "WINNER";
         statusBadge.classList.add("badge-winner");
     } else if (player.pendingElimination) {
         statusBadge.textContent = "⚠ Pending";
@@ -374,10 +374,10 @@ function createStatusBadge(player, game) {
         statusBadge.textContent = "🎯 Killer";
         statusBadge.classList.add("badge-killer");
     } else if (player.isImmune && game.settings.immunityEnabled && !player.tempIgnoreImmunity) {
-        statusBadge.textContent = "Immuun";
+        statusBadge.textContent = "Immune";
         statusBadge.classList.add("badge-immune");
     } else {
-        statusBadge.textContent = "Actief";
+        statusBadge.textContent = "Active";
         statusBadge.classList.add("badge-active");
     }
 
@@ -400,6 +400,11 @@ function isThrowButtonDisabled(game, multiplier) {
         return multiplier !== 2;
     }
 
+    // Triple Trouble: alleen triples tellen
+    if (activeModifier.name === "Triple Trouble") {
+        return multiplier !== 3;
+    }
+
     return false;
 }
 
@@ -418,7 +423,7 @@ function renderGameBoard(game, actions = {}) {
     }
 
     if (game.players.length === 0) {
-        gameBoard.innerHTML = "<p>Nog geen spelers toegevoegd.</p>";
+        gameBoard.innerHTML = "<p>No players added yet.</p>";
         return;
     }
 
@@ -483,7 +488,7 @@ function renderGameBoard(game, actions = {}) {
             extraInfo.classList.add("throw-info");
 
             const throwsText = game.currentTurnThrows.length === 0
-                ? "Nog geen worp"
+                ? "No throws yet"
                 : game.currentTurnThrows.join(" • ");
 
             if (player.pendingElimination) {
@@ -541,7 +546,7 @@ function renderGameBoard(game, actions = {}) {
             });
 
             const missButton = document.createElement("button");
-            missButton.textContent = "Mis";
+            missButton.textContent = "Miss";
             missButton.addEventListener("click", () => {
                 game.handleMiss();
                 renderApp(game, actions);

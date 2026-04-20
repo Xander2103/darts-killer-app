@@ -20,7 +20,7 @@
 
             <section class="panel home-panel">
                 <div class="home-panel-header">
-                    <h2>Kies je mode</h2>
+                    <h2>Choose your mode</h2>
                 </div>
 
                 <div class="mode-grid">
@@ -29,8 +29,8 @@
                             <span class="mode-badge mode-badge-live">Live</span>
                         </div>
                         <div class="mode-card-body">
-                            <h3>Klassiek Killer</h3>
-                            <p>De standaard Killer mode met settings, undo en nummerkeuze.</p>
+                            <h3>Classic Killer</h3>
+                            <p>The standard Killer mode with settings, undo and number selection.</p>
                         </div>
                     </button>
 
@@ -40,7 +40,7 @@
                         </div>
                         <div class="mode-card-body">
                             <h3>Chaos Mode</h3>
-                            <p>Random regels, boosts, punishment rounds en meer party chaos.</p>
+                            <p>Random rules, boosts, punishment rounds and more party chaos.</p>
                         </div>
                     </button>
 
@@ -50,7 +50,7 @@
                         </div>
                         <div class="mode-card-body">
                             <h3>Drink Mode</h3>
-                            <p>Party variant met drink challenges, penalties en fun events.</p>
+                            <p>Party variant with drink challenges, penalties and fun events.</p>
                         </div>
                     </button>
                 </div>
@@ -66,21 +66,21 @@
             </header>
 
             <section id="setupPanel" class="panel">
-                <h2>Spelers toevoegen</h2>
+                <h2>Add Players</h2>
 
-                <input type="text" id="playerName" class="player-name-input" placeholder="Naam speler">
+                <input type="text" id="playerName" class="player-name-input" placeholder="Player Name">
 
                 <div class="number-mode-section">
-                    <p class="number-mode-title">Nummer toewijzing</p>
+                    <p class="number-mode-title">Number Assignment</p>
 
                     <label class="mode-option">
                         <input type="radio" name="numberMode" id="numberModeManual" value="manual" checked>
-                        <span>Zelf nummers ingeven</span>
+                        <span>Manual Numbers</span>
                     </label>
 
                     <label class="mode-option">
                         <input type="radio" name="numberMode" id="numberModeRandom" value="random">
-                        <span>Random nummers</span>
+                        <span>Random Numbers</span>
                     </label>
                 </div>
 
@@ -89,12 +89,12 @@
                 <div class="lobby-actions">
                     <button id="addPlayerBtn" class="action-btn action-btn-secondary" type="button">
                         <span class="action-icon">+</span>
-                        Voeg speler toe
+                        Add Player
                     </button>
 
                     <button id="startGameBtn" class="action-btn action-btn-primary" type="button">
                         <span class="action-icon">▶</span>
-                        Start spel
+                        Start Game
                     </button>
                 </div>
 
@@ -103,7 +103,7 @@
 
             <section id="gamePanel" class="panel hidden">
                 <div class="panel-header">
-                    <h2>Spelbord</h2>
+                    <h2>Game Board</h2>
                     <button id="undoButton" type="button" class="small-action-button">↶ Undo</button>
                 </div>
 
@@ -185,7 +185,7 @@
             <p id="appModalMessage" class="app-modal-message">Bericht</p>
 
             <div id="appModalActions" class="app-modal-actions">
-                <button id="appModalCancel" class="app-modal-button secondary">Annuleren</button>
+                <button id="appModalCancel" class="app-modal-button secondary">Cancel</button>
                 <button id="appModalConfirm" class="app-modal-button primary">OK</button>
             </div>
         </div>
@@ -198,8 +198,8 @@
         <div class="app-modal-content chaos-modal-content" role="dialog" aria-modal="true"
             aria-labelledby="chaosIntroTitle">
             <div class="chaos-modal-badge">CHAOS ROUND</div>
-            <h2 id="chaosIntroTitle" class="app-modal-title">Modifier titel</h2>
-            <p id="chaosIntroDescription" class="app-modal-message">Modifier beschrijving</p>
+            <h2 id="chaosIntroTitle" class="app-modal-title">Modifier title</h2>
+            <p id="chaosIntroDescription" class="app-modal-message">Modifier description</p>
 
             <div class="app-modal-actions">
                 <button id="chaosIntroConfirm" class="app-modal-button primary" type="button">OK</button>
@@ -212,11 +212,11 @@
 
         <div class="app-modal-content chaos-info-modal-content" role="dialog" aria-modal="true"
             aria-labelledby="chaosInfoTitle">
-            <h2 id="chaosInfoTitle" class="app-modal-title">Modifier titel</h2>
-            <p id="chaosInfoDescription" class="app-modal-message">Modifier beschrijving</p>
+            <h2 id="chaosInfoTitle" class="app-modal-title">Modifier title</h2>
+            <p id="chaosInfoDescription" class="app-modal-message">Modifier description</p>
 
             <div class="app-modal-actions">
-                <button id="chaosInfoClose" class="app-modal-button primary" type="button">Sluit</button>
+                <button id="chaosInfoClose" class="app-modal-button primary" type="button">Close</button>
             </div>
         </div>
     </div>

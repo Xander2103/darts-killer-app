@@ -1,8 +1,15 @@
 import { ChaosModifier } from "../chaos-modifier.js";
 
+// Tijdelijk werkt immuniteit niet
 export class ImmunityOff extends ChaosModifier {
     constructor() {
-        super("Immunity Off", "Immuniteit werkt niet deze ronde.");
+        super("No Immunity", "Immunity is not working this round.");
+    }
+
+    isAvailable(game) {
+        return game.players.some(player => {
+            return player.isAlive && player.isImmune;
+        });
     }
 
     onRoundStart(game) {

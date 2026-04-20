@@ -1,9 +1,21 @@
 // main.js opstartlogica en event listeners
+
+// Game en chaos engine importeren
 import { KillerGame } from "./killer-game.js";
+
+// Chaos engine
 import { ChaosEngine } from "./chaos/chaos-engine.js";
+
+// Chaos modifiers
 import { DoubleTrouble } from "./chaos/modifiers/double-trouble.js";
 import { BonusDarts } from "./chaos/modifiers/bonus-darts.js";
 import { ImmunityOff } from "./chaos/modifiers/immunity-off.js";
+import { TripleTrouble } from "./chaos/modifiers/triple-trouble.js";
+import { TargetLock } from "./chaos/modifiers/target-lock.js";
+import { NoMiss } from "./chaos/modifiers/no-miss.js";
+import { AssassinsOnly } from "./chaos/modifiers/assassins-only.js";
+
+// UI en settings
 import { initSettings } from "./settings.js";
 import {
     renderApp,
@@ -19,8 +31,12 @@ const chaosEngine = new ChaosEngine(game);
 
 // beschikbare chaos modifiers registreren
 chaosEngine.register(new DoubleTrouble());
+chaosEngine.register(new TripleTrouble());
 chaosEngine.register(new BonusDarts());
 chaosEngine.register(new ImmunityOff());
+chaosEngine.register(new NoMiss());
+chaosEngine.register(new TargetLock());
+chaosEngine.register(new AssassinsOnly());
 
 game.setChaosEngine(chaosEngine);
 
