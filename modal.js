@@ -1,3 +1,5 @@
+//Voor popups en modals
+
 const appModal = document.getElementById("appModal");
 const appModalTitle = document.getElementById("appModalTitle");
 const appModalMessage = document.getElementById("appModalMessage");

@@ -1,227 +1,287 @@
-const settingsModal = document.getElementById("settingsModal");
-const closeSettingsButton = document.getElementById("closeSettingsButton");
-const themeSelect = document.getElementById("themeSelect");
-const immunityToggle = document.getElementById("immunityToggle");
-const killerForeverToggle = document.getElementById("killerForeverToggle");
-const exactZeroToggle = document.getElementById("exactZeroToggle");
-const recoveryToggle = document.getElementById("recoveryToggle");
-const settingsError = document.getElementById("settingsError");
+// settings beheren, inclusief thema's en game-instellingen
 
-//theme's opslaan in localStorage zodat ze behouden blijven bij herladen
-const availableThemes = [
-    "theme-neon",
-    "theme-pub",
-    "theme-arcade",
-    "theme-clean"
-];
+export function initSettings(game, renderApp, renderActions = {}) {
+    const settingsModal = document.getElementById("settingsModal");
+    const settingsButton = document.getElementById("settingsButton");
+    const closeSettingsButton = document.getElementById("closeSettingsButton");
+    const themeSelect = document.getElementById("themeSelect");
+    const immunityToggle = document.getElementById("immunityToggle");
+    const killerForeverToggle = document.getElementById("killerForeverToggle");
+    const exactZeroToggle = document.getElementById("exactZeroToggle");
+    const recoveryToggle = document.getElementById("recoveryToggle");
+    const settingsError = document.getElementById("settingsError");
 
-function applyTheme(themeName) {
-    document.body.classList.remove(...availableThemes);
-    document.body.classList.add(themeName);
-    localStorage.setItem("selectedTheme", themeName);
-}
+    // theme's opslaan in localStorage zodat ze behouden blijven bij herladen
+    const availableThemes = [
+        "theme-neon",
+        "theme-pub",
+        "theme-arcade",
+        "theme-clean"
+    ];
 
-function loadSavedTheme() {
-    const savedTheme = localStorage.getItem("selectedTheme");
-
-    if (savedTheme && availableThemes.includes(savedTheme)) {
-        applyTheme(savedTheme);
-        themeSelect.value = savedTheme;
-        return;
+    function applyTheme(themeName) {
+        document.body.classList.remove(...availableThemes);
+        document.body.classList.add(themeName);
+        localStorage.setItem("selectedTheme", themeName);
     }
 
-    applyTheme("theme-neon");
-    themeSelect.value = "theme-neon";
-}
+    function loadSavedTheme() {
+        const savedTheme = localStorage.getItem("selectedTheme");
 
-//Settings modal openen en sluiten
-function openSettingsModal() {
-    settingsModal.classList.remove("hidden");
-    clearSettingsError();
-}
+        if (savedTheme && availableThemes.includes(savedTheme)) {
+            applyTheme(savedTheme);
 
-function closeSettingsModal() {
-    settingsModal.classList.add("hidden");
-    clearSettingsError();
-}
+            if (themeSelect) {
+                themeSelect.value = savedTheme;
+            }
 
-settingsButton.addEventListener("click", () => {
-    openSettingsModal();
-});
-
-closeSettingsButton.addEventListener("click", () => {
-    closeSettingsModal();
-});
-
-settingsModal.addEventListener("click", event => {
-    if (event.target === settingsModal) {
-        closeSettingsModal();
-    }
-});
-
-themeSelect.addEventListener("change", () => {
-    applyTheme(themeSelect.value);
-});
-
-function showSettingsError(message) {
-    if (!settingsError) {
-        return;
-    }
-
-    settingsError.textContent = message;
-    settingsError.classList.remove("hidden");
-}
-
-function clearSettingsError() {
-    if (!settingsError) {
-        return;
-    }
-
-    settingsError.textContent = "";
-    settingsError.classList.add("hidden");
-}
-
-const clickableSettings = document.querySelectorAll(".clickable-setting");
-
-clickableSettings.forEach(card => {
-    card.addEventListener("click", event => {
-        if (event.target.tagName === "INPUT") {
             return;
         }
 
-        const settingType = card.dataset.setting;
+        applyTheme("theme-neon");
 
-        if (settingType === "immunity") {
-            immunityToggle.checked = !immunityToggle.checked;
-            clearSettingsError();
-            immunityToggle.dispatchEvent(new Event("change"));
+        if (themeSelect) {
+            themeSelect.value = "theme-neon";
+        }
+    }
+
+    function showSettingsError(message) {
+        if (!settingsError) {
             return;
         }
 
-        if (settingType === "killerForever") {
-            killerForeverToggle.checked = !killerForeverToggle.checked;
-            clearSettingsError();
-            killerForeverToggle.dispatchEvent(new Event("change"));
+        settingsError.textContent = message;
+        settingsError.classList.remove("hidden");
+    }
+
+    function clearSettingsError() {
+        if (!settingsError) {
             return;
         }
 
-        if (settingType === "exactZero") {
-            if (recoveryToggle.checked) {
-                showSettingsError("‘Uit op exact 0’ kan niet aan zolang ‘Recovery vóór eigen beurt’ actief is.");
+        settingsError.textContent = "";
+        settingsError.classList.add("hidden");
+    }
+
+    // Settings modal openen en sluiten
+    function openSettingsModal() {
+        if (!settingsModal) {
+            return;
+        }
+
+        settingsModal.classList.remove("hidden");
+        clearSettingsError();
+    }
+
+    function closeSettingsModal() {
+        if (!settingsModal) {
+            return;
+        }
+
+        settingsModal.classList.add("hidden");
+        clearSettingsError();
+    }
+
+    // Game settings laden uit localStorage zodat ze behouden blijven bij herladen
+    function loadSavedGameSettings() {
+        const savedImmunity = localStorage.getItem("immunityEnabled");
+        if (savedImmunity !== null) {
+            const immunityEnabled = savedImmunity === "true";
+            game.settings.immunityEnabled = immunityEnabled;
+            if (immunityToggle) {
+                immunityToggle.checked = immunityEnabled;
+            }
+        } else {
+            game.settings.immunityEnabled = true;
+            if (immunityToggle) {
+                immunityToggle.checked = true;
+            }
+        }
+
+        const savedKillerForever = localStorage.getItem("killerStaysForever");
+        if (savedKillerForever !== null) {
+            const killerStaysForever = savedKillerForever === "true";
+            game.settings.killerStaysForever = killerStaysForever;
+            if (killerForeverToggle) {
+                killerForeverToggle.checked = killerStaysForever;
+            }
+        } else {
+            game.settings.killerStaysForever = true;
+            if (killerForeverToggle) {
+                killerForeverToggle.checked = true;
+            }
+        }
+
+        const savedExactZero = localStorage.getItem("eliminateOnExactZeroOnly");
+        if (savedExactZero !== null) {
+            const eliminateOnExactZeroOnly = savedExactZero === "true";
+            game.settings.eliminateOnExactZeroOnly = eliminateOnExactZeroOnly;
+            if (exactZeroToggle) {
+                exactZeroToggle.checked = eliminateOnExactZeroOnly;
+            }
+        } else {
+            game.settings.eliminateOnExactZeroOnly = false;
+            if (exactZeroToggle) {
+                exactZeroToggle.checked = false;
+            }
+        }
+
+        const savedRecovery = localStorage.getItem("allowRecoveryBeforeTurn");
+        if (savedRecovery !== null) {
+            const allowRecoveryBeforeTurn = savedRecovery === "true";
+            game.settings.allowRecoveryBeforeTurn = allowRecoveryBeforeTurn;
+            if (recoveryToggle) {
+                recoveryToggle.checked = allowRecoveryBeforeTurn;
+            }
+        } else {
+            game.settings.allowRecoveryBeforeTurn = true;
+            if (recoveryToggle) {
+                recoveryToggle.checked = true;
+            }
+        }
+
+        if (game.settings.allowRecoveryBeforeTurn && game.settings.eliminateOnExactZeroOnly) {
+            game.settings.eliminateOnExactZeroOnly = false;
+
+            if (exactZeroToggle) {
+                exactZeroToggle.checked = false;
+            }
+        }
+    }
+
+    // Game settings opslaan wanneer ze veranderen
+    function saveGameSettings() {
+        localStorage.setItem("immunityEnabled", String(game.settings.immunityEnabled));
+        localStorage.setItem("killerStaysForever", String(game.settings.killerStaysForever));
+        localStorage.setItem("eliminateOnExactZeroOnly", String(game.settings.eliminateOnExactZeroOnly));
+        localStorage.setItem("allowRecoveryBeforeTurn", String(game.settings.allowRecoveryBeforeTurn));
+    }
+
+    if (settingsButton) {
+        settingsButton.addEventListener("click", () => {
+            openSettingsModal();
+        });
+    }
+
+    if (closeSettingsButton) {
+        closeSettingsButton.addEventListener("click", () => {
+            closeSettingsModal();
+        });
+    }
+
+    if (settingsModal) {
+        settingsModal.addEventListener("click", event => {
+            if (event.target === settingsModal) {
+                closeSettingsModal();
+            }
+        });
+    }
+
+    if (themeSelect) {
+        themeSelect.addEventListener("change", () => {
+            applyTheme(themeSelect.value);
+        });
+    }
+
+    const clickableSettings = document.querySelectorAll(".clickable-setting");
+
+    clickableSettings.forEach(card => {
+        card.addEventListener("click", event => {
+            if (event.target.tagName === "INPUT") {
                 return;
             }
 
-            exactZeroToggle.checked = !exactZeroToggle.checked;
-            clearSettingsError();
-            exactZeroToggle.dispatchEvent(new Event("change"));
-            return;
-        }
+            const settingType = card.dataset.setting;
 
-        if (settingType === "recovery") {
-            recoveryToggle.checked = !recoveryToggle.checked;
-            clearSettingsError();
-            recoveryToggle.dispatchEvent(new Event("change"));
-        }
+            if (settingType === "immunity" && immunityToggle) {
+                immunityToggle.checked = !immunityToggle.checked;
+                clearSettingsError();
+                immunityToggle.dispatchEvent(new Event("change"));
+                return;
+            }
+
+            if (settingType === "killerForever" && killerForeverToggle) {
+                killerForeverToggle.checked = !killerForeverToggle.checked;
+                clearSettingsError();
+                killerForeverToggle.dispatchEvent(new Event("change"));
+                return;
+            }
+
+            if (settingType === "exactZero" && exactZeroToggle && recoveryToggle) {
+                if (recoveryToggle.checked) {
+                    showSettingsError("‘Uit op exact 0’ kan niet aan zolang ‘Recovery vóór eigen beurt’ actief is.");
+                    return;
+                }
+
+                exactZeroToggle.checked = !exactZeroToggle.checked;
+                clearSettingsError();
+                exactZeroToggle.dispatchEvent(new Event("change"));
+                return;
+            }
+
+            if (settingType === "recovery" && recoveryToggle) {
+                recoveryToggle.checked = !recoveryToggle.checked;
+                clearSettingsError();
+                recoveryToggle.dispatchEvent(new Event("change"));
+            }
+        });
     });
-});
 
-//Game settings laden uit localStorage zodat ze behouden blijven bij herladen
-function loadSavedGameSettings() {
-    const savedImmunity = localStorage.getItem("immunityEnabled");
-    if (savedImmunity !== null) {
-        const immunityEnabled = savedImmunity === "true";
-        game.settings.immunityEnabled = immunityEnabled;
-        immunityToggle.checked = immunityEnabled;
-    } else {
-        game.settings.immunityEnabled = true;
-        immunityToggle.checked = true;
+    if (immunityToggle) {
+        immunityToggle.addEventListener("change", () => {
+            game.settings.immunityEnabled = immunityToggle.checked;
+            saveGameSettings();
+            renderApp(game, renderActions);
+        });
     }
 
-    const savedKillerForever = localStorage.getItem("killerStaysForever");
-    if (savedKillerForever !== null) {
-        const killerStaysForever = savedKillerForever === "true";
-        game.settings.killerStaysForever = killerStaysForever;
-        killerForeverToggle.checked = killerStaysForever;
-    } else {
-        game.settings.killerStaysForever = true;
-        killerForeverToggle.checked = true;
+    if (killerForeverToggle) {
+        killerForeverToggle.addEventListener("change", () => {
+            game.settings.killerStaysForever = killerForeverToggle.checked;
+            saveGameSettings();
+            renderApp(game, renderActions);
+        });
     }
 
-    const savedExactZero = localStorage.getItem("eliminateOnExactZeroOnly");
-    if (savedExactZero !== null) {
-        const eliminateOnExactZeroOnly = savedExactZero === "true";
-        game.settings.eliminateOnExactZeroOnly = eliminateOnExactZeroOnly;
-        exactZeroToggle.checked = eliminateOnExactZeroOnly;
-    } else {
-        game.settings.eliminateOnExactZeroOnly = false;
-        exactZeroToggle.checked = false;
+    if (exactZeroToggle && recoveryToggle) {
+        exactZeroToggle.addEventListener("click", event => {
+            if (recoveryToggle.checked && !exactZeroToggle.checked) {
+                event.preventDefault();
+                showSettingsError("‘Uit op exact 0’ kan niet aan zolang ‘Recovery vóór eigen beurt’ actief is.");
+            } else {
+                clearSettingsError();
+            }
+        });
+
+        exactZeroToggle.addEventListener("change", () => {
+            game.settings.eliminateOnExactZeroOnly = exactZeroToggle.checked;
+            saveGameSettings();
+            renderApp(game, renderActions);
+        });
     }
 
-    const savedRecovery = localStorage.getItem("allowRecoveryBeforeTurn");
-    if (savedRecovery !== null) {
-        const allowRecoveryBeforeTurn = savedRecovery === "true";
-        game.settings.allowRecoveryBeforeTurn = allowRecoveryBeforeTurn;
-        recoveryToggle.checked = allowRecoveryBeforeTurn;
-    } else {
-        game.settings.allowRecoveryBeforeTurn = true;
-        recoveryToggle.checked = true;
+    if (recoveryToggle && exactZeroToggle) {
+        recoveryToggle.addEventListener("change", () => {
+            game.settings.allowRecoveryBeforeTurn = recoveryToggle.checked;
+
+            if (game.settings.allowRecoveryBeforeTurn && exactZeroToggle.checked) {
+                game.settings.eliminateOnExactZeroOnly = false;
+                exactZeroToggle.checked = false;
+                showSettingsError("‘Uit op exact 0’ werd uitgezet omdat ‘Recovery vóór eigen beurt’ actief is.");
+            } else {
+                clearSettingsError();
+            }
+
+            saveGameSettings();
+            renderApp(game, renderActions);
+        });
     }
 
-    if (game.settings.allowRecoveryBeforeTurn && game.settings.eliminateOnExactZeroOnly) {
-        game.settings.eliminateOnExactZeroOnly = false;
-        exactZeroToggle.checked = false;
-    }
+    loadSavedTheme();
+    loadSavedGameSettings();
+
+    return {
+        openSettingsModal,
+        closeSettingsModal
+    };
 }
-
-//Game settings opslaan wanneer ze veranderen
-function saveGameSettings() {
-    localStorage.setItem("immunityEnabled", String(game.settings.immunityEnabled));
-    localStorage.setItem("killerStaysForever", String(game.settings.killerStaysForever));
-    localStorage.setItem("eliminateOnExactZeroOnly", String(game.settings.eliminateOnExactZeroOnly));
-    localStorage.setItem("allowRecoveryBeforeTurn", String(game.settings.allowRecoveryBeforeTurn));
-}
-
-immunityToggle.addEventListener("change", () => {
-    game.settings.immunityEnabled = immunityToggle.checked;
-    saveGameSettings();
-    renderApp(game);
-});
-
-killerForeverToggle.addEventListener("change", () => {
-    game.settings.killerStaysForever = killerForeverToggle.checked;
-    saveGameSettings();
-    renderApp(game);
-});
-
-exactZeroToggle.addEventListener("click", event => {
-    if (recoveryToggle.checked && !exactZeroToggle.checked) {
-        event.preventDefault();
-        showSettingsError("‘Uit op exact 0’ kan niet aan zolang ‘Recovery vóór eigen beurt’ actief is.");
-    } else {
-        clearSettingsError();
-    }
-});
-
-exactZeroToggle.addEventListener("change", () => {
-    game.settings.eliminateOnExactZeroOnly = exactZeroToggle.checked;
-    saveGameSettings();
-    renderApp(game);
-});
-
-recoveryToggle.addEventListener("change", () => {
-    game.settings.allowRecoveryBeforeTurn = recoveryToggle.checked;
-
-    if (game.settings.allowRecoveryBeforeTurn && exactZeroToggle.checked) {
-        game.settings.eliminateOnExactZeroOnly = false;
-        exactZeroToggle.checked = false;
-        showSettingsError("‘Uit op exact 0’ werd uitgezet omdat ‘Recovery vóór eigen beurt’ actief is.");
-    } else {
-        clearSettingsError();
-    }
-
-    saveGameSettings();
-    renderApp(game);
-});
-
-loadSavedTheme();
-loadSavedGameSettings();

@@ -7,31 +7,53 @@ const startGameButton = document.getElementById("startGameBtn");
 const gameBoard = document.getElementById("gameBoard");
 const playerList = document.getElementById("playerList");
 
-const settingsButton = document.getElementById("settingsButton");
 const undoButton = document.getElementById("undoButton");
+const backToHomeButton = document.getElementById("backToHomeButton");
+
+// Kleine sticky chaos header
+const chaosHeader = document.getElementById("chaosHeader");
+const chaosHeaderTitle = document.getElementById("chaosHeaderTitle");
+const chaosInfoButton = document.getElementById("chaosInfoButton");
+
+// Grote chaos intro modal
+const chaosIntroModal = document.getElementById("chaosIntroModal");
+const chaosIntroTitle = document.getElementById("chaosIntroTitle");
+const chaosIntroDescription = document.getElementById("chaosIntroDescription");
+const chaosIntroConfirm = document.getElementById("chaosIntroConfirm");
+const chaosIntroBackdrop = document.getElementById("chaosIntroBackdrop");
+
+// Kleine info modal
+const chaosInfoModal = document.getElementById("chaosInfoModal");
+const chaosInfoTitle = document.getElementById("chaosInfoTitle");
+const chaosInfoDescription = document.getElementById("chaosInfoDescription");
+const chaosInfoClose = document.getElementById("chaosInfoClose");
+const chaosInfoBackdrop = document.getElementById("chaosInfoBackdrop");
 
 // 1 centrale render functie
-function renderApp(game) {
+function renderApp(game, actions = {}) {
     renderSetupPanel(game);
     renderGamePanel(game);
-    renderSetupPlayers(game);
-    renderGameBoard(game);
+    renderSetupPlayers(game, actions);
+    renderChaosHeader(game);
+    renderGameBoard(game, actions);
     updateUndoButton(game);
     updateBackButton();
+    bindChaosInfoButton(game);
+    maybeShowChaosIntro(game);
 }
 
 // Setup-paneel verbergen zodra het spel gestart is
 function renderSetupPanel(game) {
-    const gameBoardSection = document.querySelector(".panel:nth-of-type(2)");
+    if (!setupPanel) {
+        return;
+    }
 
     if (game.isStarted) {
         setupPanel.style.display = "none";
-        gameBoardSection.style.display = "block";
         return;
     }
 
     setupPanel.style.display = "block";
-    gameBoardSection.style.display = "none"; // 👈 BELANGRIJK
 }
 
 // Hele spelbord-panel tonen/verbergen
@@ -47,8 +69,106 @@ function renderGamePanel(game) {
     }
 }
 
+// Kleine sticky chaos header tonen
+function renderChaosHeader(game) {
+    if (!chaosHeader || !chaosHeaderTitle || !chaosInfoButton) {
+        return;
+    }
+
+    const activeModifier = game.getActiveChaosModifier();
+    const shouldShowHeader =
+        game.gameMode === "chaos" &&
+        game.isStarted &&
+        !game.winner &&
+        !!activeModifier;
+
+    if (shouldShowHeader) {
+        chaosHeader.classList.remove("hidden");
+        chaosHeader.style.display = "flex";
+        chaosHeaderTitle.textContent = activeModifier.name;
+        chaosInfoButton.disabled = false;
+    } else {
+        chaosHeader.classList.add("hidden");
+        chaosHeader.style.display = "none";
+        chaosHeaderTitle.textContent = "";
+        chaosInfoButton.disabled = true;
+    }
+}
+
+// Grote intro popup tonen bij begin van nieuwe chaos beurt
+function maybeShowChaosIntro(game) {
+    if (!chaosIntroModal || !chaosIntroTitle || !chaosIntroDescription || !chaosIntroConfirm) {
+        return;
+    }
+
+    if (game.winner) {
+        chaosIntroModal.classList.add("hidden");
+        return;
+    }
+
+    if (!game.shouldShowChaosAnnouncement || !game.shouldShowChaosAnnouncement()) {
+        return;
+    }
+
+    const activeModifier = game.getActiveChaosModifier();
+
+    if (!activeModifier) {
+        return;
+    }
+
+    chaosIntroTitle.textContent = activeModifier.name;
+    chaosIntroDescription.textContent = activeModifier.description;
+    chaosIntroModal.classList.remove("hidden");
+
+    const closeIntro = () => {
+        chaosIntroModal.classList.add("hidden");
+        game.markChaosAnnouncementShown();
+        chaosIntroConfirm.removeEventListener("click", closeIntro);
+        chaosIntroBackdrop?.removeEventListener("click", closeIntro);
+    };
+
+    chaosIntroConfirm.addEventListener("click", closeIntro);
+    chaosIntroBackdrop?.addEventListener("click", closeIntro);
+}
+
+// Info knop bovenaan koppelen
+function bindChaosInfoButton(game) {
+    if (!chaosInfoButton) {
+        return;
+    }
+
+    chaosInfoButton.onclick = () => {
+        const activeModifier = game.getActiveChaosModifier();
+
+        if (!activeModifier || !chaosInfoModal || !chaosInfoTitle || !chaosInfoDescription) {
+            return;
+        }
+
+        chaosInfoTitle.textContent = activeModifier.name;
+        chaosInfoDescription.textContent = activeModifier.description;
+        chaosInfoModal.classList.remove("hidden");
+    };
+}
+
+// Kleine info popup sluiten
+if (chaosInfoClose && chaosInfoModal) {
+    chaosInfoClose.addEventListener("click", () => {
+        chaosInfoModal.classList.add("hidden");
+    });
+}
+
+if (chaosInfoBackdrop && chaosInfoModal) {
+    chaosInfoBackdrop.addEventListener("click", () => {
+        chaosInfoModal.classList.add("hidden");
+    });
+}
+
 // Voor de lijst van toegevoegde spelers vóór de start
-function renderSetupPlayers(game) {
+function renderSetupPlayers(game, actions = {}) {
+    if (!playerList) {
+        return;
+    }
+
     playerList.innerHTML = "";
 
     game.players.forEach((player, index) => {
@@ -98,8 +218,8 @@ function renderSetupPlayers(game) {
             numberWrapper.appendChild(label);
             numberWrapper.appendChild(manualInput);
 
-            const actions = document.createElement("div");
-            actions.classList.add("manual-player-actions");
+            const actionButtons = document.createElement("div");
+            actionButtons.classList.add("manual-player-actions");
 
             const editButton = document.createElement("button");
             editButton.type = "button";
@@ -114,7 +234,7 @@ function renderSetupPlayers(game) {
 
                     if (trimmedName !== "") {
                         player.name = trimmedName;
-                        renderApp(game);
+                        renderApp(game, actions);
                     }
                 }
             });
@@ -126,14 +246,14 @@ function renderSetupPlayers(game) {
             removeButton.title = "Speler verwijderen";
             removeButton.addEventListener("click", () => {
                 game.players.splice(index, 1);
-                renderApp(game);
+                renderApp(game, actions);
             });
 
-            actions.appendChild(editButton);
-            actions.appendChild(removeButton);
+            actionButtons.appendChild(editButton);
+            actionButtons.appendChild(removeButton);
 
             rightSide.appendChild(numberWrapper);
-            rightSide.appendChild(actions);
+            rightSide.appendChild(actionButtons);
 
             card.appendChild(leftSide);
             card.appendChild(rightSide);
@@ -156,8 +276,8 @@ function renderSetupPlayers(game) {
             leftSide.appendChild(indexBadge);
             leftSide.appendChild(nameSpan);
 
-            const actions = document.createElement("div");
-            actions.classList.add("manual-player-actions");
+            const actionsWrapper = document.createElement("div");
+            actionsWrapper.classList.add("manual-player-actions");
 
             const editButton = document.createElement("button");
             editButton.type = "button";
@@ -172,7 +292,7 @@ function renderSetupPlayers(game) {
 
                     if (trimmedName !== "") {
                         player.name = trimmedName;
-                        renderApp(game);
+                        renderApp(game, actions);
                     }
                 }
             });
@@ -184,14 +304,14 @@ function renderSetupPlayers(game) {
             removeButton.title = "Speler verwijderen";
             removeButton.addEventListener("click", () => {
                 game.players.splice(index, 1);
-                renderApp(game);
+                renderApp(game, actions);
             });
 
-            actions.appendChild(editButton);
-            actions.appendChild(removeButton);
+            actionsWrapper.appendChild(editButton);
+            actionsWrapper.appendChild(removeButton);
 
             row.appendChild(leftSide);
-            row.appendChild(actions);
+            row.appendChild(actionsWrapper);
             li.appendChild(row);
         }
 
@@ -253,7 +373,7 @@ function createStatusBadge(player, game) {
     } else if (player.isKiller) {
         statusBadge.textContent = "🎯 Killer";
         statusBadge.classList.add("badge-killer");
-    } else if (player.isImmune && game.settings.immunityEnabled) {
+    } else if (player.isImmune && game.settings.immunityEnabled && !player.tempIgnoreImmunity) {
         statusBadge.textContent = "Immuun";
         statusBadge.classList.add("badge-immune");
     } else {
@@ -264,8 +384,33 @@ function createStatusBadge(player, game) {
     return statusBadge;
 }
 
+function isThrowButtonDisabled(game, multiplier) {
+    if (game.gameMode !== "chaos") {
+        return false;
+    }
+
+    const activeModifier = game.getActiveChaosModifier();
+
+    if (!activeModifier) {
+        return false;
+    }
+
+    // Double Trouble: alleen doubles tellen
+    if (activeModifier.name === "Double Trouble") {
+        return multiplier !== 2;
+    }
+
+    return false;
+}
+
 // Volledig spelbord renderen
-function renderGameBoard(game) {
+function renderGameBoard(game, actions = {}) {
+    const { resetGameCompletely, showHomeScreen } = actions;
+
+    if (!gameBoard) {
+        return;
+    }
+
     gameBoard.innerHTML = "";
 
     if (!game.isStarted) {
@@ -361,30 +506,45 @@ function renderGameBoard(game) {
         if (game.isStarted && !game.winner) {
             const singleButton = document.createElement("button");
             singleButton.textContent = `S ${player.number}`;
+            singleButton.disabled = isThrowButtonDisabled(game, 1);
             singleButton.addEventListener("click", () => {
+                if (singleButton.disabled) {
+                    return;
+                }
+
                 game.handleThrow(player.number, 1);
-                renderApp(game);
+                renderApp(game, actions);
             });
 
             const doubleButton = document.createElement("button");
             doubleButton.textContent = `D ${player.number}`;
+            doubleButton.disabled = isThrowButtonDisabled(game, 2);
             doubleButton.addEventListener("click", () => {
+                if (doubleButton.disabled) {
+                    return;
+                }
+
                 game.handleThrow(player.number, 2);
-                renderApp(game);
+                renderApp(game, actions);
             });
 
             const tripleButton = document.createElement("button");
             tripleButton.textContent = `T ${player.number}`;
+            tripleButton.disabled = isThrowButtonDisabled(game, 3);
             tripleButton.addEventListener("click", () => {
+                if (tripleButton.disabled) {
+                    return;
+                }
+
                 game.handleThrow(player.number, 3);
-                renderApp(game);
+                renderApp(game, actions);
             });
 
             const missButton = document.createElement("button");
             missButton.textContent = "Mis";
             missButton.addEventListener("click", () => {
                 game.handleMiss();
-                renderApp(game);
+                renderApp(game, actions);
             });
 
             buttonRow.appendChild(singleButton);
@@ -408,12 +568,27 @@ function renderGameBoard(game) {
         backToMenuButton.classList.add("winner-menu-button");
         backToMenuButton.textContent = "Back to menu";
         backToMenuButton.addEventListener("click", () => {
-            resetGameCompletely();
-            showHomeScreen();
-            renderApp(game);
+            if (typeof resetGameCompletely === "function") {
+                resetGameCompletely();
+            }
+
+            if (typeof showHomeScreen === "function") {
+                showHomeScreen();
+            }
+
+            renderApp(game, actions);
         });
 
         winnerActions.appendChild(backToMenuButton);
         gameBoard.appendChild(winnerActions);
     }
 }
+
+export {
+    renderApp,
+    playerNameInput,
+    addPlayerButton,
+    startGameButton,
+    undoButton,
+    backToHomeButton
+};

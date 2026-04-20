@@ -1,40 +1,90 @@
-//Darts Killer Game Logica
+// Darts Killer Game Logica
 
-class KillerGame {
+export class KillerGame {
     constructor() {
         this.players = [];
         this.currentPlayerIndex = 0;
         this.currentThrow = 1;
+        this.maxThrows = 3;
         this.isStarted = false;
         this.winner = null;
         this.history = [];
         this.currentTurnThrows = [];
         this.numberAssignmentMode = "manual";
 
-        //settings
+        // huidige gamemode
+        this.gameMode = "classic";
+
+        // chaos engine wordt later vanuit main.js gekoppeld
+        this.chaosEngine = null;
+        this.activeChaosModifier = null;
+        this.activeChaosAnnouncementShown = false;
+
+        // bijhouden wie al gespeeld heeft in de huidige chaos-ronde
+        this.playersWhoPlayedThisRound = [];
+
+        // settings
         this.settings = {
             immunityEnabled: true,
             killerStaysForever: true,
             eliminateOnExactZeroOnly: false,
-            allowRecoveryBeforeTurn: true
+            allowRecoveryBeforeTurn: true,
+            chaosRuleScope: "round" // "round" of "turn"
         };
     }
 
-    //Huidige state opslaan zodat we later 1 stap terug kunnen
+    setGameMode(mode) {
+        if (mode === "classic" || mode === "chaos" || mode === "drink") {
+            this.gameMode = mode;
+        }
+    }
+
+    setChaosEngine(chaosEngine) {
+        this.chaosEngine = chaosEngine;
+    }
+
+    getActiveChaosModifier() {
+        return this.activeChaosModifier;
+    }
+
+    markChaosAnnouncementShown() {
+        this.activeChaosAnnouncementShown = true;
+    }
+
+    shouldShowChaosAnnouncement() {
+        return this.gameMode === "chaos"
+            && this.isStarted
+            && this.activeChaosModifier
+            && !this.activeChaosAnnouncementShown;
+    }
+
+    setChaosRuleScope(scope) {
+        if (scope === "round" || scope === "turn") {
+            this.settings.chaosRuleScope = scope;
+        }
+    }
+
+    // Huidige state opslaan zodat we later 1 stap terug kunnen
     saveState() {
         const snapshot = {
             players: JSON.parse(JSON.stringify(this.players)),
             currentPlayerIndex: this.currentPlayerIndex,
             currentThrow: this.currentThrow,
+            maxThrows: this.maxThrows,
             isStarted: this.isStarted,
             winnerNumber: this.winner ? this.winner.number : null,
-            currentTurnThrows: [...this.currentTurnThrows]
+            currentTurnThrows: [...this.currentTurnThrows],
+            gameMode: this.gameMode,
+            activeChaosModifierName: this.activeChaosModifier ? this.activeChaosModifier.name : null,
+            activeChaosAnnouncementShown: this.activeChaosAnnouncementShown,
+            playersWhoPlayedThisRound: [...this.playersWhoPlayedThisRound],
+            settings: { ...this.settings }
         };
 
         this.history.push(snapshot);
     }
 
-    //Laatste state terugzetten
+    // Laatste state terugzetten
     undo() {
         if (this.history.length === 0) {
             return;
@@ -45,13 +95,33 @@ class KillerGame {
         this.players = previousState.players;
         this.currentPlayerIndex = previousState.currentPlayerIndex;
         this.currentThrow = previousState.currentThrow;
+        this.maxThrows = previousState.maxThrows ?? 3;
         this.isStarted = previousState.isStarted;
         this.currentTurnThrows = previousState.currentTurnThrows;
+        this.gameMode = previousState.gameMode ?? "classic";
+        this.activeChaosAnnouncementShown = previousState.activeChaosAnnouncementShown ?? false;
+        this.playersWhoPlayedThisRound = previousState.playersWhoPlayedThisRound ?? [];
+        this.settings = previousState.settings ?? this.settings;
 
         if (previousState.winnerNumber === null) {
             this.winner = null;
         } else {
             this.winner = this.players.find(player => player.number === previousState.winnerNumber) || null;
+        }
+
+        if (this.chaosEngine && previousState.activeChaosModifierName) {
+            this.activeChaosModifier =
+                this.chaosEngine.availableModifiers.find(
+                    modifier => modifier.name === previousState.activeChaosModifierName
+                ) || null;
+
+            this.chaosEngine.activeModifier = this.activeChaosModifier;
+        } else {
+            this.activeChaosModifier = null;
+
+            if (this.chaosEngine) {
+                this.chaosEngine.activeModifier = null;
+            }
         }
     }
 
@@ -78,7 +148,8 @@ class KillerGame {
             isKiller: false,
             isImmune: true,
             isAlive: true,
-            pendingElimination: false
+            pendingElimination: false,
+            tempIgnoreImmunity: false
         };
 
         this.players.push(player);
@@ -117,14 +188,47 @@ class KillerGame {
         this.isStarted = true;
         this.currentPlayerIndex = 0;
         this.currentThrow = 1;
+        this.maxThrows = 3;
         this.winner = null;
         this.history = [];
         this.currentTurnThrows = [];
+        this.playersWhoPlayedThisRound = [];
+
+        this.players.forEach(player => {
+            player.tempIgnoreImmunity = false;
+        });
+
+        if (this.gameMode === "chaos" && this.chaosEngine) {
+            this.startNewChaosModifier();
+        } else {
+            this.activeChaosModifier = null;
+            this.activeChaosAnnouncementShown = false;
+        }
 
         return {
             success: true,
             message: ""
         };
+    }
+
+    startNewChaosModifier() {
+        if (this.gameMode !== "chaos" || !this.chaosEngine) {
+            this.activeChaosModifier = null;
+            this.activeChaosAnnouncementShown = false;
+            return;
+        }
+
+        this.activeChaosModifier = this.chaosEngine.startNewRound();
+        this.activeChaosAnnouncementShown = false;
+    }
+
+    endCurrentChaosModifier() {
+        if (this.gameMode === "chaos" && this.chaosEngine) {
+            this.chaosEngine.endRound();
+        }
+
+        this.activeChaosModifier = null;
+        this.activeChaosAnnouncementShown = false;
     }
 
     assignUniqueNumbers() {
@@ -150,7 +254,11 @@ class KillerGame {
         return this.players[this.currentPlayerIndex];
     }
 
-    //Single, double, triple --> 1, 2, 3 punten
+    getAlivePlayers() {
+        return this.players.filter(player => player.isAlive);
+    }
+
+    // Single, double, triple --> 1, 2, 3 punten
     getPoints(multiplier) {
         if (multiplier === 1 || multiplier === 2 || multiplier === 3) {
             return multiplier;
@@ -168,15 +276,29 @@ class KillerGame {
             return;
         }
 
-        //State opslaan voor undo
+        // State opslaan voor undo
         this.saveState();
 
-        //Speler aan de beurt
+        // Speler aan de beurt
         const player = this.getCurrentPlayer();
 
-        //Als speler al dood is, negeren we de worp
+        // Als speler al dood is, negeren we de worp
         if (!player || !player.isAlive) {
             return;
+        }
+
+        // Throw context voor chaos modifiers
+        let throwContext = {
+            player,
+            targetNumber,
+            multiplier,
+            cancelThrow: false,
+            message: ""
+        };
+
+        // Alleen chaos laten ingrijpen wanneer chaos mode actief is
+        if (this.gameMode === "chaos" && this.chaosEngine) {
+            throwContext = this.chaosEngine.handleThrow(throwContext);
         }
 
         let throwLabel = "";
@@ -193,15 +315,18 @@ class KillerGame {
             this.currentTurnThrows.push(throwLabel);
         }
 
-        this.processHit(player, targetNumber, multiplier);
+        // Als een chaos modifier de throw annuleert, telt de pijl wel als gegooid
+        if (!throwContext.cancelThrow) {
+            this.processHit(player, targetNumber, multiplier);
+        }
 
-        //Na de worp naar volgende dart of speler gaan
+        // Na de worp naar volgende dart of speler gaan
         if (!this.winner) {
             this.nextThrowOrPlayer();
         }
     }
 
-    //Als speler mist, gaan we meteen naar de volgende worp of speler
+    // Als speler mist, gaan we meteen naar de volgende worp of speler
     handleMiss() {
         if (!this.isStarted) {
             return;
@@ -211,14 +336,14 @@ class KillerGame {
             return;
         }
 
-        //State opslaan voor undo
+        // State opslaan voor undo
         this.saveState();
 
         this.currentTurnThrows.push("Mis");
         this.nextThrowOrPlayer();
     }
 
-    //SpelregelLogica: punten toekennen of afnemen, status van spelers bijwerken
+    // SpelregelLogica: punten toekennen of afnemen, status van spelers bijwerken
     processHit(player, targetNumber, multiplier) {
         const points = this.getPoints(multiplier);
 
@@ -226,7 +351,7 @@ class KillerGame {
             return;
         }
 
-        //Speler raakt zichzelf
+        // Speler raakt zichzelf
         if (targetNumber === player.number) {
             player.score += points;
 
@@ -243,42 +368,47 @@ class KillerGame {
             return;
         }
 
-        //Als speler nog geen killer is mag hij niet op anderen schieten
+        // Als speler nog geen killer is mag hij niet op anderen schieten
         if (!player.isKiller) {
             return;
         }
 
-        //Zoeken naar het doelwit in de spelerslijst
+        // Zoeken naar het doelwit in de spelerslijst
         const targetPlayer = this.players.find(otherPlayer => {
             return otherPlayer.number === targetNumber && otherPlayer.isAlive;
         });
 
-        //Als er geen geldig doelwit is, negeren we de worp
+        // Als er geen geldig doelwit is, negeren we de worp
         if (!targetPlayer) {
             return;
         }
 
-        //Je mag niet op jezelf schieten
+        // Je mag niet op jezelf schieten
         if (targetPlayer === player) {
             return;
         }
 
-        //Je mag niet op immuun spelers schieten als immuniteit aanstaat
-        if (this.settings.immunityEnabled && targetPlayer.isImmune) {
+        // Je mag niet op immuun spelers schieten als immuniteit aanstaat
+        const immunityBlocksHit =
+            this.settings.immunityEnabled &&
+            targetPlayer.isImmune &&
+            !targetPlayer.tempIgnoreImmunity;
+
+        if (immunityBlocksHit) {
             return;
         }
 
-        //Punten aftrekken van het doelwit
+        // Punten aftrekken van het doelwit
         targetPlayer.score -= points;
 
         const shouldEliminateNow = this.isDeadlyScore(targetPlayer.score);
 
-        //Als iemand killer was maar onder 5 zakt, verliest die de killer-status
+        // Als iemand killer was maar onder 5 zakt, verliest die de killer-status
         if (!this.settings.killerStaysForever && targetPlayer.isKiller && targetPlayer.score < 5) {
             targetPlayer.isKiller = false;
         }
 
-        //Als recovery aan staat en score is dodelijk, dan krijgt speler nog 1 kans
+        // Als recovery aan staat en score is dodelijk, dan krijgt speler nog 1 kans
         if (this.settings.allowRecoveryBeforeTurn && shouldEliminateNow) {
             targetPlayer.pendingElimination = true;
         } else if (shouldEliminateNow) {
@@ -287,8 +417,8 @@ class KillerGame {
             targetPlayer.pendingElimination = false;
         }
 
-        //Bij exact-zero-only clampen we negatieve scores visueel terug naar 0,
-        //maar alleen als die speler NIET pending is
+        // Bij exact-zero-only clampen we negatieve scores visueel terug naar 0,
+        // maar alleen als die speler NIET pending is
         if (
             targetPlayer.score < 0 &&
             this.settings.eliminateOnExactZeroOnly &&
@@ -297,21 +427,78 @@ class KillerGame {
             targetPlayer.score = 0;
         }
 
-        //Na elke geldige aanval controleren we of er nog maar 1 speler over is
+        // Na elke geldige aanval controleren we of er nog maar 1 speler over is
         this.checkWinner();
     }
 
-    //TurnLogica
+    registerFinishedTurn(player) {
+        if (!player) {
+            return;
+        }
+
+        if (!this.playersWhoPlayedThisRound.includes(player.number)) {
+            this.playersWhoPlayedThisRound.push(player.number);
+        }
+    }
+
+    hasEveryonePlayedThisRound() {
+        const alivePlayers = this.getAlivePlayers();
+
+        if (alivePlayers.length === 0) {
+            return false;
+        }
+
+        return alivePlayers.every(player => this.playersWhoPlayedThisRound.includes(player.number));
+    }
+
+    handleChaosAfterTurn(currentPlayer) {
+        if (this.gameMode !== "chaos" || !this.chaosEngine) {
+            return;
+        }
+
+        if (this.settings.chaosRuleScope === "turn") {
+            this.endCurrentChaosModifier();
+            return;
+        }
+
+        // round mode
+        this.registerFinishedTurn(currentPlayer);
+
+        if (this.hasEveryonePlayedThisRound()) {
+            this.endCurrentChaosModifier();
+            this.playersWhoPlayedThisRound = [];
+        }
+    }
+
+    startChaosForNextPlayerIfNeeded() {
+        if (this.gameMode !== "chaos" || !this.chaosEngine) {
+            this.activeChaosModifier = null;
+            this.activeChaosAnnouncementShown = false;
+            return;
+        }
+
+        if (this.settings.chaosRuleScope === "turn") {
+            this.startNewChaosModifier();
+            return;
+        }
+
+        // round mode
+        if (!this.activeChaosModifier) {
+            this.startNewChaosModifier();
+        }
+    }
+
+    // TurnLogica
     nextThrowOrPlayer() {
-        //Als speler nog niet 3 worpen heeft gedaan, gaat hij door met de volgende worp
-        if (this.currentThrow < 3) {
+        // Als speler nog niet zijn maximum aantal worpen heeft gedaan, gaat hij door met de volgende worp
+        if (this.currentThrow < this.maxThrows) {
             this.currentThrow++;
             return;
         }
 
         const currentPlayer = this.getCurrentPlayer();
 
-        //Als deze speler pending elimination had, checken we na zijn volledige beurt of hij veilig is
+        // Als deze speler pending elimination had, checken we na zijn volledige beurt of hij veilig is
         if (currentPlayer && currentPlayer.pendingElimination) {
             if (this.isSafeAfterRecovery(currentPlayer.score)) {
                 currentPlayer.pendingElimination = false;
@@ -322,15 +509,21 @@ class KillerGame {
             }
         }
 
-        //Na 3 worpen resetten we de worp teller en gaan we naar de volgende levende speler
+        // Na een eventuele eliminatie opnieuw winnaar checken
+        this.checkWinner();
+
+        // Huidige chaos-beurt / chaos-ronde verwerken
+        if (!this.winner) {
+            this.handleChaosAfterTurn(currentPlayer);
+        }
+
+        // Na max worpen resetten we de worp teller
         this.currentThrow = 1;
         this.currentTurnThrows = [];
 
-        //Na een eventuele eliminatie opnieuw winnaar checken
-        this.checkWinner();
-
         if (!this.winner) {
             this.goToNextAlivePlayer();
+            this.startChaosForNextPlayerIfNeeded();
         }
     }
 
@@ -352,16 +545,18 @@ class KillerGame {
         this.currentPlayerIndex = nextIndex;
     }
 
-    //Na elke worp controleren we of er nog maar 1 speler over is
+    // Na elke worp controleren we of er nog maar 1 speler over is
     checkWinner() {
         const alivePlayers = this.players.filter(player => player.isAlive);
 
         if (alivePlayers.length === 1) {
             this.winner = alivePlayers[0];
+            this.endCurrentChaosModifier();
+            this.playersWhoPlayedThisRound = [];
         }
     }
 
-    //Hulp functies Recovery
+    // Hulp functies Recovery
     isDeadlyScore(score) {
         if (this.settings.eliminateOnExactZeroOnly) {
             return score === 0;
@@ -378,7 +573,7 @@ class KillerGame {
         return score >= 0;
     }
 
-    //Manier om nummers toe te wijzen aanpassen (random of handmatig)
+    // Manier om nummers toe te wijzen aanpassen (random of handmatig)
     setNumberAssignmentMode(mode) {
         if (mode === "random" || mode === "manual") {
             this.numberAssignmentMode = mode;
