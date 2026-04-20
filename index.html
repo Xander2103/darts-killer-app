@@ -122,49 +122,49 @@
                 <div class="settings-modal-content">
                     <div class="settings-modal-header">
                         <h2>Settings</h2>
-                        <button id="closeSettingsButton" type="button" class="small-action-button">Sluiten</button>
+                        <button id="closeSettingsButton" type="button" class="small-action-button">Close</button>
                     </div>
 
                     <div class="settings-group">
-                        <label for="themeSelect">Thema</label>
+                        <label for="themeSelect">Theme</label>
                         <select id="themeSelect">
                             <option value="theme-neon">Neon Darts</option>
                             <option value="theme-pub">Pub Darts</option>
                             <option value="theme-arcade">Arcade Color</option>
                             <option value="theme-clean">Clean Sport</option>
                         </select>
-                        <p class="setting-help standalone-help">Verandert de look en sfeer van de app.</p>
+                        <p class="setting-help standalone-help">Changes the look and feel of the app.</p>
 
                         <div class="setting-card clickable-setting" data-setting="immunity">
                             <div class="setting-text">
-                                <div class="setting-title">Immuniteit aan</div>
-                                <p class="setting-help">Nieuwe spelers zijn eerst beschermd tegen aanvallen.</p>
+                                <div class="setting-title">Immunity toggle</div>
+                                <p class="setting-help">New players are initially protected from attacks.</p>
                             </div>
                             <input type="checkbox" id="immunityToggle" checked>
                         </div>
 
                         <div class="setting-card clickable-setting" data-setting="killerForever">
                             <div class="setting-text">
-                                <div class="setting-title">Killer blijft permanent</div>
-                                <p class="setting-help">Een speler die killer wordt, blijft killer ook als zijn score
-                                    terug daalt.</p>
+                                <div class="setting-title">Killer stays permanent</div>
+                                <p class="setting-help">A player who becomes a killer remains a killer even if their score
+                                    drops.</p>
                             </div>
                             <input type="checkbox" id="killerForeverToggle" checked>
                         </div>
 
                         <div class="setting-card clickable-setting" data-setting="exactZero">
                             <div class="setting-text">
-                                <div class="setting-title">Uit op exact 0</div>
-                                <p class="setting-help">Spelers vallen alleen uit als hun score exact op 0 komt.</p>
+                                <div class="setting-title">Eliminate on exact zero</div>
+                                <p class="setting-help">Players are eliminated only if their score reaches exactly zero.</p>
                             </div>
                             <input type="checkbox" id="exactZeroToggle">
                         </div>
 
                         <div class="setting-card clickable-setting" data-setting="recovery">
                             <div class="setting-text">
-                                <div class="setting-title">Recovery vóór eigen beurt</div>
-                                <p class="setting-help">Een speler krijgt nog een kans om zichzelf te redden vóór hij
-                                    echt uitvalt.</p>
+                                <div class="setting-title">Recovery before own turn</div>
+                                <p class="setting-help">A player gets one more chance to save themselves before they
+                                    actually get eliminated.</p>
                             </div>
                             <input type="checkbox" id="recoveryToggle" checked>
                         </div>
@@ -181,8 +181,8 @@
         <div class="app-modal-backdrop" id="appModalBackdrop"></div>
 
         <div class="app-modal-content" role="dialog" aria-modal="true" aria-labelledby="appModalTitle">
-            <h2 id="appModalTitle" class="app-modal-title">Titel</h2>
-            <p id="appModalMessage" class="app-modal-message">Bericht</p>
+            <h2 id="appModalTitle" class="app-modal-title">Title</h2>
+            <p id="appModalMessage" class="app-modal-message">Message</p>
 
             <div id="appModalActions" class="app-modal-actions">
                 <button id="appModalCancel" class="app-modal-button secondary">Cancel</button>
