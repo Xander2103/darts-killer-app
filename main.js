@@ -21,6 +21,9 @@ import { HotStreak } from "./chaos/modifiers/hot-streak.js";
 import { VampireMode } from "./chaos/modifiers/vampire-mode.js";
 import { Revival } from "./chaos/modifiers/revival.js";
 import { InstantKill } from "./chaos/modifiers/instant-kill.js";
+import { SuddenDeath } from "./chaos/modifiers/sudden-death.js";
+import { BullseyeMadness } from "./chaos/modifiers/bullseye-madness.js";
+import { RandomTargetSwap } from "./chaos/modifiers/random-target-swap.js";
 
 // UI en settings
 import { initSettings } from "./settings.js";
@@ -51,6 +54,9 @@ chaosEngine.register(new HotStreak());
 chaosEngine.register(new VampireMode());
 chaosEngine.register(new Revival());
 chaosEngine.register(new InstantKill());
+chaosEngine.register(new SuddenDeath());
+chaosEngine.register(new BullseyeMadness());
+chaosEngine.register(new RandomTargetSwap());
 
 game.setChaosEngine(chaosEngine);
 

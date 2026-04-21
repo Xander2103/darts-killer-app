@@ -29,6 +29,9 @@ export function initSettings(game, renderApp, renderActions = {}) {
     const vampireModeToggle = document.getElementById("vampireModeToggle");
     const revivalToggle = document.getElementById("revivalToggle");
     const instantKillToggle = document.getElementById("instantKillToggle");
+    const suddenDeathToggle = document.getElementById("suddenDeathToggle");
+    const bullseyeMadnessToggle = document.getElementById("bullseyeMadnessToggle");
+    const randomTargetSwapToggle = document.getElementById("randomTargetSwapToggle");
 
     // cards om per mode te kunnen tonen/verbergen
     const immunityCard = document.querySelector('[data-setting="immunity"]');
@@ -58,6 +61,9 @@ export function initSettings(game, renderApp, renderActions = {}) {
         vampireMode: true,
         revival: true,
         instantKill: true,
+        suddenDeath: true,
+        bullseyeMadness: true,
+        randomTargetSwap: true,
     };
 
     const defaultSettingsByMode = {
@@ -282,6 +288,18 @@ export function initSettings(game, renderApp, renderActions = {}) {
         if (instantKillToggle) {
             instantKillToggle.checked = game.settings.chaosModifiers.instantKill;
         }
+
+        if (suddenDeathToggle) {
+            suddenDeathToggle.checked = game.settings.chaosModifiers.suddenDeath;
+        }
+
+        if (bullseyeMadnessToggle) {
+            bullseyeMadnessToggle.checked = game.settings.chaosModifiers.bullseyeMadness;
+        }
+
+        if (randomTargetSwapToggle) {
+            randomTargetSwapToggle.checked = game.settings.chaosModifiers.randomTargetSwap;
+        }
     }
 
     function applyDefaultSettingsToGame() {
@@ -387,6 +405,9 @@ export function initSettings(game, renderApp, renderActions = {}) {
             vampireMode: loadChaosModifierSetting("vampireMode"),
             revival: loadChaosModifierSetting("revival"),
             instantKill: loadChaosModifierSetting("instantKill"),
+            suddenDeath: loadChaosModifierSetting("suddenDeath"),
+            bullseyeMadness: loadChaosModifierSetting("bullseyeMadness"),
+            randomTargetSwap: loadChaosModifierSetting("randomTargetSwap"),
         };
 
         if (game.settings.allowRecoveryBeforeTurn && game.settings.eliminateOnExactZeroOnly) {
@@ -423,6 +444,9 @@ export function initSettings(game, renderApp, renderActions = {}) {
         saveChaosModifierSetting("vampireMode", game.settings.chaosModifiers.vampireMode);
         saveChaosModifierSetting("revival", game.settings.chaosModifiers.revival);
         saveChaosModifierSetting("instantKill", game.settings.chaosModifiers.instantKill);
+        saveChaosModifierSetting("suddenDeath", game.settings.chaosModifiers.suddenDeath);
+        saveChaosModifierSetting("bullseyeMadness", game.settings.chaosModifiers.bullseyeMadness);
+        saveChaosModifierSetting("randomTargetSwap", game.settings.chaosModifiers.randomTargetSwap);
     }
 
     function applySettingsForCurrentMode() {
@@ -535,6 +559,9 @@ export function initSettings(game, renderApp, renderActions = {}) {
                 vampireMode: vampireModeToggle,
                 revival: revivalToggle,
                 instantKill: instantKillToggle,
+                suddenDeath: suddenDeathToggle,
+                bullseyeMadness: bullseyeMadnessToggle,
+                randomTargetSwap: randomTargetSwapToggle,
             };
 
             const targetToggle = chaosModifierMap[settingType];
@@ -717,6 +744,27 @@ export function initSettings(game, renderApp, renderActions = {}) {
     if (instantKillToggle) {
         instantKillToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.instantKill = instantKillToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (suddenDeathToggle) {
+        suddenDeathToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.suddenDeath = suddenDeathToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (bullseyeMadnessToggle) {
+        bullseyeMadnessToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.bullseyeMadness = bullseyeMadnessToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (randomTargetSwapToggle) {
+        randomTargetSwapToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.randomTargetSwap = randomTargetSwapToggle.checked;
             saveGameSettings();
         });
     }

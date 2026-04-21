@@ -456,6 +456,12 @@ function renderGameBoard(game, actions = {}) {
         return;
     }
 
+    const activeModifier = game.getActiveChaosModifier();
+    const isBullseyeMadnessActive =
+        game.gameMode === "chaos" &&
+        activeModifier &&
+        activeModifier.name === "Bullseye Madness";
+
     game.players.forEach((player, index) => {
         const row = document.createElement("div");
         row.classList.add("game-row");
@@ -546,40 +552,42 @@ function renderGameBoard(game, actions = {}) {
         const buttonRow = document.createElement("div");
         buttonRow.classList.add("game-row-buttons");
 
+        const displayedTargetNumber = player.tempTargetNumber ?? player.number;
+
         if (game.isStarted && !game.winner) {
             const singleButton = document.createElement("button");
-            singleButton.textContent = `S ${player.number}`;
+            singleButton.textContent = `S ${displayedTargetNumber}`;
             singleButton.disabled = isThrowButtonDisabled(game, 1);
             singleButton.addEventListener("click", () => {
                 if (singleButton.disabled) {
                     return;
                 }
 
-                game.handleThrow(player.number, 1);
+                game.handleThrow(displayedTargetNumber, 1);
                 renderApp(game, actions);
             });
 
             const doubleButton = document.createElement("button");
-            doubleButton.textContent = `D ${player.number}`;
+            doubleButton.textContent = `D ${displayedTargetNumber}`;
             doubleButton.disabled = isThrowButtonDisabled(game, 2);
             doubleButton.addEventListener("click", () => {
                 if (doubleButton.disabled) {
                     return;
                 }
 
-                game.handleThrow(player.number, 2);
+                game.handleThrow(displayedTargetNumber, 2);
                 renderApp(game, actions);
             });
 
             const tripleButton = document.createElement("button");
-            tripleButton.textContent = `T ${player.number}`;
+            tripleButton.textContent = `T ${displayedTargetNumber}`;
             tripleButton.disabled = isThrowButtonDisabled(game, 3);
             tripleButton.addEventListener("click", () => {
                 if (tripleButton.disabled) {
                     return;
                 }
 
-                game.handleThrow(player.number, 3);
+                game.handleThrow(displayedTargetNumber, 3);
                 renderApp(game, actions);
             });
 
@@ -593,12 +601,31 @@ function renderGameBoard(game, actions = {}) {
             buttonRow.appendChild(singleButton);
             buttonRow.appendChild(doubleButton);
             buttonRow.appendChild(tripleButton);
+
+            if (isBullseyeMadnessActive) {
+                const outerBullButton = document.createElement("button");
+                outerBullButton.textContent = "Outer Bull";
+                outerBullButton.addEventListener("click", () => {
+                    game.handleBullHit(2);
+                    renderApp(game, actions);
+                });
+
+                const innerBullButton = document.createElement("button");
+                innerBullButton.textContent = "Inner Bull";
+                innerBullButton.addEventListener("click", () => {
+                    game.handleBullHit(3);
+                    renderApp(game, actions);
+                });
+
+                buttonRow.appendChild(outerBullButton);
+                buttonRow.appendChild(innerBullButton);
+            }
+
             buttonRow.appendChild(missButton);
         }
 
         row.appendChild(topRow);
         row.appendChild(buttonRow);
-
         gameBoard.appendChild(row);
     });
 

@@ -169,6 +169,7 @@ export class KillerGame {
             tempIgnoreImmunity: false,
             tempSafeZone: false,
             tempTargetLockHit: false,
+            tempTargetNumber: null,
         };
 
         this.players.push(player);
@@ -712,5 +713,45 @@ export class KillerGame {
         this.players.forEach(player => {
             player.number = Number(player.manualNumber);
         });
+    }
+
+    handleBullHit(points) {
+        if (!this.isStarted) {
+            return;
+        }
+
+        if (this.winner) {
+            return;
+        }
+
+        if (points !== 2 && points !== 3) {
+            return;
+        }
+
+        this.saveState();
+
+        const player = this.getCurrentPlayer();
+
+        if (!player || !player.isAlive) {
+            return;
+        }
+
+        player.score += points;
+
+        if (player.score > 5) {
+            player.score = 5;
+        }
+
+        player.isImmune = false;
+
+        if (player.score >= 5) {
+            player.isKiller = true;
+        }
+
+        this.currentTurnThrows.push(points === 2 ? "OB" : "IB");
+
+        if (!this.winner) {
+            this.nextThrowOrPlayer();
+        }
     }
 }

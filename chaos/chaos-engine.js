@@ -27,6 +27,9 @@ export class ChaosEngine {
             VampireMode: "vampireMode",
             Revival: "revival",
             InstantKill: "instantKill",
+            SuddenDeath: "suddenDeath",
+            BullseyeMadness: "bullseyeMadness",
+            RandomTargetSwap: "randomTargetSwap",
         };
 
         return modifierKeyMap[modifier.constructor.name] || null;
