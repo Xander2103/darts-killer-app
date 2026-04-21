@@ -210,6 +210,7 @@ undoButton.addEventListener("click", () => {
 
 classicModeBtn.addEventListener("click", () => {
     game.setGameMode("classic");
+    settingsApi.applySettingsForCurrentMode();
     showClassicScreen();
 
     renderApp(game, {
@@ -220,6 +221,7 @@ classicModeBtn.addEventListener("click", () => {
 
 chaosModeBtn.addEventListener("click", () => {
     game.setGameMode("chaos");
+    settingsApi.applySettingsForCurrentMode();
     showClassicScreen();
 
     renderApp(game, {
@@ -271,7 +273,7 @@ backToHomeButton.addEventListener("click", () => {
 });
 
 // settings initialiseren
-initSettings(game, renderApp, {
+const settingsApi = initSettings(game, renderApp, {
     resetGameCompletely,
     showHomeScreen
 });

@@ -31,7 +31,21 @@ export class KillerGame {
             killerStaysForever: true,
             eliminateOnExactZeroOnly: false,
             allowRecoveryBeforeTurn: true,
-            chaosRuleScope: "round" // "round" of "turn"
+            chaosRuleScope: "round", // "round" of "turn"
+            chaosModifiers: {
+                doubleTrouble: true,
+                tripleTrouble: true,
+                bonusDarts: true,
+                immunityOff: true,
+                targetLock: true,
+                noMiss: true,
+                lastDartPressure: true,
+                doubleDamage: true,
+                oneShot: true,
+                safeZone: true,
+                hotStreak: true,
+                vampireMode: true
+            }
         };
     }
 
@@ -80,7 +94,7 @@ export class KillerGame {
             activeChaosModifierName: this.activeChaosModifier ? this.activeChaosModifier.name : null,
             activeChaosAnnouncementShown: this.activeChaosAnnouncementShown,
             playersWhoPlayedThisRound: [...this.playersWhoPlayedThisRound],
-            settings: { ...this.settings }
+            settings: JSON.parse(JSON.stringify(this.settings))
         };
 
         this.history.push(snapshot);
@@ -224,13 +238,22 @@ export class KillerGame {
             return;
         }
 
-        this.activeChaosModifier = this.chaosEngine.startNewRound();
+        if (this.settings.chaosRuleScope === "turn") {
+            this.activeChaosModifier = this.chaosEngine.startNewTurn();
+        } else {
+            this.activeChaosModifier = this.chaosEngine.startNewRound();
+        }
+
         this.activeChaosAnnouncementShown = false;
     }
 
     endCurrentChaosModifier() {
         if (this.gameMode === "chaos" && this.chaosEngine) {
-            this.chaosEngine.endRound();
+            if (this.settings.chaosRuleScope === "turn") {
+                this.chaosEngine.endTurn();
+            } else {
+                this.chaosEngine.endRound();
+            }
         }
 
         this.activeChaosModifier = null;

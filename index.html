@@ -126,6 +126,8 @@
                     </div>
 
                     <div class="settings-group">
+                        <h3 class="settings-section-title">General Settings</h3>
+
                         <label for="themeSelect">Theme</label>
                         <select id="themeSelect">
                             <option value="theme-neon">Neon Darts</option>
@@ -134,6 +136,8 @@
                             <option value="theme-clean">Clean Sport</option>
                         </select>
                         <p class="setting-help standalone-help">Changes the look and feel of the app.</p>
+
+                        <h3 class="settings-section-title">Base Rules</h3>
 
                         <div class="setting-card clickable-setting" data-setting="immunity">
                             <div class="setting-text">
@@ -147,8 +151,7 @@
                             <div class="setting-text">
                                 <div class="setting-title">Killer stays permanent</div>
                                 <p class="setting-help">A player who becomes a killer remains a killer even if their
-                                    score
-                                    drops.</p>
+                                    score drops.</p>
                             </div>
                             <input type="checkbox" id="killerForeverToggle" checked>
                         </div>
@@ -169,6 +172,115 @@
                                     actually get eliminated.</p>
                             </div>
                             <input type="checkbox" id="recoveryToggle" checked>
+                        </div>
+
+                        <div class="setting-card clickable-setting" data-setting="chaosRuleScope">
+                                <div class="setting-text">
+                                    <div class="setting-title">Apply modifier every turn</div>
+                                    <p class="setting-help">If disabled, one modifier stays active for the whole round.
+                                    </p>
+                                </div>
+                                <input type="checkbox" id="chaosRuleScopeToggle">
+                            </div>
+
+                        <div id="chaosSettingsSection" class="hidden">
+                            <h3 class="settings-section-title">Chaos Modifiers :</h3>
+
+                            <div class="setting-card clickable-setting" data-setting="doubleTrouble">
+                                <div class="setting-text">
+                                    <div class="setting-title">Double Trouble</div>
+                                    <p class="setting-help">Special double-based chaos effect can appear.</p>
+                                </div>
+                                <input type="checkbox" id="doubleTroubleToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="tripleTrouble">
+                                <div class="setting-text">
+                                    <div class="setting-title">Triple Trouble</div>
+                                    <p class="setting-help">Special triple-based chaos effect can appear.</p>
+                                </div>
+                                <input type="checkbox" id="tripleTroubleToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="bonusDarts">
+                                <div class="setting-text">
+                                    <div class="setting-title">Bonus Darts</div>
+                                    <p class="setting-help">Players may receive extra darts during chaos rounds.</p>
+                                </div>
+                                <input type="checkbox" id="bonusDartsToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="immunityOff">
+                                <div class="setting-text">
+                                    <div class="setting-title">Immunity Off</div>
+                                    <p class="setting-help">Immunity can temporarily be disabled.</p>
+                                </div>
+                                <input type="checkbox" id="immunityOffToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="targetLock">
+                                <div class="setting-text">
+                                    <div class="setting-title">Target Lock</div>
+                                    <p class="setting-help">Players may be forced to hit a locked target.</p>
+                                </div>
+                                <input type="checkbox" id="targetLockToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="noMiss">
+                                <div class="setting-text">
+                                    <div class="setting-title">No Miss</div>
+                                    <p class="setting-help">Missing can trigger a chaos penalty.</p>
+                                </div>
+                                <input type="checkbox" id="noMissToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="lastDartPressure">
+                                <div class="setting-text">
+                                    <div class="setting-title">Last Dart Pressure</div>
+                                    <p class="setting-help">The final dart of a turn becomes extra risky.</p>
+                                </div>
+                                <input type="checkbox" id="lastDartPressureToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="doubleDamage">
+                                <div class="setting-text">
+                                    <div class="setting-title">Double Damage</div>
+                                    <p class="setting-help">Some chaos rounds deal increased damage.</p>
+                                </div>
+                                <input type="checkbox" id="doubleDamageToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="oneShot">
+                                <div class="setting-text">
+                                    <div class="setting-title">One Shot</div>
+                                    <p class="setting-help">Players only receive 1 dart per turn.</p>
+                                </div>
+                                <input type="checkbox" id="oneShotToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="safeZone">
+                                <div class="setting-text">
+                                    <div class="setting-title">Safe Zone</div>
+                                    <p class="setting-help">A protected zone can appear during chaos.</p>
+                                </div>
+                                <input type="checkbox" id="safeZoneToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="hotStreak">
+                                <div class="setting-text">
+                                    <div class="setting-title">Hot Streak</div>
+                                    <p class="setting-help">Successful hits can chain into stronger effects.</p>
+                                </div>
+                                <input type="checkbox" id="hotStreakToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="vampireMode">
+                                <div class="setting-text">
+                                    <div class="setting-title">Vampire Mode</div>
+                                    <p class="setting-help">Hits can steal value back for the attacker.</p>
+                                </div>
+                                <input type="checkbox" id="vampireModeToggle" checked>
+                            </div>
                         </div>
 
                         <div id="settingsError" class="settings-error hidden"></div>

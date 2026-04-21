@@ -11,13 +11,102 @@ export function initSettings(game, renderApp, renderActions = {}) {
     const recoveryToggle = document.getElementById("recoveryToggle");
     const settingsError = document.getElementById("settingsError");
 
-    // theme's opslaan in localStorage zodat ze behouden blijven bij herladen
+    const chaosRuleScopeToggle = document.getElementById("chaosRuleScopeToggle");
+    const chaosSettingsSection = document.getElementById("chaosSettingsSection");
+
+    // chaos modifier toggles
+    const doubleTroubleToggle = document.getElementById("doubleTroubleToggle");
+    const tripleTroubleToggle = document.getElementById("tripleTroubleToggle");
+    const bonusDartsToggle = document.getElementById("bonusDartsToggle");
+    const immunityOffToggle = document.getElementById("immunityOffToggle");
+    const targetLockToggle = document.getElementById("targetLockToggle");
+    const noMissToggle = document.getElementById("noMissToggle");
+    const lastDartPressureToggle = document.getElementById("lastDartPressureToggle");
+    const doubleDamageToggle = document.getElementById("doubleDamageToggle");
+    const oneShotToggle = document.getElementById("oneShotToggle");
+    const safeZoneToggle = document.getElementById("safeZoneToggle");
+    const hotStreakToggle = document.getElementById("hotStreakToggle");
+    const vampireModeToggle = document.getElementById("vampireModeToggle");
+
+    // cards om per mode te kunnen tonen/verbergen
+    const immunityCard = document.querySelector('[data-setting="immunity"]');
+    const killerForeverCard = document.querySelector('[data-setting="killerForever"]');
+    const exactZeroCard = document.querySelector('[data-setting="exactZero"]');
+    const recoveryCard = document.querySelector('[data-setting="recovery"]');
+
     const availableThemes = [
         "theme-neon",
         "theme-pub",
         "theme-arcade",
         "theme-clean"
     ];
+
+    const defaultChaosModifiers = {
+        doubleTrouble: true,
+        tripleTrouble: true,
+        bonusDarts: true,
+        immunityOff: true,
+        targetLock: true,
+        noMiss: true,
+        lastDartPressure: true,
+        doubleDamage: true,
+        oneShot: true,
+        safeZone: true,
+        hotStreak: true,
+        vampireMode: true
+    };
+
+    const defaultSettingsByMode = {
+        classic: {
+            immunityEnabled: true,
+            killerStaysForever: true,
+            eliminateOnExactZeroOnly: false,
+            allowRecoveryBeforeTurn: true,
+            chaosRuleScope: "round",
+            chaosModifiers: { ...defaultChaosModifiers }
+        },
+        chaos: {
+            immunityEnabled: true,
+            killerStaysForever: true,
+            eliminateOnExactZeroOnly: false,
+            allowRecoveryBeforeTurn: true,
+            chaosRuleScope: "round",
+            chaosModifiers: { ...defaultChaosModifiers }
+        },
+        drink: {
+            immunityEnabled: true,
+            killerStaysForever: true,
+            eliminateOnExactZeroOnly: false,
+            allowRecoveryBeforeTurn: true,
+            chaosRuleScope: "round",
+            chaosModifiers: { ...defaultChaosModifiers }
+        }
+    };
+
+    function ensureChaosModifiersObject() {
+        if (!game.settings.chaosModifiers) {
+            game.settings.chaosModifiers = { ...defaultChaosModifiers };
+            return;
+        }
+
+        for (const modifierKey in defaultChaosModifiers) {
+            if (!(modifierKey in game.settings.chaosModifiers)) {
+                game.settings.chaosModifiers[modifierKey] = defaultChaosModifiers[modifierKey];
+            }
+        }
+    }
+
+    function getActiveMode() {
+        return game.gameMode || "classic";
+    }
+
+    function getStorageKey(settingName) {
+        return `${getActiveMode()}_${settingName}`;
+    }
+
+    function getDefaultsForActiveMode() {
+        return defaultSettingsByMode[getActiveMode()] || defaultSettingsByMode.classic;
+    }
 
     function applyTheme(themeName) {
         document.body.classList.remove(...availableThemes);
@@ -63,11 +152,160 @@ export function initSettings(game, renderApp, renderActions = {}) {
         settingsError.classList.add("hidden");
     }
 
-    // Settings modal openen en sluiten
+    function updateSettingsUIForMode() {
+        const activeMode = getActiveMode();
+        const isChaosMode = activeMode === "chaos";
+
+        // Base rules die altijd zichtbaar mogen zijn
+        if (immunityCard) {
+            immunityCard.style.display = "";
+        }
+
+        if (recoveryCard) {
+            recoveryCard.style.display = "";
+        }
+
+        // Alleen zichtbaar in Classic / Drink, niet in Chaos
+        if (killerForeverCard) {
+            killerForeverCard.style.display = isChaosMode ? "none" : "";
+        }
+
+        if (exactZeroCard) {
+            exactZeroCard.style.display = isChaosMode ? "none" : "";
+        }
+
+        // Chaos-sectie alleen zichtbaar in Chaos mode
+        if (chaosSettingsSection) {
+            chaosSettingsSection.style.display = isChaosMode ? "flex" : "none";
+            chaosSettingsSection.classList.toggle("hidden", !isChaosMode);
+        }
+
+        // Chaos rule scope toggle mag alleen in Chaos zichtbaar zijn
+        if (chaosRuleScopeToggle) {
+            const scopeCard =
+                chaosRuleScopeToggle.closest(".setting-card") ||
+                chaosRuleScopeToggle.closest(".clickable-setting");
+
+            if (scopeCard) {
+                scopeCard.style.display = isChaosMode ? "" : "none";
+            }
+        }
+    }
+    function applyForcedSettingsForMode() {
+        const activeMode = getActiveMode();
+
+        if (activeMode === "chaos") {
+            game.settings.killerStaysForever = true;
+            game.settings.eliminateOnExactZeroOnly = false;
+        }
+    }
+
+    function syncTogglesFromGameSettings() {
+        ensureChaosModifiersObject();
+
+        if (immunityToggle) {
+            immunityToggle.checked = game.settings.immunityEnabled;
+        }
+
+        if (killerForeverToggle) {
+            killerForeverToggle.checked = game.settings.killerStaysForever;
+        }
+
+        if (exactZeroToggle) {
+            exactZeroToggle.checked = game.settings.eliminateOnExactZeroOnly;
+        }
+
+        if (recoveryToggle) {
+            recoveryToggle.checked = game.settings.allowRecoveryBeforeTurn;
+        }
+
+        if (chaosRuleScopeToggle) {
+            chaosRuleScopeToggle.checked = game.settings.chaosRuleScope === "turn";
+        }
+
+        if (doubleTroubleToggle) {
+            doubleTroubleToggle.checked = game.settings.chaosModifiers.doubleTrouble;
+        }
+
+        if (tripleTroubleToggle) {
+            tripleTroubleToggle.checked = game.settings.chaosModifiers.tripleTrouble;
+        }
+
+        if (bonusDartsToggle) {
+            bonusDartsToggle.checked = game.settings.chaosModifiers.bonusDarts;
+        }
+
+        if (immunityOffToggle) {
+            immunityOffToggle.checked = game.settings.chaosModifiers.immunityOff;
+        }
+
+        if (targetLockToggle) {
+            targetLockToggle.checked = game.settings.chaosModifiers.targetLock;
+        }
+
+        if (noMissToggle) {
+            noMissToggle.checked = game.settings.chaosModifiers.noMiss;
+        }
+
+        if (lastDartPressureToggle) {
+            lastDartPressureToggle.checked = game.settings.chaosModifiers.lastDartPressure;
+        }
+
+        if (doubleDamageToggle) {
+            doubleDamageToggle.checked = game.settings.chaosModifiers.doubleDamage;
+        }
+
+        if (oneShotToggle) {
+            oneShotToggle.checked = game.settings.chaosModifiers.oneShot;
+        }
+
+        if (safeZoneToggle) {
+            safeZoneToggle.checked = game.settings.chaosModifiers.safeZone;
+        }
+
+        if (hotStreakToggle) {
+            hotStreakToggle.checked = game.settings.chaosModifiers.hotStreak;
+        }
+
+        if (vampireModeToggle) {
+            vampireModeToggle.checked = game.settings.chaosModifiers.vampireMode;
+        }
+    }
+
+    function applyDefaultSettingsToGame() {
+        const defaults = getDefaultsForActiveMode();
+
+        game.settings.immunityEnabled = defaults.immunityEnabled;
+        game.settings.killerStaysForever = defaults.killerStaysForever;
+        game.settings.eliminateOnExactZeroOnly = defaults.eliminateOnExactZeroOnly;
+        game.settings.allowRecoveryBeforeTurn = defaults.allowRecoveryBeforeTurn;
+        game.settings.chaosRuleScope = defaults.chaosRuleScope;
+        game.settings.chaosModifiers = { ...defaults.chaosModifiers };
+    }
+
+    function loadChaosModifierSetting(modifierKey) {
+        const savedValue = localStorage.getItem(getStorageKey(`chaosModifier_${modifierKey}`));
+
+        if (savedValue !== null) {
+            return savedValue === "true";
+        }
+
+        const defaults = getDefaultsForActiveMode();
+        return defaults.chaosModifiers[modifierKey];
+    }
+
+    function saveChaosModifierSetting(modifierKey, value) {
+        localStorage.setItem(getStorageKey(`chaosModifier_${modifierKey}`), String(value));
+    }
+
     function openSettingsModal() {
         if (!settingsModal) {
             return;
         }
+
+        loadSavedGameSettings();
+        updateSettingsUIForMode();
+        syncTogglesFromGameSettings();
 
         settingsModal.classList.remove("hidden");
         clearSettingsError();
@@ -82,79 +320,109 @@ export function initSettings(game, renderApp, renderActions = {}) {
         clearSettingsError();
     }
 
-    // Game settings laden uit localStorage zodat ze behouden blijven bij herladen
     function loadSavedGameSettings() {
-        const savedImmunity = localStorage.getItem("immunityEnabled");
+        const defaults = getDefaultsForActiveMode();
+
+        ensureChaosModifiersObject();
+
+        const savedImmunity = localStorage.getItem(getStorageKey("immunityEnabled"));
         if (savedImmunity !== null) {
-            const immunityEnabled = savedImmunity === "true";
-            game.settings.immunityEnabled = immunityEnabled;
-            if (immunityToggle) {
-                immunityToggle.checked = immunityEnabled;
-            }
+            game.settings.immunityEnabled = savedImmunity === "true";
         } else {
-            game.settings.immunityEnabled = true;
-            if (immunityToggle) {
-                immunityToggle.checked = true;
-            }
+            game.settings.immunityEnabled = defaults.immunityEnabled;
         }
 
-        const savedKillerForever = localStorage.getItem("killerStaysForever");
+        const savedKillerForever = localStorage.getItem(getStorageKey("killerStaysForever"));
         if (savedKillerForever !== null) {
-            const killerStaysForever = savedKillerForever === "true";
-            game.settings.killerStaysForever = killerStaysForever;
-            if (killerForeverToggle) {
-                killerForeverToggle.checked = killerStaysForever;
-            }
+            game.settings.killerStaysForever = savedKillerForever === "true";
         } else {
-            game.settings.killerStaysForever = true;
-            if (killerForeverToggle) {
-                killerForeverToggle.checked = true;
-            }
+            game.settings.killerStaysForever = defaults.killerStaysForever;
         }
 
-        const savedExactZero = localStorage.getItem("eliminateOnExactZeroOnly");
+        const savedExactZero = localStorage.getItem(getStorageKey("eliminateOnExactZeroOnly"));
         if (savedExactZero !== null) {
-            const eliminateOnExactZeroOnly = savedExactZero === "true";
-            game.settings.eliminateOnExactZeroOnly = eliminateOnExactZeroOnly;
-            if (exactZeroToggle) {
-                exactZeroToggle.checked = eliminateOnExactZeroOnly;
-            }
+            game.settings.eliminateOnExactZeroOnly = savedExactZero === "true";
         } else {
-            game.settings.eliminateOnExactZeroOnly = false;
-            if (exactZeroToggle) {
-                exactZeroToggle.checked = false;
-            }
+            game.settings.eliminateOnExactZeroOnly = defaults.eliminateOnExactZeroOnly;
         }
 
-        const savedRecovery = localStorage.getItem("allowRecoveryBeforeTurn");
+        const savedRecovery = localStorage.getItem(getStorageKey("allowRecoveryBeforeTurn"));
         if (savedRecovery !== null) {
-            const allowRecoveryBeforeTurn = savedRecovery === "true";
-            game.settings.allowRecoveryBeforeTurn = allowRecoveryBeforeTurn;
-            if (recoveryToggle) {
-                recoveryToggle.checked = allowRecoveryBeforeTurn;
-            }
+            game.settings.allowRecoveryBeforeTurn = savedRecovery === "true";
         } else {
-            game.settings.allowRecoveryBeforeTurn = true;
-            if (recoveryToggle) {
-                recoveryToggle.checked = true;
-            }
+            game.settings.allowRecoveryBeforeTurn = defaults.allowRecoveryBeforeTurn;
         }
+
+        const savedChaosRuleScope = localStorage.getItem(getStorageKey("chaosRuleScope"));
+        if (savedChaosRuleScope !== null && (savedChaosRuleScope === "round" || savedChaosRuleScope === "turn")) {
+            game.settings.chaosRuleScope = savedChaosRuleScope;
+        } else {
+            game.settings.chaosRuleScope = defaults.chaosRuleScope;
+        }
+
+        game.settings.chaosModifiers = {
+            doubleTrouble: loadChaosModifierSetting("doubleTrouble"),
+            tripleTrouble: loadChaosModifierSetting("tripleTrouble"),
+            bonusDarts: loadChaosModifierSetting("bonusDarts"),
+            immunityOff: loadChaosModifierSetting("immunityOff"),
+            targetLock: loadChaosModifierSetting("targetLock"),
+            noMiss: loadChaosModifierSetting("noMiss"),
+            lastDartPressure: loadChaosModifierSetting("lastDartPressure"),
+            doubleDamage: loadChaosModifierSetting("doubleDamage"),
+            oneShot: loadChaosModifierSetting("oneShot"),
+            safeZone: loadChaosModifierSetting("safeZone"),
+            hotStreak: loadChaosModifierSetting("hotStreak"),
+            vampireMode: loadChaosModifierSetting("vampireMode")
+        };
 
         if (game.settings.allowRecoveryBeforeTurn && game.settings.eliminateOnExactZeroOnly) {
             game.settings.eliminateOnExactZeroOnly = false;
-
-            if (exactZeroToggle) {
-                exactZeroToggle.checked = false;
-            }
         }
+
+        applyForcedSettingsForMode();
+
+        syncTogglesFromGameSettings();
+        updateSettingsUIForMode();
     }
 
-    // Game settings opslaan wanneer ze veranderen
     function saveGameSettings() {
-        localStorage.setItem("immunityEnabled", String(game.settings.immunityEnabled));
-        localStorage.setItem("killerStaysForever", String(game.settings.killerStaysForever));
-        localStorage.setItem("eliminateOnExactZeroOnly", String(game.settings.eliminateOnExactZeroOnly));
-        localStorage.setItem("allowRecoveryBeforeTurn", String(game.settings.allowRecoveryBeforeTurn));
+        ensureChaosModifiersObject();
+        applyForcedSettingsForMode();
+
+        localStorage.setItem(getStorageKey("immunityEnabled"), String(game.settings.immunityEnabled));
+        localStorage.setItem(getStorageKey("killerStaysForever"), String(game.settings.killerStaysForever));
+        localStorage.setItem(getStorageKey("eliminateOnExactZeroOnly"), String(game.settings.eliminateOnExactZeroOnly));
+        localStorage.setItem(getStorageKey("allowRecoveryBeforeTurn"), String(game.settings.allowRecoveryBeforeTurn));
+        localStorage.setItem(getStorageKey("chaosRuleScope"), String(game.settings.chaosRuleScope));
+
+        saveChaosModifierSetting("doubleTrouble", game.settings.chaosModifiers.doubleTrouble);
+        saveChaosModifierSetting("tripleTrouble", game.settings.chaosModifiers.tripleTrouble);
+        saveChaosModifierSetting("bonusDarts", game.settings.chaosModifiers.bonusDarts);
+        saveChaosModifierSetting("immunityOff", game.settings.chaosModifiers.immunityOff);
+        saveChaosModifierSetting("targetLock", game.settings.chaosModifiers.targetLock);
+        saveChaosModifierSetting("noMiss", game.settings.chaosModifiers.noMiss);
+        saveChaosModifierSetting("lastDartPressure", game.settings.chaosModifiers.lastDartPressure);
+        saveChaosModifierSetting("doubleDamage", game.settings.chaosModifiers.doubleDamage);
+        saveChaosModifierSetting("oneShot", game.settings.chaosModifiers.oneShot);
+        saveChaosModifierSetting("safeZone", game.settings.chaosModifiers.safeZone);
+        saveChaosModifierSetting("hotStreak", game.settings.chaosModifiers.hotStreak);
+        saveChaosModifierSetting("vampireMode", game.settings.chaosModifiers.vampireMode);
+    }
+
+    function applySettingsForCurrentMode() {
+        loadSavedGameSettings();
+        updateSettingsUIForMode();
+        syncTogglesFromGameSettings();
+    }
+
+    function resetSettingsForCurrentMode() {
+        applyDefaultSettingsToGame();
+        applyForcedSettingsForMode();
+        saveGameSettings();
+        syncTogglesFromGameSettings();
+        updateSettingsUIForMode();
+        clearSettingsError();
+        renderApp(game, renderActions);
     }
 
     if (settingsButton) {
@@ -192,6 +460,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
             }
 
             const settingType = card.dataset.setting;
+            const isChaosMode = getActiveMode() === "chaos";
 
             if (settingType === "immunity" && immunityToggle) {
                 immunityToggle.checked = !immunityToggle.checked;
@@ -201,6 +470,10 @@ export function initSettings(game, renderApp, renderActions = {}) {
             }
 
             if (settingType === "killerForever" && killerForeverToggle) {
+                if (isChaosMode) {
+                    return;
+                }
+
                 killerForeverToggle.checked = !killerForeverToggle.checked;
                 clearSettingsError();
                 killerForeverToggle.dispatchEvent(new Event("change"));
@@ -208,6 +481,10 @@ export function initSettings(game, renderApp, renderActions = {}) {
             }
 
             if (settingType === "exactZero" && exactZeroToggle && recoveryToggle) {
+                if (isChaosMode) {
+                    return;
+                }
+
                 if (recoveryToggle.checked) {
                     showSettingsError("‘Uit op exact 0’ kan niet aan zolang ‘Recovery vóór eigen beurt’ actief is.");
                     return;
@@ -223,6 +500,31 @@ export function initSettings(game, renderApp, renderActions = {}) {
                 recoveryToggle.checked = !recoveryToggle.checked;
                 clearSettingsError();
                 recoveryToggle.dispatchEvent(new Event("change"));
+                return;
+            }
+
+            const chaosModifierMap = {
+                chaosRuleScope: chaosRuleScopeToggle,
+                doubleTrouble: doubleTroubleToggle,
+                tripleTrouble: tripleTroubleToggle,
+                bonusDarts: bonusDartsToggle,
+                immunityOff: immunityOffToggle,
+                targetLock: targetLockToggle,
+                noMiss: noMissToggle,
+                lastDartPressure: lastDartPressureToggle,
+                doubleDamage: doubleDamageToggle,
+                oneShot: oneShotToggle,
+                safeZone: safeZoneToggle,
+                hotStreak: hotStreakToggle,
+                vampireMode: vampireModeToggle
+            };
+
+            const targetToggle = chaosModifierMap[settingType];
+
+            if (targetToggle) {
+                targetToggle.checked = !targetToggle.checked;
+                clearSettingsError();
+                targetToggle.dispatchEvent(new Event("change"));
             }
         });
     });
@@ -237,6 +539,12 @@ export function initSettings(game, renderApp, renderActions = {}) {
 
     if (killerForeverToggle) {
         killerForeverToggle.addEventListener("change", () => {
+            if (getActiveMode() === "chaos") {
+                game.settings.killerStaysForever = true;
+                killerForeverToggle.checked = true;
+                return;
+            }
+
             game.settings.killerStaysForever = killerForeverToggle.checked;
             saveGameSettings();
             renderApp(game, renderActions);
@@ -245,6 +553,11 @@ export function initSettings(game, renderApp, renderActions = {}) {
 
     if (exactZeroToggle && recoveryToggle) {
         exactZeroToggle.addEventListener("click", event => {
+            if (getActiveMode() === "chaos") {
+                event.preventDefault();
+                return;
+            }
+
             if (recoveryToggle.checked && !exactZeroToggle.checked) {
                 event.preventDefault();
                 showSettingsError("‘Uit op exact 0’ kan niet aan zolang ‘Recovery vóór eigen beurt’ actief is.");
@@ -254,6 +567,12 @@ export function initSettings(game, renderApp, renderActions = {}) {
         });
 
         exactZeroToggle.addEventListener("change", () => {
+            if (getActiveMode() === "chaos") {
+                game.settings.eliminateOnExactZeroOnly = false;
+                exactZeroToggle.checked = false;
+                return;
+            }
+
             game.settings.eliminateOnExactZeroOnly = exactZeroToggle.checked;
             saveGameSettings();
             renderApp(game, renderActions);
@@ -272,8 +591,101 @@ export function initSettings(game, renderApp, renderActions = {}) {
                 clearSettingsError();
             }
 
+            applyForcedSettingsForMode();
             saveGameSettings();
             renderApp(game, renderActions);
+        });
+    }
+
+    if (chaosRuleScopeToggle) {
+        chaosRuleScopeToggle.addEventListener("change", () => {
+            game.settings.chaosRuleScope = chaosRuleScopeToggle.checked ? "turn" : "round";
+            saveGameSettings();
+            renderApp(game, renderActions);
+        });
+    }
+
+    if (doubleTroubleToggle) {
+        doubleTroubleToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.doubleTrouble = doubleTroubleToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (tripleTroubleToggle) {
+        tripleTroubleToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.tripleTrouble = tripleTroubleToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (bonusDartsToggle) {
+        bonusDartsToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.bonusDarts = bonusDartsToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (immunityOffToggle) {
+        immunityOffToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.immunityOff = immunityOffToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (targetLockToggle) {
+        targetLockToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.targetLock = targetLockToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (noMissToggle) {
+        noMissToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.noMiss = noMissToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (lastDartPressureToggle) {
+        lastDartPressureToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.lastDartPressure = lastDartPressureToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (doubleDamageToggle) {
+        doubleDamageToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.doubleDamage = doubleDamageToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (oneShotToggle) {
+        oneShotToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.oneShot = oneShotToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (safeZoneToggle) {
+        safeZoneToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.safeZone = safeZoneToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (hotStreakToggle) {
+        hotStreakToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.hotStreak = hotStreakToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (vampireModeToggle) {
+        vampireModeToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.vampireMode = vampireModeToggle.checked;
+            saveGameSettings();
         });
     }
 
@@ -282,6 +694,8 @@ export function initSettings(game, renderApp, renderActions = {}) {
 
     return {
         openSettingsModal,
-        closeSettingsModal
+        closeSettingsModal,
+        applySettingsForCurrentMode,
+        resetSettingsForCurrentMode
     };
 }

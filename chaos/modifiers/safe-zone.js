@@ -6,7 +6,10 @@ export class SafeZone extends ChaosModifier {
     }
 
     isAvailable(game) {
-        return game.players.filter(player => player.isAlive).length >= 3;
+        const alivePlayers = game.players.filter(player => player.isAlive);
+        const hasAliveKiller = alivePlayers.some(player => player.isKiller);
+
+        return alivePlayers.length >= 3 && hasAliveKiller;
     }
 
     onRoundStart(game) {

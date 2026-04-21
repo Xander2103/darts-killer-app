@@ -1102,12 +1102,14 @@ button:disabled {
 .settings-modal {
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 999;
     display: flex;
-    align-items: center;
     justify-content: center;
-    padding: 1rem;
-    z-index: 9999;
+    align-items: flex-start;
+    padding: 2rem 1rem;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.55);
+    box-sizing: border-box;
 }
 
 .settings-modal.hidden {
@@ -1138,7 +1140,14 @@ button:disabled {
 .settings-group {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 0.4rem;
+}
+
+#chaosSettingsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    
 }
 
 .settings-group label {
@@ -1218,6 +1227,15 @@ button:disabled {
     font-family: 'Inter', Arial, sans-serif;
     font-size: 0.92rem;
     font-weight: 700;
+}
+
+.settings-section-title {
+    margin: 1.2rem 0 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-soft);
 }
 
 /* =========================
