@@ -24,6 +24,12 @@ import { InstantKill } from "./chaos/modifiers/instant-kill.js";
 import { SuddenDeath } from "./chaos/modifiers/sudden-death.js";
 import { BullseyeMadness } from "./chaos/modifiers/bullseye-madness.js";
 import { RandomTargetSwap } from "./chaos/modifiers/random-target-swap.js";
+import { FirstBlood } from "./chaos/modifiers/first-blood.js";
+import { Focus } from "./chaos/modifiers/focus.js";
+import { Equalizer } from "./chaos/modifiers/equalizer.js";
+import { LuckyHit } from "./chaos/modifiers/lucky-hit.js";
+import { SteadyHand } from "./chaos/modifiers/steady-hand.js";
+import { OpenSeason } from "./chaos/modifiers/open-season.js";
 
 // UI en settings
 import { initSettings } from "./settings.js";
@@ -57,6 +63,12 @@ chaosEngine.register(new InstantKill());
 chaosEngine.register(new SuddenDeath());
 chaosEngine.register(new BullseyeMadness());
 chaosEngine.register(new RandomTargetSwap());
+chaosEngine.register(new FirstBlood());
+chaosEngine.register(new Focus());
+chaosEngine.register(new Equalizer());
+chaosEngine.register(new LuckyHit());
+chaosEngine.register(new SteadyHand());
+chaosEngine.register(new OpenSeason());
 
 game.setChaosEngine(chaosEngine);
 

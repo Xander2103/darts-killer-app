@@ -32,6 +32,12 @@ export function initSettings(game, renderApp, renderActions = {}) {
     const suddenDeathToggle = document.getElementById("suddenDeathToggle");
     const bullseyeMadnessToggle = document.getElementById("bullseyeMadnessToggle");
     const randomTargetSwapToggle = document.getElementById("randomTargetSwapToggle");
+    const firstBloodToggle = document.getElementById("firstBloodToggle");
+    const focusToggle = document.getElementById("focusToggle");
+    const equalizerToggle = document.getElementById("equalizerToggle");
+    const luckyHitToggle = document.getElementById("luckyHitToggle");
+    const steadyHandToggle = document.getElementById("steadyHandToggle");
+    const openSeasonToggle = document.getElementById("openSeasonToggle");
 
     // cards om per mode te kunnen tonen/verbergen
     const immunityCard = document.querySelector('[data-setting="immunity"]');
@@ -64,6 +70,12 @@ export function initSettings(game, renderApp, renderActions = {}) {
         suddenDeath: true,
         bullseyeMadness: true,
         randomTargetSwap: true,
+        firstBlood: true,
+        focus: true,
+        equalizer: true,
+        luckyHit: true,
+        steadyHand: true,
+        openSeason: true,
     };
 
     const defaultSettingsByMode = {
@@ -300,6 +312,30 @@ export function initSettings(game, renderApp, renderActions = {}) {
         if (randomTargetSwapToggle) {
             randomTargetSwapToggle.checked = game.settings.chaosModifiers.randomTargetSwap;
         }
+
+        if (firstBloodToggle) {
+            firstBloodToggle.checked = game.settings.chaosModifiers.firstBlood;
+        }
+
+        if (focusToggle) {
+            focusToggle.checked = game.settings.chaosModifiers.focus;
+        }
+
+        if (equalizerToggle) {
+            equalizerToggle.checked = game.settings.chaosModifiers.equalizer;
+        }
+
+        if (luckyHitToggle) {
+            luckyHitToggle.checked = game.settings.chaosModifiers.luckyHit;
+        }
+
+        if (steadyHandToggle) {
+            steadyHandToggle.checked = game.settings.chaosModifiers.steadyHand;
+        }
+
+        if (openSeasonToggle) {
+            openSeasonToggle.checked = game.settings.chaosModifiers.openSeason;
+        }
     }
 
     function applyDefaultSettingsToGame() {
@@ -408,6 +444,12 @@ export function initSettings(game, renderApp, renderActions = {}) {
             suddenDeath: loadChaosModifierSetting("suddenDeath"),
             bullseyeMadness: loadChaosModifierSetting("bullseyeMadness"),
             randomTargetSwap: loadChaosModifierSetting("randomTargetSwap"),
+            firstBlood: loadChaosModifierSetting("firstBlood"),
+            focus: loadChaosModifierSetting("focus"),
+            equalizer: loadChaosModifierSetting("equalizer"),
+            luckyHit: loadChaosModifierSetting("luckyHit"),
+            steadyHand: loadChaosModifierSetting("steadyHand"),
+            openSeason: loadChaosModifierSetting("openSeason"),
         };
 
         if (game.settings.allowRecoveryBeforeTurn && game.settings.eliminateOnExactZeroOnly) {
@@ -447,6 +489,12 @@ export function initSettings(game, renderApp, renderActions = {}) {
         saveChaosModifierSetting("suddenDeath", game.settings.chaosModifiers.suddenDeath);
         saveChaosModifierSetting("bullseyeMadness", game.settings.chaosModifiers.bullseyeMadness);
         saveChaosModifierSetting("randomTargetSwap", game.settings.chaosModifiers.randomTargetSwap);
+        saveChaosModifierSetting("firstBlood", game.settings.chaosModifiers.firstBlood);
+        saveChaosModifierSetting("focus", game.settings.chaosModifiers.focus);
+        saveChaosModifierSetting("equalizer", game.settings.chaosModifiers.equalizer);
+        saveChaosModifierSetting("luckyHit", game.settings.chaosModifiers.luckyHit);
+        saveChaosModifierSetting("steadyHand", game.settings.chaosModifiers.steadyHand);
+        saveChaosModifierSetting("openSeason", game.settings.chaosModifiers.openSeason);
     }
 
     function applySettingsForCurrentMode() {
@@ -562,6 +610,12 @@ export function initSettings(game, renderApp, renderActions = {}) {
                 suddenDeath: suddenDeathToggle,
                 bullseyeMadness: bullseyeMadnessToggle,
                 randomTargetSwap: randomTargetSwapToggle,
+                firstBlood: firstBloodToggle,
+                focus: focusToggle,
+                equalizer: equalizerToggle,
+                luckyHit: luckyHitToggle,
+                steadyHand: steadyHandToggle,
+                openSeason: openSeasonToggle,
             };
 
             const targetToggle = chaosModifierMap[settingType];
@@ -765,6 +819,48 @@ export function initSettings(game, renderApp, renderActions = {}) {
     if (randomTargetSwapToggle) {
         randomTargetSwapToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.randomTargetSwap = randomTargetSwapToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (firstBloodToggle) {
+        firstBloodToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.firstBlood = firstBloodToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (focusToggle) {
+        focusToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.focus = focusToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (equalizerToggle) {
+        equalizerToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.equalizer = equalizerToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (luckyHitToggle) {
+        luckyHitToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.luckyHit = luckyHitToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (steadyHandToggle) {
+        steadyHandToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.steadyHand = steadyHandToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (openSeasonToggle) {
+        openSeasonToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.openSeason = openSeasonToggle.checked;
             saveGameSettings();
         });
     }

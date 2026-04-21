@@ -30,6 +30,12 @@ export class ChaosEngine {
             SuddenDeath: "suddenDeath",
             BullseyeMadness: "bullseyeMadness",
             RandomTargetSwap: "randomTargetSwap",
+            FirstBlood: "firstBlood",
+            Focus: "focus",
+            Equalizer: "equalizer",
+            LuckyHit: "luckyHit",
+            SteadyHand: "steadyHand",
+            OpenSeason: "openSeason",
         };
 
         return modifierKeyMap[modifier.constructor.name] || null;

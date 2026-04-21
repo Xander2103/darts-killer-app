@@ -22,6 +22,7 @@ export class KillerGame {
         this.chaosEngine = null;
         this.activeChaosModifier = null;
         this.activeChaosAnnouncementShown = false;
+        this.firstBloodTriggered = false;
 
         // bijhouden wie al gespeeld heeft in de huidige chaos-ronde
         this.playersWhoPlayedThisRound = [];
@@ -396,6 +397,18 @@ export class KillerGame {
             return;
         }
 
+        const activeModifier = this.getActiveChaosModifier();
+
+        const isOpenSeasonActive =
+            this.gameMode === "chaos" &&
+            activeModifier &&
+            activeModifier.name === "Open Season";
+
+        const isSteadyHandActive =
+            this.gameMode === "chaos" &&
+            activeModifier &&
+            activeModifier.name === "Steady Hand";
+
         // Speler raakt zichzelf
         if (targetNumber === player.number) {
             player.score += points;
@@ -413,8 +426,8 @@ export class KillerGame {
             return;
         }
 
-        // Als speler nog geen killer is mag hij niet op anderen schieten
-        if (!player.isKiller) {
+        // Als speler nog geen killer is mag hij niet op anderen schieten behalve als Open Season actief is
+        if (!player.isKiller && !isOpenSeasonActive) {
             return;
         }
 
@@ -444,7 +457,11 @@ export class KillerGame {
         }
 
         // Punten aftrekken van het doelwit
-        targetPlayer.score -= points;
+        if (isSteadyHandActive) {
+            targetPlayer.score = Math.max(0, targetPlayer.score - points);
+        } else {
+            targetPlayer.score -= points;
+        }
 
         const shouldEliminateNow = this.isDeadlyScore(targetPlayer.score);
 
