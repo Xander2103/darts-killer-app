@@ -438,6 +438,7 @@ function isThrowButtonDisabled(game, multiplier) {
 // GAME BOARD
 // =====================================================
 
+
 function renderGameBoard(game, actions = {}) {
     const { resetGameCompletely, showHomeScreen } = actions;
 
@@ -461,6 +462,11 @@ function renderGameBoard(game, actions = {}) {
         game.gameMode === "chaos" &&
         activeModifier &&
         activeModifier.name === "Bullseye Madness";
+
+    const isTargetSwapActive =
+        game.gameMode === "chaos" &&
+        activeModifier &&
+        activeModifier.name === "Random Target Swap";
 
     game.players.forEach((player, index) => {
         const row = document.createElement("div");
@@ -515,6 +521,12 @@ function renderGameBoard(game, actions = {}) {
         nameText.textContent = player.name;
         nameLine.appendChild(nameText);
 
+        if (isActivePlayer && isTargetSwapActive && player.tempTargetNumber !== null) {
+            const targetBadge = document.createElement("div");
+            targetBadge.classList.add("target-info-line");
+            targetBadge.textContent = `🎯 Target ${player.tempTargetNumber}`;
+            leftSide.appendChild(targetBadge);
+        }
         leftSide.appendChild(nameLine);
         leftSide.appendChild(createScoreBlocks(player));
 
