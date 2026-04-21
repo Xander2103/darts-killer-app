@@ -638,6 +638,39 @@ h2 {
     justify-content: center;
 }
 
+.setup-info-text {
+    margin: 0.8rem 0 0.95rem;
+    padding: 0.75rem 0.9rem;
+    border-left: 3px solid rgba(126, 255, 167, 0.35);
+    background: rgba(8, 16, 24, 0.18);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.72);
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.45;
+    box-sizing: border-box;
+}
+
+.setup-info-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.05rem;
+    background: linear-gradient(180deg, rgba(126, 255, 167, 0.22), rgba(76, 209, 120, 0.12));
+    border: 1px solid rgba(126, 255, 167, 0.28);
+    color: #bff5c9;
+    font-size: 0.82rem;
+    font-weight: 800;
+    font-family: 'Inter', Arial, sans-serif;
+    line-height: 1;
+}
+
+
 /* =========================
    Player list / manual mode
    ========================= */

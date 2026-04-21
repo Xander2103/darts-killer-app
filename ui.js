@@ -9,6 +9,7 @@ const addPlayerButton = document.getElementById("addPlayerBtn");
 const startGameButton = document.getElementById("startGameBtn");
 const gameBoard = document.getElementById("gameBoard");
 const playerList = document.getElementById("playerList");
+const setupInfoText = document.getElementById("setupInfoText");
 
 const undoButton = document.getElementById("undoButton");
 const backToHomeButton = document.getElementById("backToHomeButton");
@@ -41,6 +42,7 @@ const chaosInfoBackdrop = document.getElementById("chaosInfoBackdrop");
 function renderApp(game, actions = {}) {
     renderSetupPanel(game);
     renderGamePanel(game);
+    updateSetupInfo(game);
     renderSetupPlayers(game, actions);
     renderChaosHeader(game);
     renderGameBoard(game, actions);
@@ -88,6 +90,24 @@ function updateBackButton() {
     }
 
     backToHomeButton.textContent = "← Back";
+}
+
+function updateSetupInfo(game) {
+    if (!setupInfoText) {
+        return;
+    }
+
+    const infoContent = setupInfoText.querySelector(".setup-info-content");
+
+    if (!infoContent) {
+        return;
+    }
+
+    if (game.gameMode === "chaos") {
+        infoContent.textContent = "Base rules and chaos modifiers can be adjusted in the settings.";
+    } else {
+        infoContent.textContent = "Base rules can be adjusted in the settings.";
+    }
 }
 
 // =====================================================
