@@ -19,6 +19,8 @@ import { OneShot } from "./chaos/modifiers/one-shot.js";
 import { SafeZone } from "./chaos/modifiers/safe-zone.js";
 import { HotStreak } from "./chaos/modifiers/hot-streak.js";
 import { VampireMode } from "./chaos/modifiers/vampire-mode.js";
+import { Revival } from "./chaos/modifiers/revival.js";
+import { InstantKill } from "./chaos/modifiers/instant-kill.js";
 
 // UI en settings
 import { initSettings } from "./settings.js";
@@ -47,6 +49,8 @@ chaosEngine.register(new OneShot());
 chaosEngine.register(new SafeZone());
 chaosEngine.register(new HotStreak());
 chaosEngine.register(new VampireMode());
+chaosEngine.register(new Revival());
+chaosEngine.register(new InstantKill());
 
 game.setChaosEngine(chaosEngine);
 

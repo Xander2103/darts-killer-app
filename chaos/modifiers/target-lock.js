@@ -6,6 +6,7 @@ export class TargetLock extends ChaosModifier {
             "Target Lock",
             "Only your own number counts this round. Fail to hit it this turn and lose 1 point."
         );
+        this.spawnWeight = 7;
     }
 
     onRoundStart(game) {

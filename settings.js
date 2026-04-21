@@ -27,6 +27,8 @@ export function initSettings(game, renderApp, renderActions = {}) {
     const safeZoneToggle = document.getElementById("safeZoneToggle");
     const hotStreakToggle = document.getElementById("hotStreakToggle");
     const vampireModeToggle = document.getElementById("vampireModeToggle");
+    const revivalToggle = document.getElementById("revivalToggle");
+    const instantKillToggle = document.getElementById("instantKillToggle");
 
     // cards om per mode te kunnen tonen/verbergen
     const immunityCard = document.querySelector('[data-setting="immunity"]');
@@ -53,7 +55,9 @@ export function initSettings(game, renderApp, renderActions = {}) {
         oneShot: true,
         safeZone: true,
         hotStreak: true,
-        vampireMode: true
+        vampireMode: true,
+        revival: true,
+        instantKill: true,
     };
 
     const defaultSettingsByMode = {
@@ -270,6 +274,14 @@ export function initSettings(game, renderApp, renderActions = {}) {
         if (vampireModeToggle) {
             vampireModeToggle.checked = game.settings.chaosModifiers.vampireMode;
         }
+
+        if (revivalToggle) {
+            revivalToggle.checked = game.settings.chaosModifiers.revival;
+        }
+
+        if (instantKillToggle) {
+            instantKillToggle.checked = game.settings.chaosModifiers.instantKill;
+        }
     }
 
     function applyDefaultSettingsToGame() {
@@ -372,7 +384,9 @@ export function initSettings(game, renderApp, renderActions = {}) {
             oneShot: loadChaosModifierSetting("oneShot"),
             safeZone: loadChaosModifierSetting("safeZone"),
             hotStreak: loadChaosModifierSetting("hotStreak"),
-            vampireMode: loadChaosModifierSetting("vampireMode")
+            vampireMode: loadChaosModifierSetting("vampireMode"),
+            revival: loadChaosModifierSetting("revival"),
+            instantKill: loadChaosModifierSetting("instantKill"),
         };
 
         if (game.settings.allowRecoveryBeforeTurn && game.settings.eliminateOnExactZeroOnly) {
@@ -407,6 +421,8 @@ export function initSettings(game, renderApp, renderActions = {}) {
         saveChaosModifierSetting("safeZone", game.settings.chaosModifiers.safeZone);
         saveChaosModifierSetting("hotStreak", game.settings.chaosModifiers.hotStreak);
         saveChaosModifierSetting("vampireMode", game.settings.chaosModifiers.vampireMode);
+        saveChaosModifierSetting("revival", game.settings.chaosModifiers.revival);
+        saveChaosModifierSetting("instantKill", game.settings.chaosModifiers.instantKill);
     }
 
     function applySettingsForCurrentMode() {
@@ -516,7 +532,9 @@ export function initSettings(game, renderApp, renderActions = {}) {
                 oneShot: oneShotToggle,
                 safeZone: safeZoneToggle,
                 hotStreak: hotStreakToggle,
-                vampireMode: vampireModeToggle
+                vampireMode: vampireModeToggle,
+                revival: revivalToggle,
+                instantKill: instantKillToggle,
             };
 
             const targetToggle = chaosModifierMap[settingType];
@@ -685,6 +703,20 @@ export function initSettings(game, renderApp, renderActions = {}) {
     if (vampireModeToggle) {
         vampireModeToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.vampireMode = vampireModeToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (revivalToggle) {
+        revivalToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.revival = revivalToggle.checked;
+            saveGameSettings();
+        });
+    }
+
+    if (instantKillToggle) {
+        instantKillToggle.addEventListener("change", () => {
+            game.settings.chaosModifiers.instantKill = instantKillToggle.checked;
             saveGameSettings();
         });
     }

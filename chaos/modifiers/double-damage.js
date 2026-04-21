@@ -3,6 +3,7 @@ import { ChaosModifier } from "../chaos-modifier.js";
 export class DoubleDamage extends ChaosModifier {
     constructor() {
         super("Double Damage", "Hits on other players deal double damage this round.");
+        this.spawnWeight = 10;
     }
 
     isAvailable(game) {

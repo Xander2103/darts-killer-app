@@ -3,6 +3,7 @@ import { ChaosModifier } from "../chaos-modifier.js";
 export class OneShot extends ChaosModifier {
     constructor() {
         super("One Shot", "Each player gets only one dart this turn.");
+        this.spawnWeight = 5;
     }
 
     onRoundStart(game) {

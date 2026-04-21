@@ -24,7 +24,9 @@ export class ChaosEngine {
             OneShot: "oneShot",
             SafeZone: "safeZone",
             HotStreak: "hotStreak",
-            VampireMode: "vampireMode"
+            VampireMode: "vampireMode",
+            Revival: "revival",
+            InstantKill: "instantKill",
         };
 
         return modifierKeyMap[modifier.constructor.name] || null;
@@ -52,6 +54,24 @@ export class ChaosEngine {
         });
     }
 
+    pickWeightedRandomModifier(modifiers) {
+        const totalWeight = modifiers.reduce((sum, modifier) => {
+            return sum + (modifier.spawnWeight ?? 10);
+        }, 0);
+
+        let randomValue = Math.random() * totalWeight;
+
+        for (const modifier of modifiers) {
+            randomValue -= (modifier.spawnWeight ?? 10);
+
+            if (randomValue <= 0) {
+                return modifier;
+            }
+        }
+
+        return modifiers[modifiers.length - 1];
+    }
+
     pickRandomModifier() {
         const availableNow = this.getEnabledAvailableModifiers();
 
@@ -69,8 +89,7 @@ export class ChaosEngine {
             selectableModifiers = availableNow;
         }
 
-        const randomIndex = Math.floor(Math.random() * selectableModifiers.length);
-        return selectableModifiers[randomIndex];
+        return this.pickWeightedRandomModifier(selectableModifiers);
     }
 
     // Nieuwe chaos-ronde starten
@@ -94,7 +113,6 @@ export class ChaosEngine {
         return this.activeModifier;
     }
 
-    // Voor later: als je modifier scope op "turn" staat
     startNewTurn() {
         const selectedModifier = this.pickRandomModifier();
 

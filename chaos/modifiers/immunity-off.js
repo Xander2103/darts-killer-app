@@ -4,6 +4,7 @@ import { ChaosModifier } from "../chaos-modifier.js";
 export class ImmunityOff extends ChaosModifier {
     constructor() {
         super("No Immunity", "Immunity is not working this round.");
+        this.spawnWeight = 10;
     }
 
     isAvailable(game) {

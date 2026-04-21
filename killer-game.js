@@ -13,6 +13,7 @@ export class KillerGame {
         this.numberAssignmentMode = "manual";
         this.chaosSafeZonePlayerNumber = null;
         this.chaosSafeZonePlayerName = "";
+        this.chaosRevivedPlayerName = "";
 
         // huidige gamemode
         this.gameMode = "classic";
@@ -213,6 +214,7 @@ export class KillerGame {
         this.playersWhoPlayedThisRound = [];
         this.chaosSafeZonePlayerNumber = null;
         this.chaosSafeZonePlayerName = "";
+        this.chaosRevivedPlayerName = "";
 
         this.players.forEach(player => {
             player.tempIgnoreImmunity = false;
@@ -258,6 +260,7 @@ export class KillerGame {
 
         this.activeChaosModifier = null;
         this.activeChaosAnnouncementShown = false;
+        this.chaosRevivedPlayerName = "";
     }
 
     assignUniqueNumbers() {

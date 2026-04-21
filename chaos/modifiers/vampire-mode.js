@@ -3,6 +3,7 @@ import { ChaosModifier } from "../chaos-modifier.js";
 export class VampireMode extends ChaosModifier {
     constructor() {
         super("Vampire Mode", "Hit other players to steal 1 point.");
+        this.spawnWeight = 5;
     }
 
     isAvailable(game) {

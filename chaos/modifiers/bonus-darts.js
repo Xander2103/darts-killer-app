@@ -3,6 +3,7 @@ import { ChaosModifier } from "../chaos-modifier.js";
 export class BonusDarts extends ChaosModifier {
     constructor() {
         super("Bonus Darts", "Everyone gets 4 throws this round.");
+        this.spawnWeight = 10;
     }
 
     onRoundStart(game) {

@@ -3,6 +3,7 @@ import { ChaosModifier } from "../chaos-modifier.js";
 export class SafeZone extends ChaosModifier {
     constructor() {
         super("Safe Zone", "One random player cannot be targeted this round.");
+        this.spawnWeight = 5;
     }
 
     isAvailable(game) {

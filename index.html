@@ -175,13 +175,13 @@
                         </div>
 
                         <div class="setting-card clickable-setting" data-setting="chaosRuleScope">
-                                <div class="setting-text">
-                                    <div class="setting-title">Apply modifier every turn</div>
-                                    <p class="setting-help">If disabled, one modifier stays active for the whole round.
-                                    </p>
-                                </div>
-                                <input type="checkbox" id="chaosRuleScopeToggle">
+                            <div class="setting-text">
+                                <div class="setting-title">Apply modifier every turn</div>
+                                <p class="setting-help">If disabled, one modifier stays active for the whole round.
+                                </p>
                             </div>
+                            <input type="checkbox" id="chaosRuleScopeToggle">
+                        </div>
 
                         <div id="chaosSettingsSection" class="hidden">
                             <h3 class="settings-section-title">Chaos Modifiers :</h3>
@@ -272,6 +272,22 @@
                                     <p class="setting-help">Successful hits can chain into stronger effects.</p>
                                 </div>
                                 <input type="checkbox" id="hotStreakToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="revival">
+                                <div class="setting-text">
+                                    <div class="setting-title">Revival</div>
+                                    <p class="setting-help">One eliminated player can return to the game.</p>
+                                </div>
+                                <input type="checkbox" id="revivalToggle" checked>
+                            </div>
+
+                            <div class="setting-card clickable-setting" data-setting="instantKill">
+                                <div class="setting-text">
+                                    <div class="setting-title">Instant Kill</div>
+                                    <p class="setting-help">One dart only. A valid hit from a killer eliminates instantly.</p>
+                                </div>
+                                <input type="checkbox" id="instantKillToggle" checked>
                             </div>
 
                             <div class="setting-card clickable-setting" data-setting="vampireMode">

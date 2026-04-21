@@ -150,6 +150,9 @@ function maybeShowChaosIntro(game) {
         if (activeModifier.name === "Safe Zone" && game.chaosSafeZonePlayerName) {
             chaosIntroExtra.textContent = `Protected player: ${game.chaosSafeZonePlayerName}`;
             chaosIntroExtra.classList.remove("hidden");
+        } else if (activeModifier.name === "Revival" && game.chaosRevivedPlayerName) {
+            chaosIntroExtra.textContent = `${game.chaosRevivedPlayerName} has been revived!`;
+            chaosIntroExtra.classList.remove("hidden");
         } else {
             chaosIntroExtra.textContent = "";
             chaosIntroExtra.classList.add("hidden");
@@ -187,6 +190,9 @@ function bindChaosInfoButton(game) {
         if (chaosInfoExtra) {
             if (activeModifier.name === "Safe Zone" && game.chaosSafeZonePlayerName) {
                 chaosInfoExtra.textContent = `Protected player: ${game.chaosSafeZonePlayerName}`;
+                chaosInfoExtra.classList.remove("hidden");
+            } else if (activeModifier.name === "Revival" && game.chaosRevivedPlayerName) {
+                chaosInfoExtra.textContent = `${game.chaosRevivedPlayerName} has been revived!`;
                 chaosInfoExtra.classList.remove("hidden");
             } else {
                 chaosInfoExtra.textContent = "";
