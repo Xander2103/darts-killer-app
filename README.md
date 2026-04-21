@@ -1,73 +1,139 @@
 🎯 Darts Killer App
 
-An interactive darts game built in JavaScript, focused on Killer mode gameplay, player state management, scoring logic, and dynamic UI updates.
+An advanced browser-based darts game built in JavaScript, featuring classic Killer mode and an extended Chaos mode with dynamic gameplay modifiers.
 
-This project was created to combine game logic, frontend interaction, and usability improvements in a custom browser-based application.
+This project focuses on game logic, modular architecture, player state management, and interactive UI design.
 
-📸 Preview
+📸 Preview  
+Can be found in the repository files.
 
-Can be found in the files.
+---
 
 🚀 Features
-Killer mode game logic
-Turn-based gameplay flow
-Dynamic player score tracking
-Interactive UI updates
-Custom settings and rule variations
-Visual feedback for gameplay states
-Responsive and structured interface
+
+### 🎯 Core Gameplay
+- Full Killer mode implementation
+- Turn-based gameplay system
+- Dynamic score tracking and updates
+- Player states (alive, killer, immune, pending elimination)
+- Undo system (state snapshots)
+
+### 🌪️ Chaos Mode (Advanced)
+- Random gameplay modifiers (modular system)
+- Weighted random selection (rare vs common events)
+- Modifier cooldown system (prevents repetition)
+- Turn-based OR round-based modifier system
+
+### 🧩 Chaos Modifiers
+Includes multiple modifiers such as:
+- Double Trouble / Triple Trouble
+- Bonus Darts
+- No Miss
+- Target Lock
+- Safe Zone
+- One Shot
+- Double Damage
+- Hot Streak
+- Vampire Mode
+- Revival (revives a dead player)
+- Instant Kill (ultra rare high-risk modifier)
+
+Each modifier:
+- Has its own logic
+- Can be enabled/disabled
+- Can define availability conditions
+- Supports weighted spawn chances
+
+---
+
 🧠 Game Logic
 
-The application includes custom logic for handling:
+The application includes advanced logic for:
 
-Player state management
-Turn progression
-Score changes
-Killer status
-Immunity and elimination settings
-Rule-based variations for different play styles
+- Player lifecycle management (alive, dead, revival)
+- Killer progression system
+- Immunity and targeting rules
+- Recovery system before elimination
+- Exact-zero vs below-zero elimination logic
+- Chaos modifier lifecycle:
+  - onRoundStart
+  - onThrow
+  - onMiss
+  - onRoundEnd
+
+---
+
 ⚙️ Configurable Settings
 
-The game supports multiple configurable options, such as:
+### Base Rules
+- Immunity toggle
+- Killer stays permanent
+- Exact zero elimination
+- Recovery before own turn
 
-Immunity enabled / disabled
-Killer status persistence
-Exact zero elimination rules
-Recovery-related gameplay options
-Different visual themes / presentation choices
-👨‍💻 My Contributions
+### Chaos Settings
+- Enable/disable individual modifiers
+- Weighted modifier spawning
+- Apply modifier per turn OR per round
 
-In this project, I focused on both game logic and frontend interaction.
+### UI / UX
+- Multiple visual themes
+- Dynamic modal system (intro + info popups)
+- Contextual modifier descriptions (e.g. revived player, safe zone player)
 
-I was responsible for:
+---
 
-Building the core Killer mode logic in JavaScript
-Managing player states, score updates, and turn flow
-Creating and improving the user interface
-Adding configurable game settings and rule variations
-Improving UX through visual feedback and interaction flow
-Structuring the app into separate JavaScript files for maintainability
+🧱 Architecture
+
+The project is structured in a modular way:
+
+- `KillerGame` → core game logic
+- `ChaosEngine` → modifier system & selection logic
+- `Modifiers` → separate classes per modifier
+- `UI layer` → rendering, modals, interactions
+- `Settings system` → localStorage + per-mode configuration
+
+---
+
 🛠️ Tech Stack
-JavaScript
-HTML5
-CSS3
+
+- JavaScript (ES6 modules)
+- HTML5
+- CSS3
+
+---
+
 📌 Key Highlights
-Custom darts game logic
-Interactive and dynamic frontend
-Configurable gameplay settings
-Focus on usability and game flow
-Clear separation between UI and logic
+
+- Modular chaos modifier system
+- Weighted random system for balanced gameplay
+- Dynamic UI updates based on game state
+- Strong separation of logic and UI
+- Scalable architecture for future game modes
+
+---
+
 📈 Future Improvements
-Additional game modes
-Persistent score/history tracking
-Better mobile support
-Sound effects and animations
-Expanded statistics system
+
+- Additional game modes (Drink Mode, Party Modes)
+- Statistics system (wins, accuracy, history)
+- Persistent storage (players & sessions)
+- Animations & sound effects
+- Mobile-first UI improvements
+- Multiplayer / shared screen enhancements
+
+---
+
 👨‍💻 Author
 
-Xander Van Malder
+Xander Van Malder  
 Full Stack Developer (in training)
+
+---
 
 ⚠️ Note
 
-This project was built as part of a personal learning and portfolio journey, with a focus on JavaScript logic, interaction design, and browser-based gameplay systems.
+This project is part of a personal portfolio and focuses on:
+- JavaScript architecture
+- Game logic design
+- Interactive UI systems
