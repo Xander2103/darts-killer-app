@@ -10,6 +10,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
     const exactZeroToggle = document.getElementById("exactZeroToggle");
     const recoveryToggle = document.getElementById("recoveryToggle");
     const settingsError = document.getElementById("settingsError");
+    const toggleAllChaosModifiers = document.getElementById("toggleAllChaosModifiers");
 
     const chaosRuleScopeToggle = document.getElementById("chaosRuleScopeToggle");
     const chaosSettingsSection = document.getElementById("chaosSettingsSection");
@@ -75,7 +76,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         equalizer: true,
         luckyHit: true,
         steadyHand: true,
-        openSeason: true,
+        openSeason: true
     };
 
     const defaultSettingsByMode = {
@@ -178,7 +179,6 @@ export function initSettings(game, renderApp, renderActions = {}) {
         const activeMode = getActiveMode();
         const isChaosMode = activeMode === "chaos";
 
-        // Base rules die altijd zichtbaar mogen zijn
         if (immunityCard) {
             immunityCard.style.display = "";
         }
@@ -187,7 +187,6 @@ export function initSettings(game, renderApp, renderActions = {}) {
             recoveryCard.style.display = "";
         }
 
-        // Alleen zichtbaar in Classic / Drink, niet in Chaos
         if (killerForeverCard) {
             killerForeverCard.style.display = isChaosMode ? "none" : "";
         }
@@ -196,13 +195,11 @@ export function initSettings(game, renderApp, renderActions = {}) {
             exactZeroCard.style.display = isChaosMode ? "none" : "";
         }
 
-        // Chaos-sectie alleen zichtbaar in Chaos mode
         if (chaosSettingsSection) {
             chaosSettingsSection.style.display = isChaosMode ? "flex" : "none";
             chaosSettingsSection.classList.toggle("hidden", !isChaosMode);
         }
 
-        // Chaos rule scope toggle mag alleen in Chaos zichtbaar zijn
         if (chaosRuleScopeToggle) {
             const scopeCard =
                 chaosRuleScopeToggle.closest(".setting-card") ||
@@ -213,6 +210,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
             }
         }
     }
+
     function applyForcedSettingsForMode() {
         const activeMode = getActiveMode();
 
@@ -220,6 +218,22 @@ export function initSettings(game, renderApp, renderActions = {}) {
             game.settings.killerStaysForever = true;
             game.settings.eliminateOnExactZeroOnly = false;
         }
+    }
+
+    function getChaosModifierEntries() {
+        ensureChaosModifiersObject();
+        return Object.entries(game.settings.chaosModifiers);
+    }
+
+    function syncToggleAllCheckbox() {
+        if (!toggleAllChaosModifiers) {
+            return;
+        }
+
+        const modifierEntries = getChaosModifierEntries();
+        const allEnabled = modifierEntries.every(([, value]) => value === true);
+
+        toggleAllChaosModifiers.checked = allEnabled;
     }
 
     function syncTogglesFromGameSettings() {
@@ -336,6 +350,8 @@ export function initSettings(game, renderApp, renderActions = {}) {
         if (openSeasonToggle) {
             openSeasonToggle.checked = game.settings.chaosModifiers.openSeason;
         }
+
+        syncToggleAllCheckbox();
     }
 
     function applyDefaultSettingsToGame() {
@@ -449,7 +465,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
             equalizer: loadChaosModifierSetting("equalizer"),
             luckyHit: loadChaosModifierSetting("luckyHit"),
             steadyHand: loadChaosModifierSetting("steadyHand"),
-            openSeason: loadChaosModifierSetting("openSeason"),
+            openSeason: loadChaosModifierSetting("openSeason")
         };
 
         if (game.settings.allowRecoveryBeforeTurn && game.settings.eliminateOnExactZeroOnly) {
@@ -615,7 +631,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
                 equalizer: equalizerToggle,
                 luckyHit: luckyHitToggle,
                 steadyHand: steadyHandToggle,
-                openSeason: openSeasonToggle,
+                openSeason: openSeasonToggle
             };
 
             const targetToggle = chaosModifierMap[settingType];
@@ -704,10 +720,27 @@ export function initSettings(game, renderApp, renderActions = {}) {
         });
     }
 
+    if (toggleAllChaosModifiers) {
+        toggleAllChaosModifiers.addEventListener("change", () => {
+            ensureChaosModifiersObject();
+
+            const newValue = toggleAllChaosModifiers.checked;
+
+            Object.keys(game.settings.chaosModifiers).forEach(key => {
+                game.settings.chaosModifiers[key] = newValue;
+            });
+
+            saveGameSettings();
+            syncTogglesFromGameSettings();
+            renderApp(game, renderActions);
+        });
+    }
+
     if (doubleTroubleToggle) {
         doubleTroubleToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.doubleTrouble = doubleTroubleToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -715,6 +748,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         tripleTroubleToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.tripleTrouble = tripleTroubleToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -722,6 +756,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         bonusDartsToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.bonusDarts = bonusDartsToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -729,6 +764,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         immunityOffToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.immunityOff = immunityOffToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -736,6 +772,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         targetLockToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.targetLock = targetLockToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -743,6 +780,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         noMissToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.noMiss = noMissToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -750,6 +788,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         lastDartPressureToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.lastDartPressure = lastDartPressureToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -757,6 +796,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         doubleDamageToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.doubleDamage = doubleDamageToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -764,6 +804,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         oneShotToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.oneShot = oneShotToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -771,6 +812,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         safeZoneToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.safeZone = safeZoneToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -778,6 +820,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         hotStreakToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.hotStreak = hotStreakToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -785,6 +828,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         vampireModeToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.vampireMode = vampireModeToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -792,6 +836,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         revivalToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.revival = revivalToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -799,6 +844,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         instantKillToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.instantKill = instantKillToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -806,6 +852,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         suddenDeathToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.suddenDeath = suddenDeathToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -813,6 +860,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         bullseyeMadnessToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.bullseyeMadness = bullseyeMadnessToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -820,6 +868,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         randomTargetSwapToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.randomTargetSwap = randomTargetSwapToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -827,6 +876,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         firstBloodToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.firstBlood = firstBloodToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -834,6 +884,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         focusToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.focus = focusToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -841,6 +892,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         equalizerToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.equalizer = equalizerToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -848,6 +900,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         luckyHitToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.luckyHit = luckyHitToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -855,6 +908,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         steadyHandToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.steadyHand = steadyHandToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 
@@ -862,6 +916,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
         openSeasonToggle.addEventListener("change", () => {
             game.settings.chaosModifiers.openSeason = openSeasonToggle.checked;
             saveGameSettings();
+            syncToggleAllCheckbox();
         });
     }
 

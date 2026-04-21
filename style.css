@@ -1326,6 +1326,47 @@ button:disabled {
     color: var(--text-soft);
 }
 
+.settings-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.3rem 0 0.9rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings-section-header .settings-section-title {
+    margin-top: 0.2rem;
+}
+
+.settings-master-toggle {
+    display: inline-flex;
+    align-items: right;
+    gap: 0.65rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+}
+
+.settings-master-toggle-label {
+    color: rgba(255, 255, 255, 0.86);
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.settings-master-toggle input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: #2196f3;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
 /* =========================
    Responsive
    ========================= */
