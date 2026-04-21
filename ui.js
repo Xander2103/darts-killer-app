@@ -245,6 +245,9 @@ function createManualSetupPlayerCard(game, player, index, actions) {
     const card = document.createElement("div");
     card.classList.add("manual-player-card");
 
+    const topRow = document.createElement("div");
+    topRow.classList.add("manual-player-top");
+
     const leftSide = document.createElement("div");
     leftSide.classList.add("manual-player-left");
 
@@ -262,13 +265,6 @@ function createManualSetupPlayerCard(game, player, index, actions) {
     const rightSide = document.createElement("div");
     rightSide.classList.add("manual-player-right");
 
-    const numberWrapper = document.createElement("div");
-    numberWrapper.classList.add("manual-number-wrapper");
-
-    const label = document.createElement("span");
-    label.classList.add("manual-number-label");
-    label.textContent = "Nr";
-
     const manualInput = document.createElement("input");
     manualInput.type = "number";
     manualInput.min = "1";
@@ -281,23 +277,26 @@ function createManualSetupPlayerCard(game, player, index, actions) {
         game.setPlayerManualNumber(index, event.target.value);
     });
 
-    numberWrapper.appendChild(label);
-    numberWrapper.appendChild(manualInput);
+    rightSide.appendChild(manualInput);
+
+    topRow.appendChild(leftSide);
+    topRow.appendChild(rightSide);
 
     const actionButtons = createSetupActionButtons(game, player, index, actions);
+    actionButtons.classList.add("manual-player-actions-row");
 
-    rightSide.appendChild(numberWrapper);
-    rightSide.appendChild(actionButtons);
-
-    card.appendChild(leftSide);
-    card.appendChild(rightSide);
+    card.appendChild(topRow);
+    card.appendChild(actionButtons);
 
     return card;
 }
 
 function createRandomSetupPlayerCard(game, player, index, actions) {
-    const row = document.createElement("div");
-    row.classList.add("manual-player-card");
+    const card = document.createElement("div");
+    card.classList.add("manual-player-card");
+
+    const topRow = document.createElement("div");
+    topRow.classList.add("manual-player-top");
 
     const leftSide = document.createElement("div");
     leftSide.classList.add("manual-player-left");
@@ -313,17 +312,52 @@ function createRandomSetupPlayerCard(game, player, index, actions) {
     leftSide.appendChild(indexBadge);
     leftSide.appendChild(nameSpan);
 
-    const actionsWrapper = createSetupActionButtons(game, player, index, actions);
+    const rightSide = document.createElement("div");
+    rightSide.classList.add("manual-player-right");
 
-    row.appendChild(leftSide);
-    row.appendChild(actionsWrapper);
+    const randomBadge = document.createElement("div");
+    randomBadge.classList.add("manual-random-badge");
+    randomBadge.textContent = "1-20";
 
-    return row;
+    rightSide.appendChild(randomBadge);
+
+    topRow.appendChild(leftSide);
+    topRow.appendChild(rightSide);
+
+    const actionButtons = createSetupActionButtons(game, player, index, actions);
+    actionButtons.classList.add("manual-player-actions-row");
+
+    card.appendChild(topRow);
+    card.appendChild(actionButtons);
+
+    return card;
 }
 
 function createSetupActionButtons(game, player, index, actions) {
     const wrapper = document.createElement("div");
     wrapper.classList.add("manual-player-actions");
+
+    const moveUpButton = document.createElement("button");
+    moveUpButton.type = "button";
+    moveUpButton.classList.add("manual-icon-button");
+    moveUpButton.textContent = "↑";
+    moveUpButton.title = "Move up";
+    moveUpButton.disabled = index === 0;
+    moveUpButton.addEventListener("click", () => {
+        game.movePlayerUp(index);
+        renderApp(game, actions);
+    });
+
+    const moveDownButton = document.createElement("button");
+    moveDownButton.type = "button";
+    moveDownButton.classList.add("manual-icon-button");
+    moveDownButton.textContent = "↓";
+    moveDownButton.title = "Move down";
+    moveDownButton.disabled = index === game.players.length - 1;
+    moveDownButton.addEventListener("click", () => {
+        game.movePlayerDown(index);
+        renderApp(game, actions);
+    });
 
     const editButton = document.createElement("button");
     editButton.type = "button";
@@ -353,6 +387,8 @@ function createSetupActionButtons(game, player, index, actions) {
         renderApp(game, actions);
     });
 
+    wrapper.appendChild(moveUpButton);
+    wrapper.appendChild(moveDownButton);
     wrapper.appendChild(editButton);
     wrapper.appendChild(removeButton);
 

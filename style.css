@@ -482,6 +482,7 @@ h2 {
     gap: 0.35rem;
 }
 
+
 /* =========================
    Setup
    ========================= */
@@ -623,6 +624,20 @@ h2 {
         0 0 18px rgba(203, 255, 154, 0.18);
 }
 
+.manual-player-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.manual-icon-button {
+    min-width: 2rem;
+    min-height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* =========================
    Player list / manual mode
    ========================= */
@@ -635,18 +650,16 @@ h2 {
 
 .player-list-item {
     width: 100%;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
 }
 
 .manual-player-card {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: nowrap;
+    flex-direction: column;
     gap: 0.75rem;
     width: 100%;
-    padding: 0.8rem 0.9rem;
-    border-radius: 14px;
+    padding: 0.85rem 0.9rem;
+    border-radius: 16px;
     border: 1px solid rgba(126, 255, 167, 0.10);
     background: linear-gradient(180deg, rgba(25, 32, 40, 0.96), rgba(18, 24, 30, 0.96));
     box-sizing: border-box;
@@ -657,10 +670,18 @@ h2 {
     box-shadow: 0 0 14px rgba(86, 255, 151, 0.08);
 }
 
+.manual-player-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+}
+
 .manual-player-left {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.7rem;
     flex: 1 1 auto;
     min-width: 0;
 }
@@ -681,6 +702,8 @@ h2 {
 }
 
 .manual-player-name {
+    flex: 1 1 auto;
+    min-width: 0;
     color: #ffffff;
     font-family: 'Inter', Arial, sans-serif;
     font-weight: 800;
@@ -694,42 +717,29 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    flex-wrap: nowrap;
-    gap: 0.5rem;
     flex: 0 0 auto;
+    flex-shrink: 0;
 }
 
-.manual-number-wrapper {
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 0.45rem;
-    flex: 0 0 auto;
-}
-
-.manual-number-label {
-    color: rgba(255, 255, 255, 0.7);
-    font-family: 'Inter', Arial, sans-serif;
-    font-size: 0.88rem;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
-.manual-number-input {
-    width: 80px;
-    height: 42px;
-    padding: 0.35rem 0.45rem;
+.manual-number-input,
+.manual-random-badge {
+    width: 86px;
+    height: 40px;
     border-radius: 12px;
     border: 1px solid rgba(126, 255, 167, 0.14);
     background: rgba(10, 18, 24, 0.92);
     color: #ffffff;
+    box-sizing: border-box;
+}
+
+.manual-number-input {
+    padding: 0.35rem 0.45rem;
     font-family: 'Orbitron', Arial, sans-serif;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 900;
     letter-spacing: 0.5px;
     text-align: center;
     outline: none;
-    box-sizing: border-box;
 }
 
 .manual-number-input:focus {
@@ -737,12 +747,24 @@ h2 {
     box-shadow: 0 0 16px rgba(86, 255, 151, 0.10);
 }
 
-.manual-player-actions {
+.manual-random-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.manual-player-actions,
+.manual-player-actions-row {
     display: flex;
     align-items: center;
-    flex-wrap: nowrap;
-    gap: 0.4rem;
-    flex: 0 0 auto;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    width: 100%;
 }
 
 .manual-icon-button {
@@ -756,7 +778,7 @@ h2 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 900;
     cursor: pointer;
     box-shadow: none;
@@ -1180,7 +1202,7 @@ button:disabled {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-    
+
 }
 
 .settings-group label {

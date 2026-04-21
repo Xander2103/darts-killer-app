@@ -176,6 +176,34 @@ export class KillerGame {
         this.players.push(player);
     }
 
+    movePlayerUp(index) {
+        if (this.isStarted) {
+            return;
+        }
+
+        if (index <= 0 || index >= this.players.length) {
+            return;
+        }
+
+        const temp = this.players[index - 1];
+        this.players[index - 1] = this.players[index];
+        this.players[index] = temp;
+    }
+
+    movePlayerDown(index) {
+        if (this.isStarted) {
+            return;
+        }
+
+        if (index < 0 || index >= this.players.length - 1) {
+            return;
+        }
+
+        const temp = this.players[index + 1];
+        this.players[index + 1] = this.players[index];
+        this.players[index] = temp;
+    }
+
     startGame() {
         if (this.players.length < 2) {
             return {
