@@ -235,6 +235,26 @@ body.theme-clean {
    Home screen
    ========================= */
 
+.custom-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: black;
+}
+
+.custom-splash img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    display: block;
+}
+
+.custom-splash.hide {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
 .home-screen {
     display: block;
 }

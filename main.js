@@ -103,6 +103,7 @@ function showClassicScreen() {
     classicScreen.classList.remove("hidden");
 }
 
+
 function resetGameToClassicSetup() {
     game.isStarted = false;
     game.currentPlayerIndex = 0;
@@ -250,6 +251,22 @@ chaosModeBtn.addEventListener("click", () => {
         resetGameCompletely,
         showHomeScreen
     });
+});
+
+window.addEventListener("load", () => {
+    const splash = document.getElementById("customSplash");
+
+    if (!splash) {
+        return;
+    }
+
+    setTimeout(() => {
+        splash.classList.add("hide");
+
+        setTimeout(() => {
+            splash.remove();
+        }, 500);
+    }, 2500);
 });
 
 drinkModeBtn.addEventListener("click", () => {
