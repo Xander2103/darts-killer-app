@@ -289,9 +289,12 @@ function createManualSetupPlayerCard(game, player, index, actions) {
     manualInput.type = "number";
     manualInput.min = "1";
     manualInput.max = "20";
+    manualInput.step = "1";
+    manualInput.inputMode = "numeric";
+    manualInput.pattern = "[0-9]*";
     manualInput.classList.add("manual-number-input");
     manualInput.placeholder = "1-20";
-    manualInput.value = player.manualNumber;
+    manualInput.value = player.manualNumber ?? "";
 
     manualInput.addEventListener("input", event => {
         game.setPlayerManualNumber(index, event.target.value);
