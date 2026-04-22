@@ -3,6 +3,7 @@
 An advanced browser-based darts game built in JavaScript, featuring classic Killer mode and an extended Chaos mode with dynamic gameplay modifiers.
 
 This project focuses on game logic, modular architecture, player state management, and interactive UI design.
+built as a responsive web app and deployable to Android using Capacitor.
 
 📸 Preview  
 Can be found in the repository files.

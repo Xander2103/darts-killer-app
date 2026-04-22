@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Killer Darts</string>
+    <string name="title_activity_main">Killer Darts</string>
+    <string name="package_name">com.vmstudios.killerdarts</string>
+    <string name="custom_url_scheme">com.vmstudios.killerdarts</string>
+</resources>

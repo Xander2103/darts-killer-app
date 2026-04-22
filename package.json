@@ -1,0 +1,26 @@
+{
+  "name": "darts-killer",
+  "version": "1.0.0",
+  "description": "🎯 Darts Killer App",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xander2103/darts-killer-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Xander2103/darts-killer-app/issues"
+  },
+  "homepage": "https://github.com/Xander2103/darts-killer-app#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/cli": "^8.3.1",
+    "@capacitor/core": "^8.3.1"
+  }
+}
