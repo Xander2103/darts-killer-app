@@ -1,5 +1,13 @@
 {
   "appId": "com.vmstudios.killerdarts",
   "appName": "Killer Darts",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#000000",
+      "androidScaleType": "CENTER_CROP"
+    }
+  }
 }

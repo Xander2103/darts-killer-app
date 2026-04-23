@@ -1,4 +1,6 @@
 include ':app'
+include ':capacitor-splash-screen'
+project(':capacitor-splash-screen').projectDir = new File('../node_modules/@capacitor/splash-screen/android')
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
 
