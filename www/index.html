@@ -12,6 +12,7 @@
     <div id="introSplash" class="intro-splash">
         <img src="img/splash-photo.jpg" alt="Splash screen" class="intro-splash-image">
     </div>
+
     <main class="container">
         <!-- HOME SCREEN -->
         <section id="homeScreen" class="home-screen">
@@ -24,6 +25,9 @@
             <section class="panel home-panel">
                 <div class="home-panel-header">
                     <h2>Choose your mode</h2>
+                    <button id="gameInfoBtn" type="button" class="info-btn" aria-label="Game info">
+                        i
+                    </button>
                 </div>
 
                 <div class="mode-grid">
@@ -397,6 +401,76 @@
         </section>
     </main>
 
+    <div id="gameInfoModal" class="info-modal hidden">
+        <div id="gameInfoBackdrop" class="info-modal-backdrop"></div>
+
+        <div class="info-modal-content">
+            <div class="info-modal-top">
+                <h2>Game Info</h2>
+                <button id="closeGameInfoTop" type="button" class="info-close-btn" aria-label="Close game info">
+                    ✕
+                </button>
+            </div>
+
+            <div class="info-modal-body">
+                <section class="info-section">
+                    <h3>How to play</h3>
+                    <p>
+                        At the start, each player throws 1 dart with their non-dominant hand.
+                        The number hit becomes that player's personal number for the game.
+                        Every player must have a unique number.
+                    </p>
+                </section>
+
+                <section class="info-section">
+                    <h3>Become a Killer</h3>
+                    <p>Hit your own number to gain points:</p>
+                    <ul>
+                        <li>Single = +1</li>
+                        <li>Double = +2</li>
+                        <li>Triple = +3</li>
+                    </ul>
+                    <p>Reach 5 points on your own number to become a Killer.</p>
+                </section>
+
+                <section class="info-section">
+                    <h3>Attack other players</h3>
+                    <p>Once you're a Killer, you can attack other players by hitting their number:</p>
+                    <ul>
+                        <li>Single = -1</li>
+                        <li>Double = -2</li>
+                        <li>Triple = -3</li>
+                    </ul>
+                </section>
+
+                <section class="info-section">
+                    <h3>Elimination</h3>
+                    <p>
+                        If your score reaches 0, you are out.
+                        Depending on the game settings, some rules can be different,
+                        like exact 0 elimination or negative score recovery.
+                    </p>
+                </section>
+
+                <section class="info-section">
+                    <h3>Game Modes</h3>
+                    <p><strong>Classic:</strong> Standard Killer rules.</p>
+                    <p>
+                        <strong>Chaos:</strong> Includes random modifiers, boosts, penalties
+                        and extra party chaos that can change the round.
+                    </p>
+                    <p><strong>Drink:</strong> Party variant with drink challenges and fun events.</p>
+                </section>
+            </div>
+
+            <div class="info-modal-bottom">
+                <button id="closeGameInfoBottom" type="button" class="info-bottom-close">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- App confirm -->
     <div id="appModal" class="app-modal hidden">
         <div class="app-modal-backdrop" id="appModalBackdrop"></div>
@@ -444,6 +518,7 @@
     </div>
 
     <script type="module" src="main.js"></script>
+    <script src="gameinfomodal.js"></script>
 
 </body>
 
