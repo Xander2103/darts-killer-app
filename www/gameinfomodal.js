@@ -1,4 +1,5 @@
 const gameInfoBtn = document.getElementById("gameInfoBtn");
+const setupGameInfoBtn = document.getElementById("setupGameInfoBtn");
 const gameInfoModal = document.getElementById("gameInfoModal");
 const closeGameInfoTop = document.getElementById("closeGameInfoTop");
 const closeGameInfoBottom = document.getElementById("closeGameInfoBottom");
@@ -24,20 +25,22 @@ if (gameInfoBtn) {
     });
 }
 
-if (closeGameInfoTop) {
-    closeGameInfoTop.addEventListener("click", function () {
-        closeGameInfoModal();
+if (setupGameInfoBtn) {
+    setupGameInfoBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        openGameInfoModal();
     });
+}
+
+if (closeGameInfoTop) {
+    closeGameInfoTop.addEventListener("click", closeGameInfoModal);
 }
 
 if (closeGameInfoBottom) {
-    closeGameInfoBottom.addEventListener("click", function () {
-        closeGameInfoModal();
-    });
+    closeGameInfoBottom.addEventListener("click", closeGameInfoModal);
 }
 
 if (gameInfoBackdrop) {
-    gameInfoBackdrop.addEventListener("click", function () {
-        closeGameInfoModal();
-    });
+    gameInfoBackdrop.addEventListener("click", closeGameInfoModal);
 }
