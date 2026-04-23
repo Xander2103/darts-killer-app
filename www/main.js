@@ -256,6 +256,14 @@ drinkModeBtn.addEventListener("click", () => {
     alert("Drink Mode is nog in progress.");
 });
 
+window.addEventListener("load", () => {
+    const introSplash = document.getElementById("introSplash");
+
+    setTimeout(() => {
+        introSplash.classList.add("hidden");
+    }, 2000);
+});
+
 backToHomeButton.addEventListener("click", () => {
     if (game.isStarted) {
         openConfirmModal(
