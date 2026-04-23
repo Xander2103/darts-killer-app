@@ -509,6 +509,29 @@ body.theme-clean {
     pointer-events: auto;
 }
 
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.panel-header h2 {
+    margin: 0;
+}
+
+.panel-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.board-info-btn {
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 5;
+}
+
 /* =========================
    Game mode selection
    ========================= */

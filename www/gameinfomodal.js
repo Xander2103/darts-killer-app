@@ -1,5 +1,7 @@
 const gameInfoBtn = document.getElementById("gameInfoBtn");
 const setupGameInfoBtn = document.getElementById("setupGameInfoBtn");
+const boardGameInfoBtn = document.getElementById("boardGameInfoBtn");
+
 const gameInfoModal = document.getElementById("gameInfoModal");
 const closeGameInfoTop = document.getElementById("closeGameInfoTop");
 const closeGameInfoBottom = document.getElementById("closeGameInfoBottom");
@@ -33,14 +35,28 @@ if (setupGameInfoBtn) {
     });
 }
 
+if (boardGameInfoBtn) {
+    boardGameInfoBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        openGameInfoModal();
+    });
+}
+
 if (closeGameInfoTop) {
-    closeGameInfoTop.addEventListener("click", closeGameInfoModal);
+    closeGameInfoTop.addEventListener("click", function () {
+        closeGameInfoModal();
+    });
 }
 
 if (closeGameInfoBottom) {
-    closeGameInfoBottom.addEventListener("click", closeGameInfoModal);
+    closeGameInfoBottom.addEventListener("click", function () {
+        closeGameInfoModal();
+    });
 }
 
 if (gameInfoBackdrop) {
-    gameInfoBackdrop.addEventListener("click", closeGameInfoModal);
+    gameInfoBackdrop.addEventListener("click", function () {
+        closeGameInfoModal();
+    });
 }

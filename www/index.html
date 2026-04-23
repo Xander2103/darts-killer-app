@@ -121,7 +121,15 @@
             <section id="gamePanel" class="panel hidden">
                 <div class="panel-header">
                     <h2>Game Board</h2>
-                    <button id="undoButton" type="button" class="small-action-button">↶ Undo</button>
+
+                    <div class="panel-header-actions">
+                        <button id="boardGameInfoBtn" type="button" class="info-btn board-info-btn"
+                            aria-label="Game info">
+                            <span class="info-btn-icon" aria-hidden="true">ℹ</span>
+                        </button>
+
+                        <button id="undoButton" type="button" class="small-action-button">↶ Undo</button>
+                    </div>
                 </div>
 
                 <div id="chaosHeader" class="chaos-header hidden">
