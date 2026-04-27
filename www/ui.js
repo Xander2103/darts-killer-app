@@ -705,14 +705,28 @@ function renderGameBoard(game, actions = {}) {
 
             const missButton = document.createElement("button");
             missButton.textContent = "Miss";
+            missButton.classList.add("miss-button");
             missButton.addEventListener("click", () => {
                 game.handleMiss();
+                renderApp(game, actions);
+            });
+
+            const nextTurnButton = document.createElement("button");
+            nextTurnButton.textContent = "Next Turn →";
+            nextTurnButton.classList.add("next-turn-button");
+            nextTurnButton.disabled = game.currentTurnThrows.length === 0;
+            nextTurnButton.addEventListener("click", () => {
+                game.endTurn();
                 renderApp(game, actions);
             });
 
             buttonRow.appendChild(singleButton);
             buttonRow.appendChild(doubleButton);
             buttonRow.appendChild(tripleButton);
+            if (isActivePlayer) {
+                buttonRow.appendChild(missButton);
+                buttonRow.appendChild(nextTurnButton);
+            }
 
             if (isBullseyeMadnessActive) {
                 const outerBullButton = document.createElement("button");
@@ -732,8 +746,6 @@ function renderGameBoard(game, actions = {}) {
                 buttonRow.appendChild(outerBullButton);
                 buttonRow.appendChild(innerBullButton);
             }
-
-            buttonRow.appendChild(missButton);
         }
 
         row.appendChild(topRow);

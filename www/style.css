@@ -1205,6 +1205,18 @@ button:disabled {
         0 0 18px rgba(59, 130, 246, 0.22);
 }
 
+.active-row .miss-button {
+    border-color: rgba(255, 210, 80, 0.55);
+    background: linear-gradient(180deg, #f6c64a, #c98217);
+    color: #1c1204;
+}
+
+.active-row .next-turn-button {
+    border-color: rgba(120, 255, 170, 0.45);
+    background: linear-gradient(180deg, #58e68a, #1f9d55);
+    color: #06180d;
+}
+
 .eliminated-row {
     opacity: 0.65;
     border-color: rgba(255, 255, 255, 0.12);
@@ -1342,13 +1354,22 @@ button:disabled {
 }
 
 .game-row-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem;
 }
 
 .game-row-buttons button {
-    min-width: 68px;
+    width: 100%;
+    min-width: 0;
+}
+
+.miss-button {
+    grid-column: 1 / 2;
+}
+
+.next-turn-button {
+    grid-column: 2 / 4;
 }
 
 .game-row-buttons button:disabled {
@@ -2083,5 +2104,29 @@ button:disabled {
         background: linear-gradient(180deg, #ffffff 0%, #f3f7f4 100%) !important;
         border: 1px solid #cfd8d3 !important;
         box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    /* Fix undo button kleur */
+    .undo-button,
+    .undo-button:hover,
+    .undo-button:focus,
+    .undo-button:active {
+        background: linear-gradient(180deg, rgba(255, 185, 65, 0.95), rgba(205, 120, 22, 0.95));
+        color: #1b1206;
+        border-color: rgba(255, 220, 120, 0.42);
+        outline: none;
+    }
+
+    .undo-button:disabled,
+    .undo-button:disabled:hover,
+    .undo-button:disabled:focus,
+    .undo-button:disabled:active {
+        background: linear-gradient(180deg, rgba(120, 120, 135, 0.65), rgba(80, 80, 95, 0.65));
+        color: rgba(255, 255, 255, 0.65);
+        border-color: rgba(255, 255, 255, 0.16);
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none;
+        filter: grayscale(0.3);
     }
 }

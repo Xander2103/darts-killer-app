@@ -417,6 +417,19 @@ export class KillerGame {
         this.nextThrowOrPlayer();
     }
 
+    endTurn() {
+        if (!this.isStarted || this.winner) {
+            return;
+        }
+
+        this.saveState();
+
+        this.currentTurnThrows = [];
+        this.nextThrowOrPlayer();
+        this.nextThrowOrPlayer();
+        this.nextThrowOrPlayer();
+    }
+
     // SpelregelLogica: punten toekennen of afnemen, status van spelers bijwerken
     processHit(player, targetNumber, multiplier, pointsOverride = null) {
         const points = pointsOverride ?? this.getPoints(multiplier);

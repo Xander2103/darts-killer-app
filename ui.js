@@ -707,9 +707,19 @@ function renderGameBoard(game, actions = {}) {
                 renderApp(game, actions);
             });
 
+            const nextTurnButton = document.createElement("button");
+            nextTurnButton.textContent = "Next Turn →";
+            nextTurnButton.classList.add("next-turn-button");
+            nextTurnButton.addEventListener("click", () => {
+                game.endTurn();
+                renderApp(game, actions);
+            });
+
             buttonRow.appendChild(singleButton);
             buttonRow.appendChild(doubleButton);
             buttonRow.appendChild(tripleButton);
+            buttonRow.appendChild(missButton);
+            buttonRow.appendChild(nextTurnButton);
 
             if (isBullseyeMadnessActive) {
                 const outerBullButton = document.createElement("button");
