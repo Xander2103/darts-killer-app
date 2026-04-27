@@ -36,6 +36,84 @@ const chaosInfoClose = document.getElementById("chaosInfoClose");
 const chaosInfoBackdrop = document.getElementById("chaosInfoBackdrop");
 
 // =====================================================
+// SOUND / HAPTICS
+// =====================================================
+
+let audioContext = null;
+let lastWinnerSoundName = null;
+
+function getAudioContext() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    if (audioContext.state === "suspended") {
+        audioContext.resume();
+    }
+
+    return audioContext;
+}
+
+function playTone(frequency, duration = 0.08, type = "sine", volume = 0.08) {
+    const ctx = getAudioContext();
+
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+
+    gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + duration);
+}
+
+function vibrate(pattern = 25) {
+    if ("vibrate" in navigator) {
+        navigator.vibrate(pattern);
+    }
+}
+
+function playHitSound(multiplier) {
+    if (multiplier === 1) {
+        playTone(420, 0.08, "sine", 0.07);
+    } else if (multiplier === 2) {
+        playTone(560, 0.1, "triangle", 0.08);
+        setTimeout(() => playTone(720, 0.08, "triangle", 0.06), 55);
+    } else if (multiplier === 3) {
+        playTone(700, 0.08, "square", 0.06);
+        setTimeout(() => playTone(900, 0.08, "square", 0.05), 55);
+        setTimeout(() => playTone(1100, 0.09, "square", 0.045), 110);
+    }
+
+    vibrate(25);
+}
+
+function playMissSound() {
+    playTone(180, 0.14, "sawtooth", 0.05);
+    vibrate(45);
+}
+
+function playNextTurnSound() {
+    playTone(300, 0.06, "sine", 0.04);
+    setTimeout(() => playTone(440, 0.07, "sine", 0.05), 60);
+}
+
+function playWinnerSound() {
+    playTone(523, 0.12, "triangle", 0.08);
+    setTimeout(() => playTone(659, 0.12, "triangle", 0.08), 130);
+    setTimeout(() => playTone(784, 0.16, "triangle", 0.09), 260);
+    setTimeout(() => playTone(1046, 0.22, "triangle", 0.08), 430);
+
+    vibrate([80, 50, 120]);
+}
+
+// =====================================================
 // MAIN RENDER
 // =====================================================
 
@@ -433,6 +511,7 @@ function isThrowButtonDisabled(game, multiplier) {
 // =====================================================
 // GAME BOARD
 // =====================================================
+
 function renderNumberSelection(game, actions = {}) {
     if (!gameBoard) {
         return;
@@ -471,16 +550,16 @@ function renderNumberSelection(game, actions = {}) {
 
         <div class="number-selection-list">
             ${game.players.map((listedPlayer, index) => {
-        const isCurrent = index === game.numberSelectionIndex;
-        const hasNumber = listedPlayer.number !== null;
+                const isCurrent = index === game.numberSelectionIndex;
+                const hasNumber = listedPlayer.number !== null;
 
-        return `
+                return `
                     <div class="number-selection-player ${isCurrent ? "current" : ""}">
                         <span>${index + 1}. ${listedPlayer.name}</span>
                         <strong>${hasNumber ? listedPlayer.number : isCurrent ? "Now" : "Waiting"}</strong>
                     </div>
                 `;
-    }).join("")}
+            }).join("")}
         </div>
     `;
 
@@ -687,6 +766,7 @@ function renderGameBoard(game, actions = {}) {
                 }
 
                 game.handleThrow(displayedTargetNumber, 1);
+                playHitSound(1);
                 renderApp(game, actions);
             });
 
@@ -699,6 +779,7 @@ function renderGameBoard(game, actions = {}) {
                 }
 
                 game.handleThrow(displayedTargetNumber, 2);
+                playHitSound(2);
                 renderApp(game, actions);
             });
 
@@ -711,6 +792,7 @@ function renderGameBoard(game, actions = {}) {
                 }
 
                 game.handleThrow(displayedTargetNumber, 3);
+                playHitSound(3);
                 renderApp(game, actions);
             });
 
@@ -719,6 +801,7 @@ function renderGameBoard(game, actions = {}) {
             missButton.classList.add("miss-button");
             missButton.addEventListener("click", () => {
                 game.handleMiss();
+                playMissSound();
                 renderApp(game, actions);
             });
 
@@ -727,6 +810,7 @@ function renderGameBoard(game, actions = {}) {
             nextTurnButton.classList.add("next-turn-button");
             nextTurnButton.addEventListener("click", () => {
                 game.endTurn();
+                playNextTurnSound();
                 renderApp(game, actions);
             });
 
@@ -744,6 +828,7 @@ function renderGameBoard(game, actions = {}) {
                 outerBullButton.textContent = "Outer Bull";
                 outerBullButton.addEventListener("click", () => {
                     game.handleBullHit(2);
+                    playHitSound(2);
                     renderApp(game, actions);
                 });
 
@@ -751,6 +836,7 @@ function renderGameBoard(game, actions = {}) {
                 innerBullButton.textContent = "Inner Bull";
                 innerBullButton.addEventListener("click", () => {
                     game.handleBullHit(3);
+                    playHitSound(3);
                     renderApp(game, actions);
                 });
 
@@ -781,6 +867,23 @@ function renderGameBoard(game, actions = {}) {
     });
 
     if (game.winner) {
+        if (lastWinnerSoundName !== game.winner.name) {
+            playWinnerSound();
+            lastWinnerSoundName = game.winner.name;
+        }
+
+        const winnerCelebration = document.createElement("div");
+        winnerCelebration.classList.add("winner-celebration");
+
+        winnerCelebration.innerHTML = `
+            <div class="firework firework-1"></div>
+            <div class="firework firework-2"></div>
+            <div class="firework firework-3"></div>
+
+            <div class="winner-title">🎉 Winner!</div>
+            <div class="winner-name">${game.winner.name}</div>
+        `;
+
         const winnerActions = document.createElement("div");
         winnerActions.classList.add("winner-actions");
 
@@ -789,6 +892,8 @@ function renderGameBoard(game, actions = {}) {
         backToMenuButton.classList.add("winner-menu-button");
         backToMenuButton.textContent = "Back to menu";
         backToMenuButton.addEventListener("click", () => {
+            lastWinnerSoundName = null;
+
             if (typeof resetGameCompletely === "function") {
                 resetGameCompletely();
             }
@@ -801,7 +906,11 @@ function renderGameBoard(game, actions = {}) {
         });
 
         winnerActions.appendChild(backToMenuButton);
+
+        gameBoard.appendChild(winnerCelebration);
         gameBoard.appendChild(winnerActions);
+    } else {
+        lastWinnerSoundName = null;
     }
 }
 

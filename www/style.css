@@ -1657,6 +1657,136 @@ button:disabled {
     margin-bottom: 0.5rem; /* dit is de spacing */
 }
 
+/* =====================================================
+   Winner celebration
+   ===================================================== */
+
+.winner-celebration {
+    position: relative;
+    margin: 1rem auto 0.75rem;
+    padding: 1.2rem 1rem;
+    width: min(92%, 420px);
+    border-radius: 22px;
+    text-align: center;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at top, rgba(255, 215, 90, 0.2), transparent 55%),
+        linear-gradient(180deg, rgba(18, 40, 25, 0.95), rgba(9, 24, 15, 0.95));
+    border: 1px solid rgba(113, 255, 109, 0.45);
+    box-shadow:
+        0 0 24px rgba(64, 255, 118, 0.18),
+        inset 0 0 24px rgba(255, 255, 255, 0.04);
+}
+
+.winner-title {
+    position: relative;
+    z-index: 2;
+    font-family: 'Orbitron', Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 900;
+    color: #fff2a8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.winner-name {
+    position: relative;
+    z-index: 2;
+    margin-top: 0.35rem;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 0 14px rgba(113, 255, 109, 0.45);
+}
+
+.winner-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.8rem;
+}
+
+.winner-menu-button {
+    min-width: 220px;
+    padding: 0.95rem 1.3rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 220, 120, 0.35);
+    background: linear-gradient(180deg, #ffc83d 0%, #d98b16 100%);
+    color: #1b1203;
+    font-family: 'Orbitron', Arial, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.25),
+        0 0 18px rgba(255, 196, 60, 0.22);
+}
+
+.winner-menu-button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+}
+
+/* Fake fireworks */
+.firework {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: fireworkPop 1.4s ease-out infinite;
+    opacity: 0;
+}
+
+.firework-1 {
+    top: 28%;
+    left: 18%;
+    background: #ffd34d;
+    animation-delay: 0s;
+}
+
+.firework-2 {
+    top: 22%;
+    right: 18%;
+    background: #69f0ae;
+    animation-delay: 0.35s;
+}
+
+.firework-3 {
+    top: 58%;
+    left: 50%;
+    background: #5fd3ff;
+    animation-delay: 0.7s;
+}
+
+@keyframes fireworkPop {
+    0% {
+        opacity: 1;
+        transform: scale(0.2);
+        box-shadow:
+            0 0 0 #fff,
+            0 0 0 #fff,
+            0 0 0 #fff,
+            0 0 0 #fff;
+    }
+
+    70% {
+        opacity: 1;
+        transform: scale(1);
+        box-shadow:
+            0 -28px 0 #ffd34d,
+            24px -14px 0 #69f0ae,
+            24px 16px 0 #5fd3ff,
+            0 30px 0 #ff5c8a,
+            -24px 16px 0 #ffffff,
+            -24px -14px 0 #ffd34d;
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
 /* ==================================================
    19. CLEAN THEME READABILITY
    ================================================== */
