@@ -734,7 +734,6 @@ function renderGameBoard(game, actions = {}) {
             const nextTurnButton = document.createElement("button");
             nextTurnButton.textContent = "Next Turn →";
             nextTurnButton.classList.add("next-turn-button");
-            nextTurnButton.disabled = game.currentTurnThrows.length === 0;
             nextTurnButton.addEventListener("click", () => {
                 game.endTurn();
                 renderApp(game, actions);

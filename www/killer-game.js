@@ -459,10 +459,6 @@ export class KillerGame {
             return;
         }
 
-        if (this.currentTurnThrows.length === 0) {
-            return;
-        }
-
         this.saveState();
 
         this.currentThrow = this.maxThrows;
