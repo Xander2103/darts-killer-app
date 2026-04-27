@@ -10,10 +10,11 @@ export class KillerGame {
         this.winner = null;
         this.history = [];
         this.currentTurnThrows = [];
-        this.numberAssignmentMode = "manual";
         this.chaosSafeZonePlayerNumber = null;
         this.chaosSafeZonePlayerName = "";
         this.chaosRevivedPlayerName = "";
+        this.phase = "setup";
+        this.numberSelectionIndex = 0;
 
         // huidige gamemode
         this.gameMode = "classic";
@@ -102,6 +103,37 @@ export class KillerGame {
         this.history.push(snapshot);
     }
 
+    goBack() {
+        if (this.phase === "numberSelection") {
+            if (this.numberSelectionIndex > 0) {
+                this.numberSelectionIndex--;
+
+                const previousPlayer = this.players[this.numberSelectionIndex];
+
+                if (previousPlayer) {
+                    previousPlayer.number = null;
+                }
+
+                return;
+            }
+
+            this.phase = "setup";
+            return;
+        }
+
+        if (this.phase === "game") {
+            this.phase = "numberSelection";
+            this.isStarted = false;
+            this.numberSelectionIndex = this.players.length - 1;
+
+            const lastPlayer = this.players[this.numberSelectionIndex];
+
+            if (lastPlayer) {
+                lastPlayer.number = null;
+            }
+        }
+    }
+
     // Laatste state terugzetten
     undo() {
         if (this.history.length === 0) {
@@ -161,7 +193,6 @@ export class KillerGame {
         const player = {
             name: trimmedName,
             number: null,
-            manualNumber: "",
             score: 0,
             isKiller: false,
             isImmune: true,
@@ -212,28 +243,58 @@ export class KillerGame {
             };
         }
 
-        if (!this.numberAssignmentMode) {
-            return {
-                success: false,
-                message: "Choose first how the numbers will be assigned."
-            };
+        this.players.forEach(player => {
+            player.number = null;
+            player.manualNumber = "";
+            player.score = 0;
+            player.isKiller = false;
+            player.isImmune = true;
+            player.isAlive = true;
+            player.pendingElimination = false;
+        });
+
+        this.phase = "numberSelection";
+        this.numberSelectionIndex = 0;
+
+        return {
+            success: true,
+            message: ""
+        };
+    }
+
+    confirmPlayerNumber(number) {
+        if (this.phase !== "numberSelection") {
+            return { success: false, message: "Number selection is not active." };
         }
 
-        if (this.numberAssignmentMode === "manual") {
-            const validationError = this.validateManualNumbers();
-
-            if (validationError) {
-                return {
-                    success: false,
-                    message: validationError
-                };
-            }
-
-            this.assignManualNumbers();
-        } else {
-            this.assignUniqueNumbers();
+        if (!Number.isInteger(number) || number < 1 || number > 20) {
+            return { success: false, message: "Enter a number between 1 and 20." };
         }
 
+        const alreadyTaken = this.players.some(player => player.number === number);
+
+        if (alreadyTaken) {
+            return { success: false, message: "This number is already taken." };
+        }
+
+        const player = this.players[this.numberSelectionIndex];
+
+        if (!player) {
+            return { success: false, message: "No player found." };
+        }
+
+        player.number = number;
+        this.numberSelectionIndex++;
+
+        if (this.numberSelectionIndex >= this.players.length) {
+            this.startActualGame();
+        }
+
+        return { success: true, message: "" };
+    }
+
+    startActualGame() {
+        this.phase = "game";
         this.isStarted = true;
         this.currentPlayerIndex = 0;
         this.currentThrow = 1;
@@ -256,11 +317,6 @@ export class KillerGame {
             this.activeChaosModifier = null;
             this.activeChaosAnnouncementShown = false;
         }
-
-        return {
-            success: true,
-            message: ""
-        };
     }
 
     startNewChaosModifier() {
@@ -291,25 +347,6 @@ export class KillerGame {
         this.activeChaosModifier = null;
         this.activeChaosAnnouncementShown = false;
         this.chaosRevivedPlayerName = "";
-    }
-
-    assignUniqueNumbers() {
-        const availableNumbers = [];
-
-        for (let i = 1; i <= 20; i++) {
-            availableNumbers.push(i);
-        }
-
-        for (let i = availableNumbers.length - 1; i > 0; i--) {
-            const randomIndex = Math.floor(Math.random() * (i + 1));
-            const temp = availableNumbers[i];
-            availableNumbers[i] = availableNumbers[randomIndex];
-            availableNumbers[randomIndex] = temp;
-        }
-
-        this.players.forEach((player, index) => {
-            player.number = availableNumbers[index];
-        });
     }
 
     getCurrentPlayer() {
@@ -422,11 +459,13 @@ export class KillerGame {
             return;
         }
 
+        if (this.currentTurnThrows.length === 0) {
+            return;
+        }
+
         this.saveState();
 
-        this.currentTurnThrows = [];
-        this.nextThrowOrPlayer();
-        this.nextThrowOrPlayer();
+        this.currentThrow = this.maxThrows;
         this.nextThrowOrPlayer();
     }
 
@@ -694,45 +733,12 @@ export class KillerGame {
         return score >= 0;
     }
 
-    // Manier om nummers toe te wijzen aanpassen (random of handmatig)
-    setNumberAssignmentMode(mode) {
-        if (mode === "random" || mode === "manual") {
-            this.numberAssignmentMode = mode;
-        }
-    }
-
     setPlayerManualNumber(playerIndex, value) {
         if (!this.players[playerIndex]) {
             return;
         }
 
         this.players[playerIndex].manualNumber = value;
-    }
-
-    validateManualNumbers() {
-        const usedNumbers = new Set();
-
-        for (const player of this.players) {
-            const rawValue = String(player.manualNumber).trim();
-
-            if (rawValue === "") {
-                return "Enter a number for each player.";
-            }
-
-            const number = Number(rawValue);
-
-            if (!Number.isInteger(number) || number < 1 || number > 20) {
-                return "All numbers must be unique numbers between 1 and 20.";
-            }
-
-            if (usedNumbers.has(number)) {
-                return "Each player must have a unique number`.";
-            }
-
-            usedNumbers.add(number);
-        }
-
-        return null;
     }
 
     applyTargetLockMissPenalty(player) {
@@ -765,12 +771,6 @@ export class KillerGame {
         }
 
         this.checkWinner();
-    }
-
-    assignManualNumbers() {
-        this.players.forEach(player => {
-            player.number = Number(player.manualNumber);
-        });
     }
 
     handleBullHit(points) {

@@ -45,35 +45,40 @@ function renderApp(game, actions = {}) {
     updateSetupInfo(game);
     renderSetupPlayers(game, actions);
     renderChaosHeader(game);
-    renderGameBoard(game, actions);
     updateUndoButton(game);
     updateBackButton();
     bindChaosInfoButton(game);
     maybeShowChaosIntro(game);
+
+    if (game.phase === "numberSelection") {
+        renderNumberSelection(game, actions);
+    } else if (game.phase === "game") {
+        renderGameBoard(game, actions);
+    }
 }
 
 // =====================================================
 // PANELS / BASIC UI
 // =====================================================
 
-function renderSetupPanel(game) {
-    if (!setupPanel) {
-        return;
-    }
-
-    setupPanel.style.display = game.isStarted ? "none" : "block";
-}
-
 function renderGamePanel(game) {
     if (!gamePanel) {
         return;
     }
 
-    if (game.isStarted) {
+    if (game.phase === "numberSelection" || game.phase === "game") {
         gamePanel.classList.remove("hidden");
     } else {
         gamePanel.classList.add("hidden");
     }
+}
+
+function renderSetupPanel(game) {
+    if (!setupPanel) {
+        return;
+    }
+
+    setupPanel.style.display = game.phase === "setup" ? "block" : "none";
 }
 
 function updateUndoButton(game) {
@@ -251,17 +256,13 @@ function renderSetupPlayers(game, actions = {}) {
         const li = document.createElement("li");
         li.classList.add("player-list-item");
 
-        if (game.numberAssignmentMode === "manual") {
-            li.appendChild(createManualSetupPlayerCard(game, player, index, actions));
-        } else {
-            li.appendChild(createRandomSetupPlayerCard(game, player, index, actions));
-        }
+        li.appendChild(createSetupPlayerCard(game, player, index, actions));
 
         playerList.appendChild(li);
     });
 }
 
-function createManualSetupPlayerCard(game, player, index, actions) {
+function createSetupPlayerCard(game, player, index, actions) {
     const card = document.createElement("div");
     card.classList.add("manual-player-card");
 
@@ -282,73 +283,12 @@ function createManualSetupPlayerCard(game, player, index, actions) {
     leftSide.appendChild(indexBadge);
     leftSide.appendChild(nameSpan);
 
-    const rightSide = document.createElement("div");
-    rightSide.classList.add("manual-player-right");
-
-    const manualInput = document.createElement("input");
-    manualInput.type = "number";
-    manualInput.min = "1";
-    manualInput.max = "20";
-    manualInput.classList.add("manual-number-input");
-    manualInput.placeholder = "1-20";
-    manualInput.value = player.manualNumber;
-
-    manualInput.addEventListener("input", event => {
-        game.setPlayerManualNumber(index, event.target.value);
-    });
-
-    rightSide.appendChild(manualInput);
+    const actionButtons = createSetupActionButtons(game, player, index, actions);
 
     topRow.appendChild(leftSide);
-    topRow.appendChild(rightSide);
-
-    const actionButtons = createSetupActionButtons(game, player, index, actions);
-    actionButtons.classList.add("manual-player-actions-row");
+    topRow.appendChild(actionButtons);
 
     card.appendChild(topRow);
-    card.appendChild(actionButtons);
-
-    return card;
-}
-
-function createRandomSetupPlayerCard(game, player, index, actions) {
-    const card = document.createElement("div");
-    card.classList.add("manual-player-card");
-
-    const topRow = document.createElement("div");
-    topRow.classList.add("manual-player-top");
-
-    const leftSide = document.createElement("div");
-    leftSide.classList.add("manual-player-left");
-
-    const indexBadge = document.createElement("div");
-    indexBadge.classList.add("manual-player-index");
-    indexBadge.textContent = index + 1;
-
-    const nameSpan = document.createElement("div");
-    nameSpan.classList.add("manual-player-name");
-    nameSpan.textContent = player.name;
-
-    leftSide.appendChild(indexBadge);
-    leftSide.appendChild(nameSpan);
-
-    const rightSide = document.createElement("div");
-    rightSide.classList.add("manual-player-right");
-
-    const randomBadge = document.createElement("div");
-    randomBadge.classList.add("manual-random-badge");
-    randomBadge.textContent = "1-20";
-
-    rightSide.appendChild(randomBadge);
-
-    topRow.appendChild(leftSide);
-    topRow.appendChild(rightSide);
-
-    const actionButtons = createSetupActionButtons(game, player, index, actions);
-    actionButtons.classList.add("manual-player-actions-row");
-
-    card.appendChild(topRow);
-    card.appendChild(actionButtons);
 
     return card;
 }
@@ -493,7 +433,87 @@ function isThrowButtonDisabled(game, multiplier) {
 // =====================================================
 // GAME BOARD
 // =====================================================
+function renderNumberSelection(game, actions = {}) {
+    if (!gameBoard) {
+        return;
+    }
 
+    const player = game.players[game.numberSelectionIndex];
+
+    if (!player) {
+        return;
+    }
+
+    gameBoard.innerHTML = "";
+
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("number-selection-card");
+
+    wrapper.innerHTML = `
+        <div class="number-selection-progress">
+            Player ${game.numberSelectionIndex + 1} of ${game.players.length}
+        </div>
+
+        <h2>${player.name}</h2>
+
+        <p class="number-selection-help">
+            Throw 1 dart with your non-dominant hand.<br>
+            Enter the number you hit.
+        </p>
+
+        <input id="numberSelectionInput" class="number-selection-input" type="number" min="1" max="20" placeholder="1-20">
+
+        <div id="numberSelectionError" class="number-selection-error hidden"></div>
+
+        <button id="confirmNumberBtn" type="button" class="number-selection-button">
+            Confirm Number
+        </button>
+
+        <div class="number-selection-list">
+            ${game.players.map((listedPlayer, index) => {
+        const isCurrent = index === game.numberSelectionIndex;
+        const hasNumber = listedPlayer.number !== null;
+
+        return `
+                    <div class="number-selection-player ${isCurrent ? "current" : ""}">
+                        <span>${index + 1}. ${listedPlayer.name}</span>
+                        <strong>${hasNumber ? listedPlayer.number : isCurrent ? "Now" : "Waiting"}</strong>
+                    </div>
+                `;
+    }).join("")}
+        </div>
+    `;
+
+    gameBoard.appendChild(wrapper);
+
+    const input = document.getElementById("numberSelectionInput");
+    const confirmButton = document.getElementById("confirmNumberBtn");
+    const errorBox = document.getElementById("numberSelectionError");
+
+    input.focus();
+
+    function confirmNumber() {
+        const number = Number(input.value);
+        const result = game.confirmPlayerNumber(number);
+
+        if (!result.success) {
+            errorBox.textContent = result.message;
+            errorBox.classList.remove("hidden");
+            input.select();
+            return;
+        }
+
+        renderApp(game, actions);
+    }
+
+    confirmButton.addEventListener("click", confirmNumber);
+
+    input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            confirmNumber();
+        }
+    });
+}
 
 function renderGameBoard(game, actions = {}) {
     const { resetGameCompletely, showHomeScreen } = actions;

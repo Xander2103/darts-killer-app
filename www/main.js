@@ -45,7 +45,7 @@ import {
 const game = new KillerGame();
 const chaosEngine = new ChaosEngine(game);
 
-// beschikbare chaos modifiers registreren
+// Chaos modifiers registreren
 chaosEngine.register(new DoubleTrouble());
 chaosEngine.register(new TripleTrouble());
 chaosEngine.register(new BonusDarts());
@@ -80,8 +80,6 @@ const chaosModeBtn = document.getElementById("chaosModeBtn");
 const drinkModeBtn = document.getElementById("drinkModeBtn");
 
 const setupError = document.getElementById("setupError");
-const numberModeRandom = document.getElementById("numberModeRandom");
-const numberModeManual = document.getElementById("numberModeManual");
 
 function showSetupError(message) {
     setupError.textContent = message;
@@ -104,6 +102,8 @@ function showClassicScreen() {
 }
 
 function resetGameToClassicSetup() {
+    game.phase = "setup";
+    game.numberSelectionIndex = 0;
     game.isStarted = false;
     game.currentPlayerIndex = 0;
     game.currentThrow = 1;
@@ -114,6 +114,9 @@ function resetGameToClassicSetup() {
     game.activeChaosModifier = null;
     game.activeChaosAnnouncementShown = false;
     game.chaosSafeZonePlayerNumber = null;
+    game.chaosSafeZonePlayerName = "";
+    game.chaosRevivedPlayerName = "";
+    game.playersWhoPlayedThisRound = [];
 
     if (game.chaosEngine) {
         game.chaosEngine.activeModifier = null;
@@ -129,11 +132,14 @@ function resetGameToClassicSetup() {
         player.tempIgnoreImmunity = false;
         player.tempSafeZone = false;
         player.tempTargetLockHit = false;
+        player.tempTargetNumber = null;
     });
 }
 
 function resetGameCompletely() {
     game.players = [];
+    game.phase = "setup";
+    game.numberSelectionIndex = 0;
     game.currentPlayerIndex = 0;
     game.currentThrow = 1;
     game.maxThrows = 3;
@@ -143,8 +149,11 @@ function resetGameCompletely() {
     game.currentTurnThrows = [];
     game.activeChaosModifier = null;
     game.activeChaosAnnouncementShown = false;
-    game.numberAssignmentMode = numberModeManual.checked ? "manual" : "random";
     game.chaosSafeZonePlayerNumber = null;
+    game.chaosSafeZonePlayerName = "";
+    game.chaosRevivedPlayerName = "";
+    game.playersWhoPlayedThisRound = [];
+
     clearSetupError();
 
     if (game.chaosEngine) {
@@ -171,6 +180,13 @@ function openConfirmModal(title, message, onConfirm) {
     }
 }
 
+// Settings initialiseren
+const settingsApi = initSettings(game, renderApp, {
+    resetGameCompletely,
+    showHomeScreen
+});
+
+// Events
 addPlayerButton.addEventListener("click", () => {
     addPlayerFromInput();
 });
@@ -197,30 +213,6 @@ playerNameInput.addEventListener("keydown", event => {
     }
 });
 
-numberModeRandom.addEventListener("change", () => {
-    if (numberModeRandom.checked) {
-        game.setNumberAssignmentMode("random");
-        clearSetupError();
-
-        renderApp(game, {
-            resetGameCompletely,
-            showHomeScreen
-        });
-    }
-});
-
-numberModeManual.addEventListener("change", () => {
-    if (numberModeManual.checked) {
-        game.setNumberAssignmentMode("manual");
-        clearSetupError();
-
-        renderApp(game, {
-            resetGameCompletely,
-            showHomeScreen
-        });
-    }
-});
-
 undoButton.addEventListener("click", () => {
     game.undo();
 
@@ -231,6 +223,7 @@ undoButton.addEventListener("click", () => {
 });
 
 classicModeBtn.addEventListener("click", () => {
+    resetGameCompletely();
     game.setGameMode("classic");
     settingsApi.applySettingsForCurrentMode();
     showClassicScreen();
@@ -242,6 +235,7 @@ classicModeBtn.addEventListener("click", () => {
 });
 
 chaosModeBtn.addEventListener("click", () => {
+    resetGameCompletely();
     game.setGameMode("chaos");
     settingsApi.applySettingsForCurrentMode();
     showClassicScreen();
@@ -256,22 +250,24 @@ drinkModeBtn.addEventListener("click", () => {
     alert("Drink Mode is nog in progress.");
 });
 
-window.addEventListener("load", () => {
-    const introSplash = document.getElementById("introSplash");
-
-    setTimeout(() => {
-        introSplash.classList.add("hidden");
-    }, 2000);
-});
-
 backToHomeButton.addEventListener("click", () => {
-    if (game.isStarted) {
+    if (game.phase === "numberSelection") {
+        game.goBack();
+
+        renderApp(game, {
+            resetGameCompletely,
+            showHomeScreen
+        });
+
+        return;
+    }
+
+    if (game.phase === "game") {
         openConfirmModal(
-            "Terug naar home?",
+            "Terug naar nummers?",
             "Ben je zeker dat je terug wilt gaan? De huidige match wordt gestopt.",
             () => {
-                resetGameToClassicSetup();
-                showHomeScreen();
+                game.goBack();
 
                 renderApp(game, {
                     resetGameCompletely,
@@ -279,6 +275,7 @@ backToHomeButton.addEventListener("click", () => {
                 });
             }
         );
+
         return;
     }
 
@@ -302,14 +299,17 @@ backToHomeButton.addEventListener("click", () => {
     });
 });
 
-// settings initialiseren
-const settingsApi = initSettings(game, renderApp, {
-    resetGameCompletely,
-    showHomeScreen
+window.addEventListener("load", () => {
+    const introSplash = document.getElementById("introSplash");
+
+    setTimeout(() => {
+        introSplash.classList.add("hidden");
+    }, 2000);
 });
 
-// eerste render
+// Eerste render
 showHomeScreen();
+
 renderApp(game, {
     resetGameCompletely,
     showHomeScreen
