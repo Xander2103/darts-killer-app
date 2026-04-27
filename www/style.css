@@ -1652,6 +1652,11 @@ button:disabled {
     }
 }
 
+/* spacing tussen throw history en knoppen */
+.turn-info-panel {
+    margin-bottom: 0.5rem; /* dit is de spacing */
+}
+
 /* ==================================================
    19. CLEAN THEME READABILITY
    ================================================== */
