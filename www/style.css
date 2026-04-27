@@ -2129,4 +2129,59 @@ button:disabled {
         transform: none;
         filter: grayscale(0.3);
     }
+
+    /* Active player extra duidelijk */
+    .active-row {
+        animation: activeCardPulse 1.6s ease-in-out infinite;
+    }
+
+    .active-row .player-name {
+        animation: activeNamePulse 1.2s ease-in-out infinite;
+    }
+
+    /* Niet-actieve spelers rustiger maken */
+    .game-row:not(.active-row):not(.winner-row) {
+        opacity: 0.78;
+        filter: saturate(0.85);
+    }
+
+    .game-row:not(.active-row):not(.winner-row) .game-row-buttons button {
+        opacity: 0.75;
+    }
+
+    /* Active player blijft volledig helder */
+    .active-row {
+        opacity: 1;
+        filter: none;
+    }
+
+    @keyframes activeCardPulse {
+
+        0%,
+        100% {
+            box-shadow:
+                0 0 0 8px rgba(59, 130, 246, 0.14),
+                0 0 18px rgba(59, 130, 246, 0.22);
+        }
+
+        50% {
+            box-shadow:
+                0 0 0 10px rgba(59, 130, 246, 0.24),
+                0 0 28px rgba(59, 130, 246, 0.38);
+        }
+    }
+
+    @keyframes activeNamePulse {
+
+        0%,
+        100% {
+            color: var(--text-main);
+            text-shadow: none;
+        }
+
+        50% {
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.75);
+        }
+    }
 }
