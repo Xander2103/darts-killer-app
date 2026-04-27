@@ -546,7 +546,7 @@ body.theme-clean {
 .panel-header-actions {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
 }
 
 .board-info-btn {
@@ -554,6 +554,43 @@ body.theme-clean {
     position: relative;
     z-index: 5;
 }
+
+.undo-button {
+    min-height: 44px;
+    padding: 0 0.95rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 220, 120, 0.42);
+    background: linear-gradient(180deg, rgba(255, 185, 65, 0.95), rgba(205, 120, 22, 0.95));
+    color: #1b1206;
+    font-weight: 900;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.16) inset,
+        0 6px 16px rgba(255, 150, 35, 0.22);
+}
+
+.undo-button:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.undo-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.3);
+    transform: none;
+}
+
+.undo-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
 
 /* =========================
    Game mode selection
