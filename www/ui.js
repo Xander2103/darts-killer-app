@@ -581,6 +581,7 @@ function renderGameBoard(game, actions = {}) {
         if (player.tempSafeZone && player.isAlive) {
             row.classList.add("safe-zone-row");
         }
+
         if (!player.isAlive) {
             const topRow = document.createElement("div");
             topRow.classList.add("game-row-top", "out-player-top");
@@ -641,13 +642,15 @@ function renderGameBoard(game, actions = {}) {
         nameText.textContent = player.name;
         nameLine.appendChild(nameText);
 
+        leftSide.appendChild(nameLine);
+
         if (isActivePlayer && isTargetSwapActive && player.tempTargetNumber !== null) {
             const targetBadge = document.createElement("div");
             targetBadge.classList.add("target-info-line");
             targetBadge.textContent = `🎯 Target ${player.tempTargetNumber}`;
             leftSide.appendChild(targetBadge);
         }
-        leftSide.appendChild(nameLine);
+
         leftSide.appendChild(createScoreBlocks(player));
 
         const rightSide = document.createElement("div");
@@ -656,27 +659,15 @@ function renderGameBoard(game, actions = {}) {
         const statusBadge = createStatusBadge(player, game);
         rightSide.appendChild(statusBadge);
 
-        const extraInfo = document.createElement("div");
-        extraInfo.classList.add("extra-info");
+        const scoreInfo = document.createElement("div");
+        scoreInfo.classList.add("score-pill");
+        scoreInfo.innerHTML = `Score: <strong>${player.score}</strong>`;
 
-        if (isActivePlayer) {
-            extraInfo.classList.add("throw-info");
-
-            const throwsText =
-                game.currentTurnThrows.length === 0
-                    ? "No throws yet"
-                    : game.currentTurnThrows.join(" • ");
-
-            if (player.pendingElimination) {
-                extraInfo.textContent = `Score: ${player.score} • ${throwsText}`;
-            } else {
-                extraInfo.textContent = throwsText;
-            }
-        } else {
-            extraInfo.textContent = `Score: ${player.score}`;
+        if (player.score < 0 || player.pendingElimination) {
+            scoreInfo.classList.add("score-pill-warning");
         }
 
-        rightSide.appendChild(extraInfo);
+        rightSide.appendChild(scoreInfo);
 
         topRow.appendChild(leftSide);
         topRow.appendChild(rightSide);
@@ -742,6 +733,7 @@ function renderGameBoard(game, actions = {}) {
             buttonRow.appendChild(singleButton);
             buttonRow.appendChild(doubleButton);
             buttonRow.appendChild(tripleButton);
+
             if (isActivePlayer) {
                 buttonRow.appendChild(missButton);
                 buttonRow.appendChild(nextTurnButton);
@@ -768,6 +760,22 @@ function renderGameBoard(game, actions = {}) {
         }
 
         row.appendChild(topRow);
+
+        if (isActivePlayer) {
+            const turnInfoPanel = document.createElement("div");
+            turnInfoPanel.classList.add("turn-info-panel");
+
+            const throwsLine = document.createElement("div");
+            throwsLine.classList.add("turn-info-throws");
+            throwsLine.textContent =
+                game.currentTurnThrows.length === 0
+                    ? "No throws yet"
+                    : game.currentTurnThrows.join(" • ");
+
+            turnInfoPanel.appendChild(throwsLine);
+            row.appendChild(turnInfoPanel);
+        }
+
         row.appendChild(buttonRow);
         gameBoard.appendChild(row);
     });
