@@ -524,7 +524,13 @@ function renderGameBoard(game, actions = {}) {
         activeModifier &&
         activeModifier.name === "Random Target Swap";
 
-    game.players.forEach((player, index) => {
+    const sortedPlayers = [
+        ...game.players.filter(player => player.isAlive),
+        ...game.players.filter(player => !player.isAlive)
+    ];
+
+    sortedPlayers.forEach((player) => {
+        const index = game.players.indexOf(player);
         const row = document.createElement("div");
         row.classList.add("game-row");
 
@@ -554,6 +560,44 @@ function renderGameBoard(game, actions = {}) {
 
         if (player.tempSafeZone && player.isAlive) {
             row.classList.add("safe-zone-row");
+        }
+        if (!player.isAlive) {
+            const topRow = document.createElement("div");
+            topRow.classList.add("game-row-top", "out-player-top");
+
+            const leftSide = document.createElement("div");
+            leftSide.classList.add("game-row-left");
+
+            const nameLine = document.createElement("div");
+            nameLine.classList.add("player-main-info");
+
+            if (player.number !== null) {
+                const numberBadge = document.createElement("span");
+                numberBadge.classList.add("player-number-badge");
+                numberBadge.textContent = player.number;
+                nameLine.appendChild(numberBadge);
+            }
+
+            const nameText = document.createElement("span");
+            nameText.classList.add("player-name");
+            nameText.textContent = player.name;
+            nameLine.appendChild(nameText);
+
+            leftSide.appendChild(nameLine);
+
+            const rightSide = document.createElement("div");
+            rightSide.classList.add("game-row-right");
+
+            const statusBadge = createStatusBadge(player, game);
+            rightSide.appendChild(statusBadge);
+
+            topRow.appendChild(leftSide);
+            topRow.appendChild(rightSide);
+
+            row.appendChild(topRow);
+            gameBoard.appendChild(row);
+
+            return;
         }
 
         const topRow = document.createElement("div");

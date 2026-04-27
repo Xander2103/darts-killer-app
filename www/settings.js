@@ -81,7 +81,7 @@ export function initSettings(game, renderApp, renderActions = {}) {
 
     const defaultSettingsByMode = {
         classic: {
-            immunityEnabled: true,
+            immunityEnabled: false,
             killerStaysForever: true,
             eliminateOnExactZeroOnly: false,
             allowRecoveryBeforeTurn: true,
