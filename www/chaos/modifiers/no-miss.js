@@ -3,7 +3,7 @@ import { ChaosModifier } from "../chaos-modifier.js";
 export class NoMiss extends ChaosModifier {
     constructor() {
         super("No Miss", "A miss costs you 1 point.");
-        this.spawnWeight = 10;
+        this.spawnWeight = 3;
     }
 
     onMiss(game, player) {
