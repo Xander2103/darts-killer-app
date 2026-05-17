@@ -550,16 +550,16 @@ function renderNumberSelection(game, actions = {}) {
 
         <div class="number-selection-list">
             ${game.players.map((listedPlayer, index) => {
-                const isCurrent = index === game.numberSelectionIndex;
-                const hasNumber = listedPlayer.number !== null;
+        const isCurrent = index === game.numberSelectionIndex;
+        const hasNumber = listedPlayer.number !== null;
 
-                return `
+        return `
                     <div class="number-selection-player ${isCurrent ? "current" : ""}">
                         <span>${index + 1}. ${listedPlayer.name}</span>
                         <strong>${hasNumber ? listedPlayer.number : isCurrent ? "Now" : "Waiting"}</strong>
                     </div>
                 `;
-            }).join("")}
+    }).join("")}
         </div>
     `;
 
@@ -914,8 +914,126 @@ function renderGameBoard(game, actions = {}) {
     }
 }
 
+function renderDrinkMode(challenge, actions = {}) {
+    if (!setupPanel || !gamePanel || !gameBoard) {
+        return;
+    }
+
+    setupPanel.style.display = "none";
+    gamePanel.classList.remove("hidden");
+
+    if (chaosHeader) {
+        chaosHeader.classList.add("hidden");
+        chaosHeader.style.display = "none";
+    }
+
+    if (undoButton) {
+        undoButton.disabled = true;
+        undoButton.classList.add("hidden");
+    }
+
+    if (backToHomeButton) {
+        backToHomeButton.textContent = "← Back";
+        backToHomeButton.onclick = () => {
+            if (typeof actions.onBack === "function") {
+                actions.onBack();
+            }
+        };
+    }
+
+    gameBoard.innerHTML = "";
+
+    const screen = document.createElement("section");
+    screen.classList.add("drink-mode-screen");
+
+    const card = document.createElement("article");
+    card.classList.add("drink-challenge-card");
+
+    const topLine = document.createElement("div");
+    topLine.classList.add("drink-card-topline");
+
+    const badge = document.createElement("span");
+    badge.classList.add("drink-card-badge");
+    badge.textContent = "Dart Drinking Challenge";
+
+    const icon = document.createElement("span");
+    icon.classList.add("drink-card-icon");
+    icon.textContent = "🍻";
+
+    topLine.appendChild(badge);
+    topLine.appendChild(icon);
+
+    const title = document.createElement("h2");
+    title.classList.add("drink-card-title");
+    title.textContent = challenge ? challenge.title : "No Challenge";
+
+    const description = document.createElement("p");
+    description.classList.add("drink-card-description");
+    description.textContent = challenge ? challenge.description : "No drinking challenges found.";
+
+    const resultGrid = document.createElement("div");
+    resultGrid.classList.add("drink-result-grid");
+
+    const successBox = document.createElement("div");
+    successBox.classList.add("drink-result-card", "drink-result-card--success");
+
+    const successLabel = document.createElement("span");
+    successLabel.classList.add("drink-result-label");
+    successLabel.textContent = "Success";
+
+    const successText = document.createElement("p");
+    successText.classList.add("drink-result-text");
+    successText.textContent = challenge ? challenge.success : "";
+
+    successBox.appendChild(successLabel);
+    successBox.appendChild(successText);
+
+    const failBox = document.createElement("div");
+    failBox.classList.add("drink-result-card", "drink-result-card--fail");
+
+    const failLabel = document.createElement("span");
+    failLabel.classList.add("drink-result-label");
+    failLabel.textContent = "Fail";
+
+    const failText = document.createElement("p");
+    failText.classList.add("drink-result-text");
+    failText.textContent = challenge ? challenge.fail : "";
+
+    failBox.appendChild(failLabel);
+    failBox.appendChild(failText);
+
+    resultGrid.appendChild(successBox);
+    resultGrid.appendChild(failBox);
+
+    const doneButton = document.createElement("button");
+    doneButton.type = "button";
+    doneButton.classList.add("drink-done-button");
+    doneButton.textContent = "DONE";
+
+    doneButton.addEventListener("click", () => {
+        if (typeof actions.onDone === "function") {
+            actions.onDone();
+        }
+    });
+
+    const note = document.createElement("p");
+    note.classList.add("drink-responsible-note");
+    note.textContent = "Play responsibly. You can play with any drink.";
+
+    card.appendChild(topLine);
+    card.appendChild(title);
+    card.appendChild(description);
+    card.appendChild(resultGrid);
+    card.appendChild(doneButton);
+    card.appendChild(note);
+
+    screen.appendChild(card);
+    gameBoard.appendChild(screen);
+}
+
 export {
     renderApp,
+    renderDrinkMode,
     playerNameInput,
     addPlayerButton,
     startGameButton,

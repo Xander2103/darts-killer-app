@@ -6,6 +6,9 @@ import { KillerGame } from "./killer-game.js";
 // Chaos engine
 import { ChaosEngine } from "./chaos/chaos-engine.js";
 
+// Drink engine
+import { DrinkEngine } from "./drink/drink-engine.js";
+
 // Chaos modifiers
 import { DoubleTrouble } from "./chaos/modifiers/double-trouble.js";
 import { BonusDarts } from "./chaos/modifiers/bonus-darts.js";
@@ -35,6 +38,7 @@ import { OpenSeason } from "./chaos/modifiers/open-season.js";
 import { initSettings } from "./settings.js";
 import {
     renderApp,
+    renderDrinkMode,
     playerNameInput,
     addPlayerButton,
     startGameButton,
@@ -44,6 +48,7 @@ import {
 
 const game = new KillerGame();
 const chaosEngine = new ChaosEngine(game);
+const drinkEngine = new DrinkEngine();
 
 // Chaos modifiers registreren
 chaosEngine.register(new DoubleTrouble());
@@ -180,6 +185,21 @@ function openConfirmModal(title, message, onConfirm) {
     }
 }
 
+function showDrinkChallenge() {
+    const challenge = drinkEngine.getCurrentChallenge();
+
+    renderDrinkMode(challenge, {
+        onDone: () => {
+            drinkEngine.nextChallenge();
+            showDrinkChallenge();
+        },
+        onBack: () => {
+            resetGameCompletely();
+            showHomeScreen();
+        }
+    });
+}
+
 // Settings initialiseren
 const settingsApi = initSettings(game, renderApp, {
     resetGameCompletely,
@@ -247,10 +267,23 @@ chaosModeBtn.addEventListener("click", () => {
 });
 
 drinkModeBtn.addEventListener("click", () => {
-    alert("Drink Mode is nog in progress.");
+    resetGameCompletely();
+    game.setGameMode("drink");
+
+    homeScreen.classList.add("hidden");
+    classicScreen.classList.remove("hidden");
+
+    drinkEngine.start();
+    showDrinkChallenge();
 });
 
 backToHomeButton.addEventListener("click", () => {
+    if (game.gameMode === "drink") {
+        resetGameCompletely();
+        showHomeScreen();
+        return;
+    }
+
     if (game.phase === "numberSelection") {
         game.goBack();
 
