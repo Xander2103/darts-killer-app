@@ -6,8 +6,112 @@ const gameInfoModal = document.getElementById("gameInfoModal");
 const closeGameInfoTop = document.getElementById("closeGameInfoTop");
 const closeGameInfoBottom = document.getElementById("closeGameInfoBottom");
 const gameInfoBackdrop = document.getElementById("gameInfoBackdrop");
+const gameInfoTitle = document.querySelector("#gameInfoModal .info-modal-top h2");
+const gameInfoBody = document.querySelector("#gameInfoModal .info-modal-body");
+
+const infoContentByMode = {
+    home: {
+        title: "Game Info",
+        body: `
+            <section class="info-section">
+                <h3>Choose a mode</h3>
+                <p><strong>Classic Killer:</strong> Standard Killer darts with player numbers, killers and elimination.</p>
+                <p><strong>Chaos Mode:</strong> Killer darts with random modifiers and party effects.</p>
+                <p><strong>121 Checkout:</strong> Collaborative checkout training. Bring the target to exactly 0 within the dart limit.</p>
+                <p><strong>Drink Mode:</strong> Party challenge cards for darts and drinks. Play responsibly.</p>
+            </section>
+        `
+    },
+    classic: {
+        title: "Classic Killer Info",
+        body: `
+            <section class="info-section">
+                <h3>How to play</h3>
+                <p>Each player throws 1 dart with their non-dominant hand. The number hit becomes their personal number. Every player needs a unique number.</p>
+            </section>
+            <section class="info-section">
+                <h3>Become a Killer</h3>
+                <p>Hit your own number to gain points. Single = +1, Double = +2, Triple = +3. Reach 5 to become a Killer.</p>
+            </section>
+            <section class="info-section">
+                <h3>Attack players</h3>
+                <p>Once you're a Killer, hit opponents' numbers to damage them. If a player reaches 0, that player is out.</p>
+            </section>
+        `
+    },
+    chaos: {
+        title: "Chaos Mode Info",
+        body: `
+            <section class="info-section">
+                <h3>How it works</h3>
+                <p>Chaos Mode uses the same base as Killer, but random modifiers can change the rules during the match.</p>
+            </section>
+            <section class="info-section">
+                <h3>Modifiers</h3>
+                <p>Some rounds force doubles or triples, give bonus darts, protect players, revive players or create sudden pressure.</p>
+            </section>
+            <section class="info-section">
+                <h3>Settings</h3>
+                <p>You can enable or disable modifiers in the settings screen.</p>
+            </section>
+        `
+    },
+    checkout: {
+        title: "121 Checkout Info",
+        body: `
+            <section class="info-section">
+                <h3>Goal</h3>
+                <p>Start at 121 and try to reach exactly 0 within 9 darts.</p>
+            </section>
+            <section class="info-section">
+                <h3>Success</h3>
+                <p>If you check out, the next target increases by 1 point.</p>
+            </section>
+            <section class="info-section">
+                <h3>Fail</h3>
+                <p>If you bust or run out of darts, you fall back to your safehouse score.</p>
+            </section>
+            <section class="info-section">
+                <h3>Multiplayer</h3>
+                <p>With multiple players, everyone works together on the same checkout. After every dart, the next player throws.</p>
+            </section>
+        `
+    },
+    drink: {
+        title: "Drink Mode Info",
+        body: `
+            <section class="info-section">
+                <h3>How it works</h3>
+                <p>Drink Mode gives you random dart challenges. Try the challenge, then follow the success or fail result.</p>
+            </section>
+            <section class="info-section">
+                <h3>Examples</h3>
+                <p>Challenges can ask you to hit a double, triple, bull, same number twice, or avoid missing.</p>
+            </section>
+            <section class="info-section">
+                <h3>Play responsibly</h3>
+                <p>You can play with any drink. Keep it fun and stop when needed.</p>
+            </section>
+        `
+    }
+};
+
+function updateGameInfoContent() {
+    const mode = document.body.dataset.currentMode || "home";
+    const content = infoContentByMode[mode] || infoContentByMode.home;
+
+    if (gameInfoTitle) {
+        gameInfoTitle.textContent = content.title;
+    }
+
+    if (gameInfoBody) {
+        gameInfoBody.innerHTML = content.body;
+    }
+}
 
 function openGameInfoModal() {
+    updateGameInfoContent();
+
     if (gameInfoModal) {
         gameInfoModal.classList.remove("hidden");
     }

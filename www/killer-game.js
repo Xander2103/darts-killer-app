@@ -53,7 +53,7 @@ export class KillerGame {
     }
 
     setGameMode(mode) {
-        if (mode === "classic" || mode === "chaos" || mode === "drink") {
+        if (mode === "classic" || mode === "chaos" || mode === "drink" || mode === "checkout") {
             this.gameMode = mode;
         }
     }

@@ -121,17 +121,24 @@ function renderApp(game, actions = {}) {
     renderSetupPanel(game);
     renderGamePanel(game);
     updateSetupInfo(game);
+    updateSetupActionButton(game);
     renderSetupPlayers(game, actions);
     renderChaosHeader(game);
-    updateUndoButton(game);
-    updateBackButton();
+    updateUndoButton(game, actions);
+    updateBackButton(game);
     bindChaosInfoButton(game);
     maybeShowChaosIntro(game);
 
-    if (game.phase === "numberSelection") {
+    if (game.phase === "checkoutSetup") {
+        renderCheckoutSetup(game, actions.checkoutEngine, actions);
+    } else if (game.phase === "numberSelection") {
         renderNumberSelection(game, actions);
     } else if (game.phase === "game") {
-        renderGameBoard(game, actions);
+        if (game.gameMode === "checkout") {
+            renderCheckoutMode(actions.checkoutEngine, actions);
+        } else {
+            renderGameBoard(game, actions);
+        }
     }
 }
 
@@ -144,7 +151,7 @@ function renderGamePanel(game) {
         return;
     }
 
-    if (game.phase === "numberSelection" || game.phase === "game") {
+    if (game.phase === "numberSelection" || game.phase === "game" || game.phase === "checkoutSetup") {
         gamePanel.classList.remove("hidden");
     } else {
         gamePanel.classList.add("hidden");
@@ -159,20 +166,52 @@ function renderSetupPanel(game) {
     setupPanel.style.display = game.phase === "setup" ? "block" : "none";
 }
 
-function updateUndoButton(game) {
+function updateSetupActionButton(game) {
+    if (!startGameButton) {
+        return;
+    }
+
+    if (game.gameMode === "checkout") {
+        startGameButton.innerHTML = `
+            <span class="action-icon">⚙</span>
+            Setup Game
+        `;
+        return;
+    }
+
+    startGameButton.innerHTML = `
+        <span class="action-icon">▶</span>
+        Start Game
+    `;
+}
+
+function updateUndoButton(game, actions = {}) {
     if (!undoButton) {
+        return;
+    }
+
+    if (game.phase === "checkoutSetup") {
+        undoButton.disabled = true;
+        undoButton.classList.add("hidden");
+        return;
+    }
+
+    undoButton.classList.remove("hidden");
+
+    if (game.gameMode === "checkout" && actions.checkoutEngine) {
+        undoButton.disabled = actions.checkoutEngine.history.length === 0;
         return;
     }
 
     undoButton.disabled = game.history.length === 0;
 }
 
-function updateBackButton() {
+function updateBackButton(game) {
     if (!backToHomeButton) {
         return;
     }
 
-    backToHomeButton.textContent = "← Back";
+    backToHomeButton.textContent = game && game.phase === "checkoutSetup" ? "← Players" : "← Back";
 }
 
 function updateSetupInfo(game) {
@@ -188,6 +227,8 @@ function updateSetupInfo(game) {
 
     if (game.gameMode === "chaos") {
         infoContent.textContent = "Base rules and chaos modifiers can be adjusted in the settings.";
+    } else if (game.gameMode === "checkout") {
+        infoContent.textContent = "Add one or more players. In 121 Checkout everyone works together on the same target.";
     } else {
         infoContent.textContent = "Base rules can be adjusted in the settings.";
     }
@@ -914,6 +955,648 @@ function renderGameBoard(game, actions = {}) {
     }
 }
 
+// =====================================================
+// 121 CHECKOUT SETUP
+// =====================================================
+
+function renderCheckoutSetup(game, checkoutEngine, actions = {}) {
+    if (!gameBoard || !checkoutEngine) {
+        return;
+    }
+
+    gameBoard.innerHTML = "";
+
+    const settings = checkoutEngine.settings;
+    const screen = document.createElement("section");
+    screen.classList.add("checkout-setup-screen");
+
+    const card = document.createElement("article");
+    card.classList.add("checkout-setup-card");
+
+    const roundLimitText = settings.roundLimit === "infinite" ? "Infinite" : settings.roundLimit;
+    const safehouseText = settings.safehouseEnabled
+        ? `After check with ${settings.safehouseDartLimit} darts`
+        : "Off";
+
+    card.innerHTML = `
+        <div class="checkout-setup-header">
+            <span class="checkout-mode-badge">121 Checkout</span>
+            <h2>Game Setup</h2>
+            <p>Choose the rules for this checkout session. Everyone works together on the same target.</p>
+        </div>
+
+        <div class="checkout-setup-summary">
+            <span>Start: <strong>${settings.startScore}</strong></span>
+            <span>Darts: <strong>${settings.maxDarts}</strong></span>
+            <span>Rounds: <strong>${roundLimitText}</strong></span>
+            <span>Safehouse: <strong>${safehouseText}</strong></span>
+        </div>
+    `;
+
+    function rerenderWith(partialSettings) {
+        checkoutEngine.updateSettings(partialSettings);
+        renderCheckoutSetup(game, checkoutEngine, actions);
+    }
+
+    function createOptionGroup(title, help, options, activeValue, onSelect) {
+        const group = document.createElement("div");
+        group.classList.add("checkout-setting-group");
+
+        const header = document.createElement("div");
+        header.classList.add("checkout-setting-header");
+        header.innerHTML = `
+            <h3>${title}</h3>
+            ${help ? `<p>${help}</p>` : ""}
+        `;
+
+        const row = document.createElement("div");
+        row.classList.add("checkout-segment-row");
+
+        options.forEach(option => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.classList.add("checkout-segment-button");
+            if (String(activeValue) === String(option.value)) {
+                button.classList.add("active");
+            }
+            button.innerHTML = option.label;
+            button.addEventListener("click", () => onSelect(option.value));
+            row.appendChild(button);
+        });
+
+        group.appendChild(header);
+        group.appendChild(row);
+        return group;
+    }
+
+    const startScoreGroup = createOptionGroup(
+        "Start score",
+        "The target you need to checkout first.",
+        [
+            { value: 121, label: "121" },
+            { value: 170, label: "170" }
+        ],
+        settings.startScore,
+        value => rerenderWith({ startScore: Number(value) })
+    );
+
+    const customStart = document.createElement("div");
+    customStart.classList.add("checkout-custom-row");
+    customStart.innerHTML = `
+        <label for="checkoutCustomStart">Custom start score</label>
+        <input id="checkoutCustomStart" type="number" min="2" max="501" value="${settings.startScore}">
+    `;
+    customStart.querySelector("input").addEventListener("change", event => {
+        const value = Math.max(2, Number(event.target.value) || 121);
+        rerenderWith({ startScore: value });
+    });
+    startScoreGroup.appendChild(customStart);
+    card.appendChild(startScoreGroup);
+
+    card.appendChild(createOptionGroup(
+        "Maximum amount of darts",
+        "The team must checkout within this amount of darts.",
+        [3, 6, 9, 12, 15].map(value => ({ value, label: String(value) })),
+        settings.maxDarts,
+        value => rerenderWith({ maxDarts: Number(value) })
+    ));
+
+    card.appendChild(createOptionGroup(
+        "Safehouse",
+        "A fast checkout can save your progress. On fail you fall back to the last safehouse.",
+        [
+            { value: "off", label: "Off" },
+            { value: 3, label: "After 3 darts" },
+            { value: 6, label: "After 6 darts" },
+            { value: 9, label: "After 9 darts" }
+        ],
+        settings.safehouseEnabled ? settings.safehouseDartLimit : "off",
+        value => {
+            if (value === "off") {
+                rerenderWith({ safehouseEnabled: false });
+                return;
+            }
+
+            rerenderWith({
+                safehouseEnabled: true,
+                safehouseDartLimit: Number(value)
+            });
+        }
+    ));
+
+    const roundsGroup = createOptionGroup(
+        "Number of rounds",
+        "Stop after a fixed amount of rounds or play without a limit.",
+        [
+            { value: 10, label: "10" },
+            { value: 25, label: "25" },
+            { value: "infinite", label: "Infinite" }
+        ],
+        settings.roundLimit,
+        value => rerenderWith({ roundLimit: value === "infinite" ? "infinite" : Number(value) })
+    );
+
+    const customRounds = document.createElement("div");
+    customRounds.classList.add("checkout-custom-row");
+    customRounds.innerHTML = `
+        <label for="checkoutCustomRounds">Custom rounds</label>
+        <input id="checkoutCustomRounds" type="number" min="1" max="99" value="${settings.roundLimit === "infinite" ? 25 : settings.roundLimit}">
+    `;
+    customRounds.querySelector("input").addEventListener("change", event => {
+        const value = Math.max(1, Number(event.target.value) || 10);
+        rerenderWith({ roundLimit: value });
+    });
+    roundsGroup.appendChild(customRounds);
+    card.appendChild(roundsGroup);
+
+    const increaseGroup = document.createElement("div");
+    increaseGroup.classList.add("checkout-setting-group");
+    increaseGroup.innerHTML = `
+        <div class="checkout-setting-header">
+            <h3>Increase on success</h3>
+            <p>How much harder the target becomes after a successful checkout.</p>
+        </div>
+        <div class="checkout-stepper-row">
+            <button type="button" class="checkout-stepper-button" data-step="down">−</button>
+            <strong>${settings.increaseOnSuccess}</strong>
+            <button type="button" class="checkout-stepper-button" data-step="up">+</button>
+        </div>
+    `;
+
+    increaseGroup.querySelector('[data-step="down"]').addEventListener("click", () => {
+        rerenderWith({ increaseOnSuccess: Math.max(1, settings.increaseOnSuccess - 1) });
+    });
+
+    increaseGroup.querySelector('[data-step="up"]').addEventListener("click", () => {
+        rerenderWith({ increaseOnSuccess: Math.min(25, settings.increaseOnSuccess + 1) });
+    });
+
+    card.appendChild(increaseGroup);
+
+    const startButton = document.createElement("button");
+    startButton.type = "button";
+    startButton.classList.add("checkout-start-button");
+    startButton.textContent = "Start 121 Checkout";
+    startButton.addEventListener("click", () => {
+        if (typeof actions.startCheckoutGame === "function") {
+            actions.startCheckoutGame();
+        }
+    });
+
+    card.appendChild(startButton);
+    screen.appendChild(card);
+    gameBoard.appendChild(screen);
+}
+
+// =====================================================
+// 121 CHECKOUT MODE
+// =====================================================
+
+function scrollCheckoutToTop() {
+    window.setTimeout(() => {
+        const checkoutCard = document.querySelector(".checkout-main-card");
+        const fallbackTarget = document.querySelector(".checkout-screen");
+        const target = checkoutCard || fallbackTarget;
+
+        if (!target) {
+            window.scrollTo({ top: 0, behavior: "auto" });
+            return;
+        }
+
+        const targetTop = target.getBoundingClientRect().top + window.pageYOffset - 10;
+        window.scrollTo({ top: Math.max(targetTop, 0), behavior: "auto" });
+
+        const scrollableParents = [document.documentElement, document.body, gameBoard, gameBoard?.parentElement].filter(Boolean);
+        scrollableParents.forEach(parent => {
+            if (parent.scrollHeight > parent.clientHeight) {
+                parent.scrollTop = Math.max(target.offsetTop - 10, 0);
+            }
+        });
+    }, 0);
+}
+
+function getCheckoutFinishOptions() {
+    const finishes = [];
+
+    for (let number = 1; number <= 20; number++) {
+        finishes.push({ score: number * 2, label: `D${number}` });
+    }
+
+    finishes.push({ score: 50, label: "Bull" });
+    return finishes;
+}
+
+function getCheckoutSetupOptions() {
+    const options = [];
+
+    for (let number = 1; number <= 20; number++) {
+        options.push({ score: number, label: `${number}` });
+    }
+
+    for (let number = 1; number <= 20; number++) {
+        options.push({ score: number * 3, label: `T${number}` });
+    }
+
+    for (let number = 1; number <= 20; number++) {
+        options.push({ score: number * 2, label: `D${number}` });
+    }
+
+    options.push({ score: 25, label: "25" });
+    options.push({ score: 50, label: "Bull" });
+    return options;
+}
+
+const commonTwoDartCheckoutRoutes = {
+    41: "9 + D16",
+    42: "10 + D16",
+    43: "3 + D20",
+    44: "4 + D20",
+    45: "13 + D16",
+    46: "6 + D20",
+    47: "7 + D20",
+    48: "16 + D16",
+    49: "17 + D16",
+    50: "18 + D16",
+    51: "19 + D16",
+    52: "20 + D16",
+    53: "13 + D20",
+    54: "14 + D20",
+    55: "15 + D20",
+    56: "16 + D20",
+    57: "17 + D20",
+    58: "18 + D20",
+    59: "19 + D20",
+    60: "20 + D20"
+};
+
+function getCheckoutRoute(remaining, dartsLeft = 3) {
+    const score = Number(remaining);
+
+    if (!Number.isFinite(score) || score <= 1) {
+        return "No checkout route";
+    }
+
+    if (score > 170) {
+        return "No checkout available above 170";
+    }
+
+    const finishes = getCheckoutFinishOptions();
+
+    if (dartsLeft >= 1) {
+        const oneDartFinish = finishes.find(item => item.score === score);
+
+        if (oneDartFinish) {
+            return oneDartFinish.label;
+        }
+    }
+
+    if (dartsLeft >= 2 && commonTwoDartCheckoutRoutes[score]) {
+        return commonTwoDartCheckoutRoutes[score];
+    }
+
+    const setupOptions = getCheckoutSetupOptions();
+
+    if (dartsLeft >= 2) {
+        for (const first of setupOptions) {
+            const finish = finishes.find(item => item.score === score - first.score);
+
+            if (finish) {
+                return `${first.label} + ${finish.label}`;
+            }
+        }
+    }
+
+    if (dartsLeft >= 3) {
+        const preferredFirstDarts = [
+            { score: 60, label: "T20" },
+            { score: 57, label: "T19" },
+            { score: 54, label: "T18" },
+            { score: 51, label: "T17" },
+            { score: 48, label: "T16" },
+            ...setupOptions
+        ];
+
+        for (const first of preferredFirstDarts) {
+            const twoDartRoute = getCheckoutRoute(score - first.score, 2);
+
+            if (twoDartRoute && !twoDartRoute.startsWith("No checkout")) {
+                return `${first.label} + ${twoDartRoute}`;
+            }
+        }
+    }
+
+    return "No clean checkout route";
+}
+
+
+function groupCheckoutThrowsByPlayer(throws = []) {
+    const grouped = [];
+
+    throws.forEach(item => {
+        let group = grouped[grouped.length - 1];
+
+        if (!group || group.playerName !== item.playerName) {
+            group = {
+                playerName: item.playerName,
+                darts: []
+            };
+            grouped.push(group);
+        }
+
+        group.darts.push(item);
+    });
+
+    return grouped;
+}
+
+function createCheckoutThrowsPanel(checkoutEngine) {
+    const throwsPanel = document.createElement("div");
+    throwsPanel.classList.add("checkout-throws-panel");
+
+    const title = document.createElement("span");
+    title.textContent = "This round";
+    throwsPanel.appendChild(title);
+
+    if (checkoutEngine.throws.length === 0) {
+        const empty = document.createElement("strong");
+        empty.textContent = "No darts yet";
+        throwsPanel.appendChild(empty);
+        return throwsPanel;
+    }
+
+    const groups = document.createElement("div");
+    groups.classList.add("checkout-throw-groups");
+
+    groupCheckoutThrowsByPlayer(checkoutEngine.throws).forEach(group => {
+        const row = document.createElement("div");
+        row.classList.add("checkout-throw-player-row");
+
+        const name = document.createElement("div");
+        name.classList.add("checkout-throw-player-name");
+        name.textContent = group.playerName;
+
+        const darts = document.createElement("div");
+        darts.classList.add("checkout-dart-chip-row");
+
+        group.darts.forEach((dart, index) => {
+            const chip = document.createElement("span");
+            chip.classList.add("checkout-dart-chip");
+            chip.textContent = `${index + 1}. ${dart.label}`;
+            darts.appendChild(chip);
+        });
+
+        row.appendChild(name);
+        row.appendChild(darts);
+        groups.appendChild(row);
+    });
+
+    throwsPanel.appendChild(groups);
+    return throwsPanel;
+}
+
+function renderCheckoutMode(checkoutEngine, actions = {}) {
+    if (!gameBoard || !checkoutEngine) {
+        return;
+    }
+
+    gameBoard.innerHTML = "";
+
+    if (undoButton) {
+        undoButton.classList.remove("hidden");
+        undoButton.disabled = checkoutEngine.history.length === 0 || checkoutEngine.status === "finished";
+    }
+
+    const screen = document.createElement("section");
+    screen.classList.add("checkout-screen");
+
+    const topCard = document.createElement("article");
+    topCard.classList.add("checkout-main-card");
+
+    const currentPlayer = checkoutEngine.players[checkoutEngine.currentPlayerIndex];
+    const dartsLeft = checkoutEngine.settings.maxDarts - checkoutEngine.dartsUsed;
+    const playerDartsLeft = Math.max(checkoutEngine.settings.dartsPerPlayerTurn - checkoutEngine.currentPlayerTurnDarts, 0);
+    const isInfiniteRoundLimit = checkoutEngine.settings.roundLimit === "infinite";
+    const roundLimitText = isInfiniteRoundLimit
+        ? "∞"
+        : checkoutEngine.settings.roundLimit;
+    const currentRoundText = isInfiniteRoundLimit
+        ? checkoutEngine.round
+        : Math.min(checkoutEngine.round, checkoutEngine.settings.roundLimit);
+
+    topCard.innerHTML = `
+        <div class="checkout-title-row">
+            <span class="checkout-mode-badge">121 Checkout</span>
+            <span class="checkout-round-pill">Round ${currentRoundText} / ${roundLimitText}</span>
+        </div>
+
+        <div class="checkout-score-grid">
+            <div class="checkout-score-box">
+                <span>Target</span>
+                <strong>${checkoutEngine.currentTarget}</strong>
+            </div>
+            <div class="checkout-score-box checkout-score-box-primary">
+                <span>Remaining</span>
+                <strong>${checkoutEngine.remainingScore}</strong>
+            </div>
+            <div class="checkout-score-box">
+                <span>Darts left</span>
+                <strong>${Math.max(dartsLeft, 0)}</strong>
+            </div>
+        </div>
+
+        <div class="checkout-player-card checkout-current-player-card">
+            <span>Current player</span>
+            <strong>${currentPlayer ? currentPlayer.name : "Player"}</strong>
+            <small>${playerDartsLeft} dart${playerDartsLeft === 1 ? "" : "s"} left in this turn</small>
+        </div>
+    `;
+
+    const shouldShowResult = checkoutEngine.lastResult &&
+        (!checkoutEngine.lastResultCreatedAt || Date.now() - checkoutEngine.lastResultCreatedAt < 5000);
+
+    if (shouldShowResult) {
+        const resultBox = document.createElement("div");
+        resultBox.classList.add("checkout-result-box", `checkout-result-${checkoutEngine.lastResult.type}`);
+        resultBox.textContent = checkoutEngine.lastResult.message;
+        topCard.appendChild(resultBox);
+
+        if (checkoutEngine.resultDismissTimer) {
+            clearTimeout(checkoutEngine.resultDismissTimer);
+        }
+
+        checkoutEngine.resultDismissTimer = setTimeout(() => {
+            checkoutEngine.clearLastResult();
+            renderCheckoutMode(checkoutEngine, actions);
+        }, 5000);
+    } else if (checkoutEngine.lastResult) {
+        checkoutEngine.clearLastResult();
+    }
+
+    topCard.appendChild(createCheckoutThrowsPanel(checkoutEngine));
+    screen.appendChild(topCard);
+
+    if (checkoutEngine.status === "finished") {
+        const finishedBox = document.createElement("div");
+        finishedBox.classList.add("checkout-finished-box");
+        finishedBox.innerHTML = `
+            <h2>Session finished</h2>
+            <p>Rounds are finished.</p>
+            <p>Highest completed target: <strong>${checkoutEngine.highestCompletedTarget ?? "None"}</strong></p>
+        `;
+
+        const actionWrap = document.createElement("div");
+        actionWrap.classList.add("checkout-finished-actions");
+
+        const rematchButton = document.createElement("button");
+        rematchButton.type = "button";
+        rematchButton.classList.add("checkout-start-button");
+        rematchButton.textContent = "Rematch same setup";
+        rematchButton.addEventListener("click", () => {
+            if (typeof actions.startCheckoutGame === "function") {
+                actions.startCheckoutGame();
+            }
+        });
+
+        const menuButton = document.createElement("button");
+        menuButton.type = "button";
+        menuButton.classList.add("winner-menu-button");
+        menuButton.textContent = "Back to main menu";
+        menuButton.addEventListener("click", () => {
+            if (typeof actions.resetGameCompletely === "function") {
+                actions.resetGameCompletely();
+            }
+
+            if (typeof actions.showHomeScreen === "function") {
+                actions.showHomeScreen();
+            }
+        });
+
+        actionWrap.appendChild(rematchButton);
+        actionWrap.appendChild(menuButton);
+        finishedBox.appendChild(actionWrap);
+        screen.appendChild(finishedBox);
+    } else {
+        const checkoutRuleNote = document.createElement("div");
+        checkoutRuleNote.classList.add("checkout-rule-note");
+        const checkoutRoute = getCheckoutRoute(checkoutEngine.remainingScore, Math.max(dartsLeft, 1));
+        checkoutRuleNote.innerHTML = `
+            <span>Checkout route</span>
+            <strong>${checkoutRoute}</strong>
+        `;
+        screen.appendChild(checkoutRuleNote);
+
+        const multiplierRow = document.createElement("div");
+        multiplierRow.classList.add("checkout-multiplier-row");
+
+        [
+            { value: 1, label: "Single" },
+            { value: 2, label: "Double" },
+            { value: 3, label: "Triple" }
+        ].forEach(item => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.classList.add("checkout-multiplier-button");
+
+            if (checkoutEngine.selectedMultiplier === item.value) {
+                button.classList.add("active");
+            }
+
+            button.textContent = item.label;
+            button.addEventListener("click", () => {
+                checkoutEngine.selectMultiplier(item.value);
+                renderCheckoutMode(checkoutEngine, actions);
+                scrollCheckoutToTop();
+            });
+
+            multiplierRow.appendChild(button);
+        });
+
+        const numberGrid = document.createElement("div");
+        numberGrid.classList.add("checkout-number-grid");
+
+        for (let number = 1; number <= 20; number++) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = number;
+            button.addEventListener("click", () => {
+                const selectedMultiplier = checkoutEngine.selectedMultiplier;
+                checkoutEngine.throwNumber(number);
+                checkoutEngine.selectMultiplier(1);
+                playHitSound(selectedMultiplier);
+                renderCheckoutMode(checkoutEngine, actions);
+                scrollCheckoutToTop();
+            });
+
+            numberGrid.appendChild(button);
+        }
+
+        const actionRow = document.createElement("div");
+        actionRow.classList.add("checkout-action-row");
+
+        const outerBullButton = document.createElement("button");
+        outerBullButton.type = "button";
+        outerBullButton.textContent = "Outer Bull 25";
+        outerBullButton.addEventListener("click", () => {
+            checkoutEngine.throwBull(25);
+            checkoutEngine.selectMultiplier(1);
+            playHitSound(2);
+            renderCheckoutMode(checkoutEngine, actions);
+            scrollCheckoutToTop();
+        });
+
+        const bullButton = document.createElement("button");
+        bullButton.type = "button";
+        bullButton.textContent = "Bull 50";
+        bullButton.addEventListener("click", () => {
+            checkoutEngine.throwBull(50);
+            checkoutEngine.selectMultiplier(1);
+            playHitSound(3);
+            renderCheckoutMode(checkoutEngine, actions);
+            scrollCheckoutToTop();
+        });
+
+        const missButton = document.createElement("button");
+        missButton.type = "button";
+        missButton.classList.add("checkout-miss-button");
+        missButton.textContent = "Miss";
+        missButton.addEventListener("click", () => {
+            checkoutEngine.miss();
+            checkoutEngine.selectMultiplier(1);
+            playMissSound();
+            renderCheckoutMode(checkoutEngine, actions);
+            scrollCheckoutToTop();
+        });
+
+        actionRow.appendChild(outerBullButton);
+        actionRow.appendChild(bullButton);
+        actionRow.appendChild(missButton);
+
+        screen.appendChild(multiplierRow);
+        screen.appendChild(numberGrid);
+        screen.appendChild(actionRow);
+    }
+
+    if (checkoutEngine.roundHistory.length > 0) {
+        const historyPanel = document.createElement("div");
+        historyPanel.classList.add("checkout-history-panel");
+        historyPanel.innerHTML = `<h3>History</h3>`;
+
+        checkoutEngine.roundHistory.slice(0, 5).forEach(item => {
+            const row = document.createElement("div");
+            row.classList.add("checkout-history-row", item.result === "success" ? "success" : "failed");
+            row.innerHTML = `
+                <span>Round ${item.round} • ${item.target}</span>
+                <strong>${item.result === "success" ? `Checked in ${item.dartsUsed}` : "Failed"}</strong>
+            `;
+            historyPanel.appendChild(row);
+        });
+
+        screen.appendChild(historyPanel);
+    }
+
+    gameBoard.appendChild(screen);
+}
+
 function renderDrinkMode(challenge, actions = {}) {
     if (!setupPanel || !gamePanel || !gameBoard) {
         return;
@@ -1034,6 +1717,7 @@ function renderDrinkMode(challenge, actions = {}) {
 export {
     renderApp,
     renderDrinkMode,
+    renderCheckoutMode,
     playerNameInput,
     addPlayerButton,
     startGameButton,

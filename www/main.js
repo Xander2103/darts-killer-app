@@ -8,6 +8,7 @@ import { ChaosEngine } from "./chaos/chaos-engine.js";
 
 // Drink engine
 import { DrinkEngine } from "./drink/drink-engine.js";
+import { CheckoutEngine } from "./checkout/checkout-engine.js";
 
 // Chaos modifiers
 import { DoubleTrouble } from "./chaos/modifiers/double-trouble.js";
@@ -39,6 +40,7 @@ import { initSettings } from "./settings.js";
 import {
     renderApp,
     renderDrinkMode,
+    renderCheckoutMode,
     playerNameInput,
     addPlayerButton,
     startGameButton,
@@ -49,6 +51,7 @@ import {
 const game = new KillerGame();
 const chaosEngine = new ChaosEngine(game);
 const drinkEngine = new DrinkEngine();
+const checkoutEngine = new CheckoutEngine();
 
 // Chaos modifiers registreren
 chaosEngine.register(new DoubleTrouble());
@@ -83,6 +86,7 @@ const classicScreen = document.getElementById("classicScreen");
 const classicModeBtn = document.getElementById("classicModeBtn");
 const chaosModeBtn = document.getElementById("chaosModeBtn");
 const drinkModeBtn = document.getElementById("drinkModeBtn");
+const checkoutModeBtn = document.getElementById("checkoutModeBtn");
 
 const setupError = document.getElementById("setupError");
 
@@ -97,6 +101,7 @@ function clearSetupError() {
 }
 
 function showHomeScreen() {
+    document.body.dataset.currentMode = "home";
     homeScreen.classList.remove("hidden");
     classicScreen.classList.add("hidden");
 }
@@ -122,6 +127,7 @@ function resetGameToClassicSetup() {
     game.chaosSafeZonePlayerName = "";
     game.chaosRevivedPlayerName = "";
     game.playersWhoPlayedThisRound = [];
+    checkoutEngine.reset();
 
     if (game.chaosEngine) {
         game.chaosEngine.activeModifier = null;
@@ -158,6 +164,7 @@ function resetGameCompletely() {
     game.chaosSafeZonePlayerName = "";
     game.chaosRevivedPlayerName = "";
     game.playersWhoPlayedThisRound = [];
+    checkoutEngine.reset();
 
     clearSetupError();
 
@@ -173,7 +180,9 @@ function addPlayerFromInput() {
 
     renderApp(game, {
         resetGameCompletely,
-        showHomeScreen
+        showHomeScreen,
+        startCheckoutGame,
+        checkoutEngine
     });
 }
 
@@ -200,10 +209,26 @@ function showDrinkChallenge() {
     });
 }
 
+function startCheckoutGame() {
+    clearSetupError();
+    checkoutEngine.start(game.players);
+    game.phase = "game";
+    game.isStarted = true;
+
+    renderApp(game, {
+        resetGameCompletely,
+        showHomeScreen,
+        startCheckoutGame,
+        checkoutEngine
+    });
+}
+
 // Settings initialiseren
 const settingsApi = initSettings(game, renderApp, {
     resetGameCompletely,
-    showHomeScreen
+    showHomeScreen,
+    startCheckoutGame,
+    checkoutEngine
 });
 
 // Events
@@ -212,6 +237,24 @@ addPlayerButton.addEventListener("click", () => {
 });
 
 startGameButton.addEventListener("click", () => {
+    if (game.gameMode === "checkout") {
+        if (game.players.length === 0) {
+            showSetupError("Add at least one player before setting up 121 Checkout.");
+            return;
+        }
+
+        clearSetupError();
+        game.phase = "checkoutSetup";
+
+        renderApp(game, {
+            resetGameCompletely,
+            showHomeScreen,
+            startCheckoutGame,
+            checkoutEngine
+        });
+        return;
+    }
+
     const result = game.startGame();
 
     if (!result.success) {
@@ -223,7 +266,9 @@ startGameButton.addEventListener("click", () => {
 
     renderApp(game, {
         resetGameCompletely,
-        showHomeScreen
+        showHomeScreen,
+        startCheckoutGame,
+        checkoutEngine
     });
 });
 
@@ -234,41 +279,68 @@ playerNameInput.addEventListener("keydown", event => {
 });
 
 undoButton.addEventListener("click", () => {
-    game.undo();
+    if (game.gameMode === "checkout") {
+        checkoutEngine.undo();
+    } else {
+        game.undo();
+    }
 
     renderApp(game, {
         resetGameCompletely,
-        showHomeScreen
+        showHomeScreen,
+        startCheckoutGame,
+        checkoutEngine
     });
 });
 
 classicModeBtn.addEventListener("click", () => {
     resetGameCompletely();
     game.setGameMode("classic");
+    document.body.dataset.currentMode = "classic";
     settingsApi.applySettingsForCurrentMode();
     showClassicScreen();
 
     renderApp(game, {
         resetGameCompletely,
-        showHomeScreen
+        showHomeScreen,
+        startCheckoutGame,
+        checkoutEngine
     });
 });
 
 chaosModeBtn.addEventListener("click", () => {
     resetGameCompletely();
     game.setGameMode("chaos");
+    document.body.dataset.currentMode = "chaos";
     settingsApi.applySettingsForCurrentMode();
     showClassicScreen();
 
     renderApp(game, {
         resetGameCompletely,
-        showHomeScreen
+        showHomeScreen,
+        startCheckoutGame,
+        checkoutEngine
+    });
+});
+
+checkoutModeBtn.addEventListener("click", () => {
+    resetGameCompletely();
+    game.setGameMode("checkout");
+    document.body.dataset.currentMode = "checkout";
+    showClassicScreen();
+
+    renderApp(game, {
+        resetGameCompletely,
+        showHomeScreen,
+        startCheckoutGame,
+        checkoutEngine
     });
 });
 
 drinkModeBtn.addEventListener("click", () => {
     resetGameCompletely();
     game.setGameMode("drink");
+    document.body.dataset.currentMode = "drink";
 
     homeScreen.classList.add("hidden");
     classicScreen.classList.remove("hidden");
@@ -281,6 +353,40 @@ backToHomeButton.addEventListener("click", () => {
     if (game.gameMode === "drink") {
         resetGameCompletely();
         showHomeScreen();
+        return;
+    }
+
+    if (game.gameMode === "checkout" && game.phase === "checkoutSetup") {
+        game.phase = "setup";
+
+        renderApp(game, {
+            resetGameCompletely,
+            showHomeScreen,
+            startCheckoutGame,
+            checkoutEngine
+        });
+
+        return;
+    }
+
+    if (game.gameMode === "checkout" && game.phase === "game") {
+        openConfirmModal(
+            "Back to setup?",
+            "Are you sure you want to stop the current 121 Checkout session?",
+            () => {
+                checkoutEngine.reset();
+                game.phase = "setup";
+                game.isStarted = false;
+
+                renderApp(game, {
+                    resetGameCompletely,
+                    showHomeScreen,
+                    startCheckoutGame,
+                    checkoutEngine
+                });
+            }
+        );
+
         return;
     }
 
@@ -328,7 +434,9 @@ backToHomeButton.addEventListener("click", () => {
 
     renderApp(game, {
         resetGameCompletely,
-        showHomeScreen
+        showHomeScreen,
+        startCheckoutGame,
+        checkoutEngine
     });
 });
 
@@ -345,5 +453,7 @@ showHomeScreen();
 
 renderApp(game, {
     resetGameCompletely,
-    showHomeScreen
+    showHomeScreen,
+    startCheckoutGame,
+    checkoutEngine
 });
