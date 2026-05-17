@@ -185,4 +185,46 @@ export const drinkingChallenges = [
         success: "Give 4 sips.",
         fail: "Take 1 sip."
     },
+    {
+        title: "Red Zone",
+        description: "Hit red scoring segments with all 3 darts.",
+        success: "Give 5 sips.",
+        fail: "Take 1 sip."
+    },
+    {
+        title: "Green Machine",
+        description: "Hit green scoring segments with all 3 darts.",
+        success: "Give 5 sips.",
+        fail: "Take 1 sip."
+    },
+    {
+        title: "Blackout",
+        description: "Hit black single segments with all 3 darts.",
+        success: "Give 4 sips.",
+        fail: "Take 1 sip."
+    },
+    {
+        title: "Whiteout",
+        description: "Hit white single segments with all 3 darts.",
+        success: "Give 4 sips.",
+        fail: "Take 1 sip."
+    },
+    {
+        title: "Color Collector",
+        description: "Hit 3 different colors with your 3 darts.",
+        success: "Give 5 sips.",
+        fail: "Take 1 sip."
+    },
+    {
+        title: "Traffic Light",
+        description: "Hit red, green and black with your 3 darts.",
+        success: "Give 5 sips.",
+        fail: "Take 1 sip."
+    },
+    {
+        title: "Christmas",
+        description: "Hit at least one red and one green segment.",
+        success: "Give 3 sips.",
+        fail: "Take 1 sip."
+    },
 ];
