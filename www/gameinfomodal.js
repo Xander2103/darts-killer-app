@@ -18,6 +18,7 @@ const infoContentByMode = {
                 <p><strong>Classic Killer:</strong> Standard Killer darts with player numbers, killers and elimination.</p>
                 <p><strong>Chaos Mode:</strong> Killer darts with random modifiers and party effects.</p>
                 <p><strong>121 Checkout:</strong> Collaborative checkout training. Bring the target to exactly 0 within the dart limit.</p>
+                <p><strong>Halve It:</strong> Number rounds with random challenges. Miss a round and your score is halved.</p>
                 <p><strong>Drink Mode:</strong> Party challenge cards for darts and drinks. Play responsibly.</p>
             </section>
         `

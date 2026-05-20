@@ -1,0 +1,296 @@
+/* =====================================================
+   HALVE IT MODE - SIMPLE CONTRACT INPUT UI
+   ===================================================== */
+
+.halve-it-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.halve-it-main-card,
+.halve-it-mini-scoreboard,
+.halve-it-finished-panel {
+    border-radius: 22px;
+    border: 1px solid rgba(126, 255, 167, 0.18);
+    background:
+        radial-gradient(circle at top left, rgba(126, 255, 167, 0.12), transparent 42%),
+        rgba(8, 16, 24, 0.96);
+    box-shadow: 0 0 20px rgba(126, 255, 167, 0.06);
+}
+
+.halve-it-main-card {
+    padding: 1rem;
+}
+
+.halve-it-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.halve-it-mode-label {
+    display: inline-flex;
+    width: fit-content;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(126, 255, 167, 0.26);
+    background: rgba(126, 255, 167, 0.12);
+    color: var(--accent);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.halve-it-card-top h2 {
+    margin: 0.65rem 0 0;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--text-main);
+}
+
+.halve-it-round-pill {
+    min-width: 78px;
+    padding: 0.7rem 0.75rem;
+    border-radius: 16px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.065);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.halve-it-round-pill span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.halve-it-round-pill strong {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+.halve-it-total-score {
+    margin-top: 1.1rem;
+    padding: 1rem;
+    border-radius: 20px;
+    background:
+        linear-gradient(145deg, rgba(255, 153, 32, 0.96), rgba(226, 84, 40, 0.96));
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+.halve-it-total-score span {
+    display: block;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.halve-it-total-score strong {
+    display: block;
+    margin-top: 0.35rem;
+    color: white;
+    font-size: 4rem;
+    line-height: 0.9;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+}
+
+.halve-it-contract-box {
+    margin-top: 1rem;
+    padding: 0.9rem;
+    border-radius: 18px;
+    border: 1px solid rgba(126, 255, 167, 0.16);
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.halve-it-contract-box span {
+    display: block;
+    color: var(--accent);
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.halve-it-contract-box h3 {
+    margin: 0.45rem 0 0;
+    color: var(--text-main);
+    font-size: 1.55rem;
+    line-height: 1.1;
+}
+
+.halve-it-contract-box p {
+    margin: 0.55rem 0 0;
+    color: var(--text-main);
+    font-size: 0.86rem;
+    line-height: 1.35;
+}
+
+.halve-it-last-result {
+    margin-top: 0.8rem;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+.halve-it-score-form {
+    margin-top: 1rem;
+}
+
+.halve-it-score-form label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.halve-it-score-input-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.65rem;
+}
+
+.halve-it-score-input-row input {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(126, 255, 167, 0.16);
+    background: rgba(5, 14, 17, 0.95);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 1.25rem;
+    font-weight: 800;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.halve-it-score-input-row input:focus {
+    border-color: rgba(126, 255, 167, 0.55);
+    box-shadow: 0 0 0 3px rgba(126, 255, 167, 0.12);
+}
+
+.halve-it-score-input-row button {
+    min-height: 52px;
+    padding: 0 1.1rem;
+    border-radius: 16px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #0ca451;
+    background-color: #012b14;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.halve-it-score-help {
+    margin: 0.55rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    line-height: 1.35;
+}
+
+.halve-it-mini-scoreboard {
+    padding: 0.95rem;
+}
+
+.halve-it-mini-scoreboard h3 {
+    margin: 0 0 0.7rem;
+    font-size: 1rem;
+}
+
+.halve-it-score-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0.75rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.halve-it-score-row + .halve-it-score-row {
+    margin-top: 0.45rem;
+}
+
+.halve-it-score-row.active {
+    border-color: rgba(126, 255, 167, 0.42);
+    background: rgba(126, 255, 167, 0.10);
+}
+
+.halve-it-score-row span {
+    min-width: 0;
+    font-size: 0.88rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.halve-it-score-row strong {
+    color: var(--accent);
+    font-size: 1.05rem;
+}
+
+.halve-it-finished-panel {
+    padding: 1.2rem;
+    text-align: center;
+}
+
+.halve-it-final-scores {
+    margin: 1rem 0;
+    text-align: left;
+}
+
+@media (max-width: 520px) {
+    .halve-it-screen {
+        gap: 0.75rem;
+    }
+
+    .halve-it-main-card {
+        padding: 0.9rem;
+    }
+
+    .halve-it-card-top h2 {
+        font-size: 1.65rem;
+    }
+
+    .halve-it-total-score {
+        padding: 0.9rem;
+    }
+
+    .halve-it-total-score strong {
+        font-size: 3.4rem;
+    }
+
+    .halve-it-contract-box h3 {
+        font-size: 1.35rem;
+    }
+
+    .halve-it-score-input-row {
+        grid-template-columns: 1fr auto;
+        gap: 0.5rem;
+    }
+
+    .halve-it-score-input-row input {
+        min-height: 48px;
+        font-size: 1.1rem;
+    }
+
+    .halve-it-score-input-row button {
+        min-height: 48px;
+        padding: 0 0.9rem;
+    }
+}

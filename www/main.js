@@ -48,10 +48,24 @@ import {
     backToHomeButton
 } from "./ui.js";
 
+import {
+    createHalveItGame,
+    getCurrentHalveItRound,
+    getCurrentHalveItPlayer,
+    addHalveItDart,
+    finishHalveItTurn,
+    undoLastHalveItDart,
+    resetHalveItTurn,
+    submitHalveItScore
+} from "./halveIt/halveItEngine.js";
+
+import { renderHalveItMode } from "./halveIt/halveItUi.js";
+
 const game = new KillerGame();
 const chaosEngine = new ChaosEngine(game);
 const drinkEngine = new DrinkEngine();
 const checkoutEngine = new CheckoutEngine();
+let halveItGame = null;
 
 // Chaos modifiers registreren
 chaosEngine.register(new DoubleTrouble());
@@ -87,6 +101,7 @@ const classicModeBtn = document.getElementById("classicModeBtn");
 const chaosModeBtn = document.getElementById("chaosModeBtn");
 const drinkModeBtn = document.getElementById("drinkModeBtn");
 const checkoutModeBtn = document.getElementById("checkoutModeBtn");
+const halveItModeBtn = document.getElementById("halveItModeBtn");
 
 const setupError = document.getElementById("setupError");
 
@@ -128,6 +143,7 @@ function resetGameToClassicSetup() {
     game.chaosRevivedPlayerName = "";
     game.playersWhoPlayedThisRound = [];
     checkoutEngine.reset();
+    halveItGame = null;
 
     if (game.chaosEngine) {
         game.chaosEngine.activeModifier = null;
@@ -165,6 +181,7 @@ function resetGameCompletely() {
     game.chaosRevivedPlayerName = "";
     game.playersWhoPlayedThisRound = [];
     checkoutEngine.reset();
+    halveItGame = null;
 
     clearSetupError();
 
@@ -182,6 +199,7 @@ function addPlayerFromInput() {
         resetGameCompletely,
         showHomeScreen,
         startCheckoutGame,
+        startHalveItGame,
         checkoutEngine
     });
 }
@@ -219,15 +237,93 @@ function startCheckoutGame() {
         resetGameCompletely,
         showHomeScreen,
         startCheckoutGame,
+        startHalveItGame,
         checkoutEngine
     });
 }
 
+function startHalveItGame() {
+    clearSetupError();
+
+    if (game.players.length === 0) {
+        showSetupError("Add at least one player before starting Halve It.");
+        return;
+    }
+
+    halveItGame = createHalveItGame(game.players);
+
+    game.phase = "game";
+    game.isStarted = true;
+
+    showHalveItGame();
+}
+
+function showHalveItGame() {
+    if (!halveItGame) {
+        return;
+    }
+
+    renderHalveItMode(halveItGame, {
+        getCurrentHalveItRound,
+        getCurrentHalveItPlayer,
+
+        onDart: (dart) => {
+            halveItGame = addHalveItDart(halveItGame, dart);
+
+            if (halveItGame.dartsThisTurn.length >= 3) {
+                halveItGame = finishHalveItTurn(halveItGame);
+            }
+
+            showHalveItGame();
+        },
+
+        onFinishTurn: () => {
+            halveItGame = finishHalveItTurn(halveItGame);
+            showHalveItGame();
+        },
+
+        onUndo: () => {
+            halveItGame = undoLastHalveItDart(halveItGame);
+            showHalveItGame();
+        },
+
+        onResetTurn: () => {
+            halveItGame = resetHalveItTurn(halveItGame);
+            showHalveItGame();
+        },
+
+        onSubmitScore: (score) => {
+            halveItGame = submitHalveItScore(halveItGame, score);
+            showHalveItGame();
+        },
+
+        onBack: () => {
+            const isSure = confirm("Are you sure you want to stop the current Halve It match?");
+
+            if (!isSure) {
+                return;
+            }
+
+            halveItGame = null;
+            game.phase = "setup";
+            game.isStarted = false;
+
+            renderApp(game, {
+                resetGameCompletely,
+                showHomeScreen,
+                startCheckoutGame,
+                startHalveItGame,
+                checkoutEngine
+            });
+        }
+    });
+}
 // Settings initialiseren
 const settingsApi = initSettings(game, renderApp, {
     resetGameCompletely,
     showHomeScreen,
     startCheckoutGame,
+    startHalveItGame,
     checkoutEngine
 });
 
@@ -250,8 +346,14 @@ startGameButton.addEventListener("click", () => {
             resetGameCompletely,
             showHomeScreen,
             startCheckoutGame,
+            startHalveItGame,
             checkoutEngine
         });
+        return;
+    }
+
+    if (game.gameMode === "halveIt") {
+        startHalveItGame();
         return;
     }
 
@@ -268,6 +370,7 @@ startGameButton.addEventListener("click", () => {
         resetGameCompletely,
         showHomeScreen,
         startCheckoutGame,
+        startHalveItGame,
         checkoutEngine
     });
 });
@@ -281,6 +384,10 @@ playerNameInput.addEventListener("keydown", event => {
 undoButton.addEventListener("click", () => {
     if (game.gameMode === "checkout") {
         checkoutEngine.undo();
+    } else if (game.gameMode === "halveIt" && halveItGame) {
+        halveItGame = undoLastHalveItDart(halveItGame);
+        showHalveItGame();
+        return;
     } else {
         game.undo();
     }
@@ -289,6 +396,7 @@ undoButton.addEventListener("click", () => {
         resetGameCompletely,
         showHomeScreen,
         startCheckoutGame,
+        startHalveItGame,
         checkoutEngine
     });
 });
@@ -304,6 +412,7 @@ classicModeBtn.addEventListener("click", () => {
         resetGameCompletely,
         showHomeScreen,
         startCheckoutGame,
+        startHalveItGame,
         checkoutEngine
     });
 });
@@ -319,6 +428,7 @@ chaosModeBtn.addEventListener("click", () => {
         resetGameCompletely,
         showHomeScreen,
         startCheckoutGame,
+        startHalveItGame,
         checkoutEngine
     });
 });
@@ -333,9 +443,27 @@ checkoutModeBtn.addEventListener("click", () => {
         resetGameCompletely,
         showHomeScreen,
         startCheckoutGame,
+        startHalveItGame,
         checkoutEngine
     });
 });
+
+if (halveItModeBtn) {
+    halveItModeBtn.addEventListener("click", () => {
+        resetGameCompletely();
+        game.setGameMode("halveIt");
+        document.body.dataset.currentMode = "halveIt";
+        showClassicScreen();
+
+        renderApp(game, {
+            resetGameCompletely,
+            showHomeScreen,
+            startCheckoutGame,
+            startHalveItGame,
+            checkoutEngine
+        });
+    });
+}
 
 drinkModeBtn.addEventListener("click", () => {
     resetGameCompletely();
@@ -363,6 +491,7 @@ backToHomeButton.addEventListener("click", () => {
             resetGameCompletely,
             showHomeScreen,
             startCheckoutGame,
+            startHalveItGame,
             checkoutEngine
         });
 
@@ -382,6 +511,7 @@ backToHomeButton.addEventListener("click", () => {
                     resetGameCompletely,
                     showHomeScreen,
                     startCheckoutGame,
+                    startHalveItGame,
                     checkoutEngine
                 });
             }
@@ -436,6 +566,7 @@ backToHomeButton.addEventListener("click", () => {
         resetGameCompletely,
         showHomeScreen,
         startCheckoutGame,
+        startHalveItGame,
         checkoutEngine
     });
 });
@@ -455,5 +586,6 @@ renderApp(game, {
     resetGameCompletely,
     showHomeScreen,
     startCheckoutGame,
+    startHalveItGame,
     checkoutEngine
 });

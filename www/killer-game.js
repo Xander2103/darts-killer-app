@@ -53,8 +53,35 @@ export class KillerGame {
     }
 
     setGameMode(mode) {
-        if (mode === "classic" || mode === "chaos" || mode === "drink" || mode === "checkout") {
-            this.gameMode = mode;
+        const allowedModes = ["classic", "chaos", "checkout", "drink", "halveIt"];
+
+        if (!allowedModes.includes(mode)) {
+            this.gameMode = "classic";
+            return;
+        }
+
+        this.gameMode = mode;
+
+        if (mode === "chaos") {
+            this.settings.killerStaysForever = true;
+            this.settings.eliminateOnExactZeroOnly = false;
+            return;
+        }
+
+        if (mode === "classic") {
+            return;
+        }
+
+        if (mode === "checkout") {
+            return;
+        }
+
+        if (mode === "drink") {
+            return;
+        }
+
+        if (mode === "halveIt") {
+            return;
         }
     }
 

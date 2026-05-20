@@ -120,6 +120,7 @@ function playWinnerSound() {
 function renderApp(game, actions = {}) {
     renderSetupPanel(game);
     renderGamePanel(game);
+    renderSetupModeBadge(game);
     updateSetupInfo(game);
     updateSetupActionButton(game);
     renderSetupPlayers(game, actions);
@@ -953,6 +954,78 @@ function renderGameBoard(game, actions = {}) {
     } else {
         lastWinnerSoundName = null;
     }
+}
+
+function getModeDisplayInfo(game) {
+    switch (game.gameMode) {
+        case "classic":
+            return {
+                title: "Classic Killer",
+                description: "Standard Killer rules."
+            };
+
+        case "chaos":
+            return {
+                title: "Chaos Mode",
+                description: "Random modifiers and party chaos."
+            };
+
+        case "checkout":
+            return {
+                title: "121 Checkout",
+                description: "Checkout training. Reach exactly 0 within the dart limit."
+            };
+
+        case "halveIt":
+            return {
+                title: "Halve It",
+                description: "Number rounds with random challenges. Miss a round and your score is halved."
+            };
+
+        case "drink":
+            return {
+                title: "Drink Mode",
+                description: "Party mode with drink challenges and fun events."
+            };
+
+        default:
+            return {
+                title: "Classic Killer",
+                description: "Standard Killer rules."
+            };
+    }
+}
+
+function renderSetupModeBadge(game) {
+    const existingBadge = document.getElementById("setupModeBadge");
+
+    if (existingBadge) {
+        existingBadge.remove();
+    }
+
+    if (!setupPanel) {
+        return;
+    }
+
+    const titleRow = setupPanel.querySelector(".section-title-row");
+
+    if (!titleRow) {
+        return;
+    }
+
+    const modeInfo = getModeDisplayInfo(game);
+
+    const badge = document.createElement("div");
+    badge.id = "setupModeBadge";
+    badge.classList.add("setup-mode-badge");
+
+    badge.innerHTML = `
+        <span class="setup-mode-label">Current mode</span>
+        <strong>${modeInfo.title}</strong>
+        <p>${modeInfo.description}</p>
+    `;
+
+    titleRow.insertAdjacentElement("afterend", badge);
 }
 
 // =====================================================
