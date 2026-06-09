@@ -1,0 +1,649 @@
+/* www/css/duel.css */
+
+/* =====================================================
+   DUEL MODE — home screen card
+   ===================================================== */
+
+.mode-card-duel {
+    border-color: rgba(220, 38, 38, 0.32);
+    background:
+        radial-gradient(circle at top left, rgba(220, 38, 38, 0.18), transparent 44%),
+        linear-gradient(180deg, rgba(30, 10, 10, 0.98), rgba(14, 14, 20, 0.98));
+}
+
+.mode-badge-duel {
+    color: #fff0f0;
+    background: rgba(185, 28, 28, 0.85);
+    border: 1px solid rgba(220, 38, 38, 0.4);
+}
+
+/* =====================================================
+   DUEL MODE — shared structure
+   ===================================================== */
+
+.duel-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-bottom: 1rem;
+}
+
+.duel-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 14px;
+    padding: 0.8rem;
+}
+
+.duel-badge-row {
+    margin-bottom: 0.5rem;
+}
+
+.duel-mode-badge {
+    display: inline-block;
+    background: rgba(220, 38, 38, 0.18);
+    color: #f87171;
+    border: 1px solid rgba(220, 38, 38, 0.35);
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.18rem 0.55rem;
+}
+
+/* =====================================================
+   NUMBER SELECTION
+   ===================================================== */
+
+.duel-number-selection-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.duel-ns-progress {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.duel-ns-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.duel-ns-help {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.duel-number-input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 10px;
+    border: 1px solid var(--border-card);
+    background: var(--bg-card-alt, rgba(255,255,255,0.05));
+    color: var(--text-main);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.duel-number-error {
+    font-size: 0.78rem;
+    color: #f87171;
+    font-weight: 600;
+    padding: 0.35rem 0.6rem;
+    background: rgba(220, 38, 38, 0.1);
+    border-radius: 7px;
+    border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.duel-confirm-button {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    border: none;
+    background: #dc2626;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    min-height: 44px;
+}
+
+.duel-confirm-button:active {
+    opacity: 0.85;
+}
+
+.duel-ns-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+}
+
+.duel-ns-player {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.duel-ns-player.current {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--text-main);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.duel-ns-player strong {
+    font-weight: 700;
+}
+
+/* =====================================================
+   PLAYING — main card
+   ===================================================== */
+
+.duel-main-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.duel-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.duel-undo-button {
+    padding: 0.38rem 0.8rem;
+    min-height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 155, 34, 0.45);
+    background: rgba(255, 155, 34, 0.1);
+    color: var(--text-main);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.duel-undo-button:disabled {
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+/* HP section */
+
+.duel-hp-section {
+    display: flex;
+    align-items: stretch;
+    gap: 0.4rem;
+}
+
+.duel-player-hp-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.55rem 0.6rem;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    transition: border-color 0.15s;
+}
+
+.duel-player-hp-card.active {
+    border-color: rgba(220, 38, 38, 0.4);
+    background: rgba(220, 38, 38, 0.07);
+}
+
+.duel-player-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.duel-player-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.duel-player-number {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #f87171;
+    background: rgba(220, 38, 38, 0.15);
+    border-radius: 5px;
+    padding: 0.1rem 0.35rem;
+    white-space: nowrap;
+}
+
+.duel-hp-text {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.duel-hp-bar-wrap {
+    height: 6px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+}
+
+.duel-hp-bar {
+    height: 100%;
+    border-radius: 4px;
+    background: #2ed573;
+    transition: width 0.2s ease, background 0.2s ease;
+}
+
+.duel-hp-bar.mid {
+    background: #ffa502;
+}
+
+.duel-hp-bar.low {
+    background: #ff4757;
+}
+
+.duel-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: #f87171;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    padding: 0 0.1rem;
+}
+
+/* Heal target card */
+
+.duel-heal-card {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: 9px;
+    background: rgba(46, 213, 115, 0.1);
+    border: 1px solid rgba(46, 213, 115, 0.3);
+}
+
+.duel-heal-badge {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #2ed573;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.duel-heal-number {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #2ed573;
+    margin-left: auto;
+}
+
+.duel-heal-card small {
+    font-size: 0.68rem;
+    color: rgba(46, 213, 115, 0.8);
+    white-space: nowrap;
+}
+
+/* Turn card */
+
+.duel-turn-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0.6rem;
+    border-radius: 9px;
+    background: rgba(255,255,255,0.04);
+    font-size: 0.82rem;
+}
+
+.duel-turn-card span {
+    color: var(--text-muted);
+}
+
+.duel-turn-card strong {
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+/* Turn throws */
+
+.duel-turn-throws {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.duel-throw-chip {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.07);
+    color: var(--text-muted);
+}
+
+.duel-throw-chip.damage {
+    background: rgba(220, 38, 38, 0.2);
+    color: #f87171;
+}
+
+.duel-throw-chip.heal {
+    background: rgba(46, 213, 115, 0.2);
+    color: #2ed573;
+}
+
+/* =====================================================
+   CONTROLS
+   ===================================================== */
+
+.duel-multiplier-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+}
+
+.duel-multiplier-button {
+    padding: 0.5rem 0.25rem;
+    min-height: 40px;
+    border-radius: 9px;
+    border: 1px solid var(--border-card);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.duel-multiplier-button.active {
+    background: rgba(220, 38, 38, 0.2);
+    border-color: rgba(220, 38, 38, 0.5);
+    color: var(--text-main);
+}
+
+.duel-number-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.35rem;
+}
+
+.duel-number-grid button {
+    min-height: 42px;
+    border-radius: 9px;
+    border: 1px solid var(--border-card);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.duel-number-grid button.duel-attack-target {
+    background: rgba(220, 38, 38, 0.25);
+    border-color: rgba(220, 38, 38, 0.55);
+    color: #fca5a5;
+}
+
+.duel-number-grid button.duel-heal-target {
+    background: rgba(46, 213, 115, 0.22);
+    border-color: rgba(46, 213, 115, 0.5);
+    color: #6ee7b7;
+}
+
+.duel-action-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.4rem;
+}
+
+.duel-bull-button,
+.duel-miss-button {
+    min-height: 42px;
+    border-radius: 9px;
+    border: 1px solid var(--border-card);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.duel-miss-button {
+    background: rgba(255,255,255,0.04);
+    color: var(--text-muted);
+}
+
+/* =====================================================
+   FINISHED SCREEN
+   ===================================================== */
+
+.duel-finished-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    text-align: center;
+}
+
+.duel-winner-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.duel-winner-name {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #f87171;
+}
+
+.duel-finished-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+}
+
+.duel-finished-player-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.65rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.duel-finished-player-row.winner {
+    background: rgba(220, 38, 38, 0.12);
+    color: var(--text-main);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.duel-finished-player-row strong {
+    font-weight: 700;
+}
+
+.duel-finished-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.duel-start-button {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    border: none;
+    background: #dc2626;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    min-height: 44px;
+}
+
+.duel-start-button:active {
+    opacity: 0.85;
+}
+
+/* =====================================================
+   IMPROVEMENTS — active/inactive player cards
+   ===================================================== */
+
+.duel-player-hp-card.active {
+    border-color: rgba(220, 38, 38, 0.65);
+    background: rgba(220, 38, 38, 0.13);
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.22);
+}
+
+.duel-player-hp-card.inactive {
+    opacity: 0.45;
+}
+
+/* YOUR TURN badge */
+
+.duel-your-turn-badge {
+    display: inline-block;
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #fff;
+    background: #dc2626;
+    border-radius: 4px;
+    padding: 0.1rem 0.35rem;
+    white-space: nowrap;
+}
+
+/* Danger HP state */
+
+.duel-hp-text.danger {
+    color: #f87171;
+    font-weight: 800;
+}
+
+.duel-hp-bar.danger {
+    background: rgba(220, 38, 38, 0.5);
+}
+
+.duel-hp-bar-wrap.danger {
+    background: rgba(220, 38, 38, 0.2);
+}
+
+/* LAST CHANCE banner */
+
+@keyframes duel-danger-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+    50%       { box-shadow: 0 0 0 7px rgba(220, 38, 38, 0); }
+}
+
+.duel-last-chance-banner {
+    padding: 0.65rem 0.9rem;
+    border-radius: 10px;
+    background: rgba(220, 38, 38, 0.2);
+    border: 1px solid rgba(220, 38, 38, 0.55);
+    color: #fca5a5;
+    font-size: 0.84rem;
+    font-weight: 800;
+    text-align: center;
+    animation: duel-danger-pulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .duel-last-chance-banner {
+        animation: none;
+    }
+}
+
+/* Muted irrelevant numbers */
+
+.duel-number-grid button.duel-irrelevant {
+    opacity: 0.28;
+    color: var(--text-muted);
+}
+
+/* Bull buttons — healing green */
+
+.duel-bull-button.duel-bull-heal {
+    background: rgba(46, 213, 115, 0.15);
+    border-color: rgba(46, 213, 115, 0.4);
+    color: #6ee7b7;
+}
+
+/* Info button */
+
+.duel-info-button {
+    padding: 0.38rem 0.6rem;
+    min-height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(96, 165, 250, 0.45);
+    background: rgba(96, 165, 250, 0.1);
+    color: #93c5fd;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Title actions group (info + undo grouped right) */
+
+.duel-title-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* Info panel */
+
+.duel-info-panel {
+    display: none;
+    padding: 0.65rem 0.75rem;
+    border-radius: 9px;
+    background: rgba(96, 165, 250, 0.08);
+    border: 1px solid rgba(96, 165, 250, 0.22);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.duel-info-panel.visible {
+    display: block;
+}
+
+.duel-info-panel p {
+    margin: 0.2rem 0;
+}
+
+.duel-info-panel p strong {
+    color: var(--text-main);
+}
