@@ -137,6 +137,8 @@ function renderApp(game, actions = {}) {
     } else if (game.phase === "game") {
         if (game.gameMode === "checkout") {
             renderCheckoutMode(actions.checkoutEngine, actions);
+        } else if (game.gameMode === "duel") {
+            // rendering handled by showDuelGame() in main.js
         } else {
             renderGameBoard(game, actions);
         }
@@ -180,6 +182,22 @@ function updateSetupActionButton(game) {
         return;
     }
 
+    if (game.gameMode === "duel") {
+        startGameButton.innerHTML = `
+            <span class="action-icon">⚔</span>
+            Start Duel
+        `;
+        return;
+    }
+
+    if (game.gameMode === "transitArena") {
+        startGameButton.innerHTML = `
+            <span class="action-icon">▶</span>
+            Start Arena
+        `;
+        return;
+    }
+
     startGameButton.innerHTML = `
         <span class="action-icon">▶</span>
         Start Game
@@ -191,7 +209,10 @@ function updateUndoButton(game, actions = {}) {
         return;
     }
 
-    if (game.phase === "checkoutSetup") {
+    if (game.phase === "checkoutSetup" ||
+        (game.gameMode === "checkout" && game.phase === "game") ||
+        (game.gameMode === "duel" && game.phase === "game") ||
+        (game.gameMode === "transitArena" && game.phase === "game")) {
         undoButton.disabled = true;
         undoButton.classList.add("hidden");
         return;
@@ -230,6 +251,10 @@ function updateSetupInfo(game) {
         infoContent.textContent = "Base rules and chaos modifiers can be adjusted in the settings.";
     } else if (game.gameMode === "checkout") {
         infoContent.textContent = "Add one or more players. In 121 Checkout everyone works together on the same target.";
+    } else if (game.gameMode === "duel") {
+        infoContent.textContent = "Add exactly 2 players. Each player picks a target number. Attack by hitting your opponent's number — first to 0 HP loses.";
+    } else if (game.gameMode === "transitArena") {
+        infoContent.textContent = "Add 2 or more players. Multiplayer HP battle with board-segment power-ups.";
     } else {
         infoContent.textContent = "Base rules can be adjusted in the settings.";
     }
@@ -982,6 +1007,18 @@ function getModeDisplayInfo(game) {
                 description: "Number rounds with random challenges. Miss a round and your score is halved."
             };
 
+        case "duel":
+            return {
+                title: "Duel",
+                description: "1v1 HP battle. Hit your opponent's number to deal damage. Bull heals you."
+            };
+
+        case "transitArena":
+            return {
+                title: "Transit Arena",
+                description: "Multiplayer HP battle with board-segment power-ups."
+            };
+
         case "drink":
             return {
                 title: "Drink Mode",
@@ -1248,120 +1285,6 @@ function scrollCheckoutToTop() {
     }, 0);
 }
 
-function getCheckoutFinishOptions() {
-    const finishes = [];
-
-    for (let number = 1; number <= 20; number++) {
-        finishes.push({ score: number * 2, label: `D${number}` });
-    }
-
-    finishes.push({ score: 50, label: "Bull" });
-    return finishes;
-}
-
-function getCheckoutSetupOptions() {
-    const options = [];
-
-    for (let number = 1; number <= 20; number++) {
-        options.push({ score: number, label: `${number}` });
-    }
-
-    for (let number = 1; number <= 20; number++) {
-        options.push({ score: number * 3, label: `T${number}` });
-    }
-
-    for (let number = 1; number <= 20; number++) {
-        options.push({ score: number * 2, label: `D${number}` });
-    }
-
-    options.push({ score: 25, label: "25" });
-    options.push({ score: 50, label: "Bull" });
-    return options;
-}
-
-const commonTwoDartCheckoutRoutes = {
-    41: "9 + D16",
-    42: "10 + D16",
-    43: "3 + D20",
-    44: "4 + D20",
-    45: "13 + D16",
-    46: "6 + D20",
-    47: "7 + D20",
-    48: "16 + D16",
-    49: "17 + D16",
-    50: "18 + D16",
-    51: "19 + D16",
-    52: "20 + D16",
-    53: "13 + D20",
-    54: "14 + D20",
-    55: "15 + D20",
-    56: "16 + D20",
-    57: "17 + D20",
-    58: "18 + D20",
-    59: "19 + D20",
-    60: "20 + D20"
-};
-
-function getCheckoutRoute(remaining, dartsLeft = 3) {
-    const score = Number(remaining);
-
-    if (!Number.isFinite(score) || score <= 1) {
-        return "No checkout route";
-    }
-
-    if (score > 170) {
-        return "No checkout available above 170";
-    }
-
-    const finishes = getCheckoutFinishOptions();
-
-    if (dartsLeft >= 1) {
-        const oneDartFinish = finishes.find(item => item.score === score);
-
-        if (oneDartFinish) {
-            return oneDartFinish.label;
-        }
-    }
-
-    if (dartsLeft >= 2 && commonTwoDartCheckoutRoutes[score]) {
-        return commonTwoDartCheckoutRoutes[score];
-    }
-
-    const setupOptions = getCheckoutSetupOptions();
-
-    if (dartsLeft >= 2) {
-        for (const first of setupOptions) {
-            const finish = finishes.find(item => item.score === score - first.score);
-
-            if (finish) {
-                return `${first.label} + ${finish.label}`;
-            }
-        }
-    }
-
-    if (dartsLeft >= 3) {
-        const preferredFirstDarts = [
-            { score: 60, label: "T20" },
-            { score: 57, label: "T19" },
-            { score: 54, label: "T18" },
-            { score: 51, label: "T17" },
-            { score: 48, label: "T16" },
-            ...setupOptions
-        ];
-
-        for (const first of preferredFirstDarts) {
-            const twoDartRoute = getCheckoutRoute(score - first.score, 2);
-
-            if (twoDartRoute && !twoDartRoute.startsWith("No checkout")) {
-                return `${first.label} + ${twoDartRoute}`;
-            }
-        }
-    }
-
-    return "No clean checkout route";
-}
-
-
 function groupCheckoutThrowsByPlayer(throws = []) {
     const grouped = [];
 
@@ -1435,8 +1358,7 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
     gameBoard.innerHTML = "";
 
     if (undoButton) {
-        undoButton.classList.remove("hidden");
-        undoButton.disabled = checkoutEngine.history.length === 0 || checkoutEngine.status === "finished";
+        undoButton.classList.add("hidden");
     }
 
     const screen = document.createElement("section");
@@ -1456,10 +1378,15 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
         ? checkoutEngine.round
         : Math.min(checkoutEngine.round, checkoutEngine.settings.roundLimit);
 
+    const undoDisabled = checkoutEngine.history.length === 0 || checkoutEngine.status === "finished";
+
     topCard.innerHTML = `
         <div class="checkout-title-row">
             <span class="checkout-mode-badge">121 Checkout</span>
-            <span class="checkout-round-pill">Round ${currentRoundText} / ${roundLimitText}</span>
+            <div class="checkout-title-right">
+                <button type="button" class="checkout-undo-button"${undoDisabled ? " disabled" : ""}>↶ Undo last throw</button>
+                <span class="checkout-round-pill">Round ${currentRoundText} / ${roundLimitText}</span>
+            </div>
         </div>
 
         <div class="checkout-score-grid">
@@ -1483,6 +1410,12 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
             <small>${playerDartsLeft} dart${playerDartsLeft === 1 ? "" : "s"} left in this turn</small>
         </div>
     `;
+
+    topCard.querySelector(".checkout-undo-button").addEventListener("click", () => {
+        checkoutEngine.undo();
+        renderCheckoutMode(checkoutEngine, actions);
+        scrollCheckoutToTop();
+    });
 
     const shouldShowResult = checkoutEngine.lastResult &&
         (!checkoutEngine.lastResultCreatedAt || Date.now() - checkoutEngine.lastResultCreatedAt < 5000);
@@ -1549,13 +1482,20 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
         finishedBox.appendChild(actionWrap);
         screen.appendChild(finishedBox);
     } else {
+        const checkoutAdvice = checkoutEngine.getCurrentAdvice(Math.max(dartsLeft, 1));
         const checkoutRuleNote = document.createElement("div");
         checkoutRuleNote.classList.add("checkout-rule-note");
-        const checkoutRoute = getCheckoutRoute(checkoutEngine.remainingScore, Math.max(dartsLeft, 1));
-        checkoutRuleNote.innerHTML = `
-            <span>Checkout route</span>
-            <strong>${checkoutRoute}</strong>
-        `;
+        const adviceLabel = document.createElement("span");
+        adviceLabel.textContent = checkoutAdvice.title;
+        const adviceRoute = document.createElement("strong");
+        adviceRoute.textContent = checkoutAdvice.route;
+        checkoutRuleNote.appendChild(adviceLabel);
+        checkoutRuleNote.appendChild(adviceRoute);
+        if (checkoutAdvice.helper) {
+            const adviceHelper = document.createElement("small");
+            adviceHelper.textContent = checkoutAdvice.helper;
+            checkoutRuleNote.appendChild(adviceHelper);
+        }
         screen.appendChild(checkoutRuleNote);
 
         const multiplierRow = document.createElement("div");

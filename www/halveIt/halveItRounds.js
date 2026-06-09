@@ -62,18 +62,6 @@ export const HALVE_IT_MINIGAME_POOL = [
         targets: [66, 116, 121],
         description: "Score exactly 66, exactly 116 or 121+ with 3 darts. Your actual score counts."
     },
-    {
-        label: "Odd Numbers",
-        shortLabel: "Odd",
-        type: "oddNumbers",
-        description: "Only odd numbers count."
-    },
-    {
-        label: "Even Numbers",
-        shortLabel: "Even",
-        type: "evenNumbers",
-        description: "Only even numbers count."
-    }
 ];
 
 function shuffleArray(array) {

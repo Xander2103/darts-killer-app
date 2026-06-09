@@ -2083,13 +2083,13 @@ body.theme-clean .clickable-setting * {
 .checkout-screen {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.6rem;
 }
 
 .checkout-main-card,
 .checkout-history-panel,
 .checkout-finished-box {
-    padding: 1rem;
+    padding: 0.7rem;
     border: 1px solid var(--panel-border);
     border-radius: 20px;
     background:
@@ -2131,12 +2131,12 @@ body.theme-clean .clickable-setting * {
 .checkout-score-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.6rem;
-    margin-top: 1rem;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
 }
 
 .checkout-score-box {
-    padding: 0.8rem 0.55rem;
+    padding: 0.5rem 0.4rem;
     border-radius: 16px;
     text-align: center;
     background: rgba(0, 0, 0, 0.18);
@@ -2156,7 +2156,7 @@ body.theme-clean .clickable-setting * {
 
 .checkout-score-box strong {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.6rem;
+    font-size: 1.35rem;
 }
 
 .checkout-score-box-primary {
@@ -2167,8 +2167,8 @@ body.theme-clean .clickable-setting * {
 .checkout-player-card,
 .checkout-throws-panel,
 .checkout-result-box {
-    margin-top: 0.75rem;
-    padding: 0.85rem;
+    margin-top: 0.4rem;
+    padding: 0.55rem 0.7rem;
     border-radius: 16px;
     background: rgba(0, 0, 0, 0.16);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2201,7 +2201,7 @@ body.theme-clean .clickable-setting * {
 .checkout-multiplier-button,
 .checkout-action-row button,
 .checkout-number-grid button {
-    min-height: 46px;
+    min-height: 40px;
     border: 1px solid var(--panel-border);
     border-radius: 14px;
     color: var(--text-main);
@@ -2223,9 +2223,9 @@ body.theme-clean .clickable-setting * {
 }
 
 .checkout-number-grid button {
-    min-height: 50px;
+    min-height: 42px;
     font-family: 'Orbitron', sans-serif;
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .checkout-miss-button {
@@ -2471,7 +2471,7 @@ body.theme-clean .clickable-setting * {
 }
 
 .checkout-rule-note {
-    padding: 0.7rem 0.85rem;
+    padding: 0.45rem 0.7rem;
     border: 1px solid rgba(255, 155, 34, 0.22);
     border-radius: 14px;
     color: var(--text-main);
@@ -2562,6 +2562,49 @@ body.theme-clean .clickable-setting * {
 .checkout-rule-note strong {
     color: var(--text-main);
     font-size: 1rem;
+}
+
+.checkout-title-row {
+    align-items: flex-start;
+}
+
+.checkout-title-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+}
+
+@keyframes checkout-undo-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 155, 34, 0); }
+    50% { box-shadow: 0 0 0 4px rgba(255, 155, 34, 0.20); }
+}
+
+.checkout-undo-button {
+    padding: 0.42rem 0.95rem;
+    min-height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 155, 34, 0.5);
+    background: rgba(255, 155, 34, 0.12);
+    color: var(--text-main);
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.checkout-undo-button:not(:disabled) {
+    animation: checkout-undo-pulse 2.5s ease-in-out infinite;
+}
+
+.checkout-undo-button:disabled {
+    opacity: 0.28;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .checkout-undo-button {
+        animation: none !important;
+    }
 }
 
 /* =====================================================

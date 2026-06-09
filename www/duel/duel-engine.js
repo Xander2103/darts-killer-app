@@ -202,7 +202,7 @@ export class DuelEngine {
     }
 
     _randomHealInterval() {
-        return Math.floor(Math.random() * 4) + 3; // 3–6
+        return Math.floor(Math.random() * 4) + 2; // 2–5
     }
 
     _pickHealTarget() {

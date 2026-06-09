@@ -2,6 +2,8 @@
 // 121 Checkout Engine
 // =====================================================
 
+import { getCheckoutAdvice } from "./checkout-routes.js";
+
 export class CheckoutEngine {
     constructor() {
         this.defaultSettings = {
@@ -46,6 +48,8 @@ export class CheckoutEngine {
         this.lastResult = null;
         this.lastResultCreatedAt = 0;
         this.resultDismissTimer = null;
+        this.activeRouteParts = null;
+        this.activeRouteAdvice = null;
     }
 
     start(players = []) {
@@ -106,6 +110,7 @@ export class CheckoutEngine {
         this.dartsUsed++;
         this.currentPlayerTurnDarts++;
         this.remainingScore = newRemainingScore;
+        this.advanceOrClearRoute(label);
 
         if (newRemainingScore === 0) {
             if (this.settings.doubleOut && !isValidCheckoutFinish) {
@@ -133,6 +138,7 @@ export class CheckoutEngine {
     }
 
     handleBustedTurn(message) {
+        this.clearPlannedRoute();
         this.remainingScore = this.turnStartRemainingScore;
 
         const dartsToSkip = Math.max(
@@ -153,6 +159,7 @@ export class CheckoutEngine {
     }
 
     completeRound(success, customMessage = "") {
+        this.clearPlannedRoute();
         const completedTarget = this.currentTarget;
         const completedThrows = [...this.throws];
         const completedDarts = this.dartsUsed;
@@ -260,7 +267,9 @@ export class CheckoutEngine {
             roundHistory: JSON.parse(JSON.stringify(this.roundHistory)),
             status: this.status,
             lastResult: this.lastResult ? { ...this.lastResult } : null,
-            lastResultCreatedAt: this.lastResultCreatedAt
+            lastResultCreatedAt: this.lastResultCreatedAt,
+            activeRouteParts: this.activeRouteParts ? [...this.activeRouteParts] : null,
+            activeRouteAdvice: this.activeRouteAdvice ? { ...this.activeRouteAdvice } : null
         });
     }
 
@@ -284,5 +293,50 @@ export class CheckoutEngine {
         }
 
         return "S";
+    }
+
+    clearPlannedRoute() {
+        this.activeRouteParts = null;
+        this.activeRouteAdvice = null;
+    }
+
+    normalizeThrowLabel(label) {
+        if (label === "Miss") return null;
+        if (label === "Bull 50") return "Bull";
+        if (label === "Outer Bull 25") return "25";
+        if (label.startsWith("S")) return label.slice(1);
+        return label;
+    }
+
+    advanceOrClearRoute(label) {
+        if (!this.activeRouteParts || this.activeRouteParts.length === 0) {
+            return;
+        }
+        const normalized = this.normalizeThrowLabel(label);
+        if (normalized !== null && normalized === this.activeRouteParts[0]) {
+            this.activeRouteParts = this.activeRouteParts.slice(1);
+            if (this.activeRouteParts.length === 0) {
+                this.clearPlannedRoute();
+            }
+        } else {
+            this.clearPlannedRoute();
+        }
+    }
+
+    getCurrentAdvice(dartsLeft) {
+        if (!this.activeRouteParts || this.activeRouteParts.length === 0) {
+            const advice = getCheckoutAdvice(this.remainingScore, dartsLeft);
+            if (advice.type === "checkout") {
+                this.activeRouteParts = advice.route.split(" + ");
+                this.activeRouteAdvice = advice;
+            }
+            return advice;
+        }
+        return {
+            type: this.activeRouteAdvice.type,
+            title: this.activeRouteAdvice.title,
+            route: this.activeRouteParts.join(" + "),
+            helper: this.activeRouteParts.length > 1 ? this.activeRouteAdvice.helper : ""
+        };
     }
 }

@@ -53,7 +53,7 @@ export class KillerGame {
     }
 
     setGameMode(mode) {
-        const allowedModes = ["classic", "chaos", "checkout", "drink", "halveIt"];
+        const allowedModes = ["classic", "chaos", "checkout", "drink", "halveIt", "duel", "transitArena"];
 
         if (!allowedModes.includes(mode)) {
             this.gameMode = "classic";

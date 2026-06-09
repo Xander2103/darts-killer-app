@@ -1,0 +1,725 @@
+/* www/css/transit-arena.css */
+
+/* =====================================================
+   TRANSIT ARENA — home screen card
+   ===================================================== */
+
+.mode-card-transit-arena {
+    border-color: rgba(251, 146, 60, 0.32);
+    background:
+        radial-gradient(circle at top left, rgba(251, 146, 60, 0.15), transparent 44%),
+        linear-gradient(180deg, rgba(20, 12, 4, 0.98), rgba(14, 14, 20, 0.98));
+}
+
+.mode-badge-transit-arena {
+    color: #fff7ed;
+    background: rgba(194, 65, 12, 0.85);
+    border: 1px solid rgba(251, 146, 60, 0.4);
+}
+
+/* =====================================================
+   TRANSIT ARENA — shared structure
+   ===================================================== */
+
+.ta-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-bottom: 1.5rem;
+}
+
+.ta-card {
+    background: var(--bg-card, rgba(255,255,255,0.04));
+    border: 1px solid var(--border-card, rgba(255,255,255,0.1));
+    border-radius: 14px;
+    padding: 0.8rem;
+}
+
+/* =====================================================
+   TOP CARD
+   ===================================================== */
+
+.ta-top-card {
+    padding: 0.65rem 0.8rem;
+}
+
+.ta-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.ta-title-row-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ta-mode-badge {
+    display: inline-block;
+    background: rgba(194, 65, 12, 0.2);
+    color: #fb923c;
+    border: 1px solid rgba(251, 146, 60, 0.35);
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.18rem 0.55rem;
+}
+
+.ta-round-badge {
+    font-size: 0.72rem;
+    color: var(--text-muted, #8a9ba8);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ta-undo-button {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted, #8a9ba8);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 7px;
+    padding: 0.28rem 0.6rem;
+    cursor: pointer;
+    min-height: 32px;
+}
+
+.ta-undo-button:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.ta-undo-button:not(:disabled):active {
+    opacity: 0.75;
+}
+
+/* =====================================================
+   PLAYERS STRIP
+   ===================================================== */
+
+.ta-players-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.ta-player-card {
+    flex: 1 1 120px;
+    min-width: 110px;
+    background: var(--bg-card, rgba(255,255,255,0.04));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 0.55rem 0.65rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    transition: border-color 0.15s;
+}
+
+.ta-player-card.active {
+    border-color: #fb923c;
+    background: rgba(251, 146, 60, 0.08);
+}
+
+.ta-player-card.targeted {
+    border-color: rgba(248, 113, 113, 0.6);
+    background: rgba(220, 38, 38, 0.07);
+}
+
+.ta-player-card.dead {
+    opacity: 0.45;
+    border-color: rgba(255,255,255,0.06);
+}
+
+.ta-player-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.3rem;
+}
+
+.ta-player-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-main, #f5f7fa);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ta-dead-badge {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    background: rgba(148,163,184,0.15);
+    border-radius: 4px;
+    padding: 0.1rem 0.3rem;
+    flex-shrink: 0;
+}
+
+/* HP bar */
+.ta-hp-bar-wrap {
+    width: 100%;
+    height: 5px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.ta-hp-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.2s ease;
+}
+
+.ta-hp-bar.high { background: #4ade80; }
+.ta-hp-bar.mid  { background: #facc15; }
+.ta-hp-bar.low  { background: #f87171; }
+
+.ta-hp-text {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted, #8a9ba8);
+    letter-spacing: 0.02em;
+}
+
+/* Shield pips */
+.ta-shield-pips {
+    display: flex;
+    gap: 3px;
+    margin-top: 1px;
+}
+
+.ta-shield-pip {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.ta-shield-pip.filled {
+    background: #60a5fa;
+    border-color: #93c5fd;
+}
+
+/* Power-up icon row */
+.ta-powerup-icons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 2px;
+}
+
+.ta-powerup-icon {
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+/* =====================================================
+   TARGET AREA
+   ===================================================== */
+
+.ta-target-area {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0.7rem;
+    background: var(--bg-card, rgba(255,255,255,0.04));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+.ta-target-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted, #8a9ba8);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+
+.ta-target-auto {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #f87171;
+}
+
+.ta-target-btn {
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0.32rem 0.7rem;
+    border-radius: 7px;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    background: rgba(248, 113, 113, 0.07);
+    color: var(--text-main, #f5f7fa);
+    cursor: pointer;
+    min-height: 34px;
+}
+
+.ta-target-btn.active {
+    border-color: #f87171;
+    background: rgba(248, 113, 113, 0.2);
+    color: #fca5a5;
+}
+
+.ta-target-btn:active {
+    opacity: 0.75;
+}
+
+/* =====================================================
+   ACTIVE POWER-UP CARD
+   ===================================================== */
+
+.ta-powerup-card {
+    border-color: rgba(251, 146, 60, 0.4);
+    background: rgba(194, 65, 12, 0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ta-powerup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.ta-powerup-name {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #fb923c;
+}
+
+.ta-powerup-segment-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted, #8a9ba8);
+    background: rgba(255,255,255,0.06);
+    border-radius: 5px;
+    padding: 0.18rem 0.5rem;
+}
+
+.ta-powerup-segment-label.unlocked {
+    color: #fb923c;
+    background: rgba(251, 146, 60, 0.15);
+    border: 1px solid rgba(251, 146, 60, 0.4);
+}
+
+.ta-powerup-effect {
+    font-size: 0.76rem;
+    color: var(--text-muted, #8a9ba8);
+    margin: 0;
+    line-height: 1.45;
+}
+
+.ta-powerup-timer {
+    font-size: 0.7rem;
+    color: var(--text-muted, #8a9ba8);
+    font-weight: 600;
+}
+
+/* ─── Coin token ─── */
+
+.ta-coin-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.2rem;
+}
+
+.ta-coin {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid rgba(251, 146, 60, 0.6);
+    background: radial-gradient(circle at 38% 38%, rgba(60, 30, 5, 0.95), rgba(20, 10, 0, 0.98));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.5rem;
+    line-height: 1;
+    box-shadow: 0 0 6px 1px rgba(251, 146, 60, 0.25);
+    transition: box-shadow 0.2s;
+    perspective: 200px;
+}
+
+.ta-coin:active {
+    opacity: 0.8;
+}
+
+.ta-coin--spinning {
+    animation: ta-coin-spin 4s linear infinite;
+}
+
+.ta-coin--unlocked {
+    border-color: #fb923c;
+    box-shadow:
+        0 0 12px 4px rgba(251, 146, 60, 0.55),
+        0 0 24px 6px rgba(251, 146, 60, 0.25);
+    animation: ta-coin-pulse 0.9s ease-in-out infinite;
+}
+
+.ta-coin-hint {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted, #8a9ba8);
+    text-align: center;
+    letter-spacing: 0.03em;
+}
+
+.ta-coin-hint.unlocked {
+    color: #fb923c;
+    font-size: 0.78rem;
+}
+
+/* ─── Coin animations ─── */
+
+@keyframes ta-coin-spin {
+    0%   { transform: rotateY(0deg); }
+    100% { transform: rotateY(360deg); }
+}
+
+@keyframes ta-coin-pulse {
+    0%, 100% {
+        box-shadow:
+            0 0 10px 3px rgba(251, 146, 60, 0.55),
+            0 0 22px 5px rgba(251, 146, 60, 0.25);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow:
+            0 0 20px 7px rgba(251, 146, 60, 0.85),
+            0 0 36px 10px rgba(251, 146, 60, 0.4);
+        transform: scale(1.08);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ta-coin--spinning {
+        animation: none;
+    }
+
+    .ta-coin--unlocked {
+        animation: none;
+        box-shadow:
+            0 0 14px 5px rgba(251, 146, 60, 0.7),
+            0 0 28px 8px rgba(251, 146, 60, 0.35);
+        transform: none;
+    }
+}
+
+/* =====================================================
+   TURN CARD
+   ===================================================== */
+
+.ta-turn-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.55rem 0.8rem;
+}
+
+.ta-turn-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-main, #f5f7fa);
+}
+
+.ta-darts-left {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #fb923c;
+}
+
+/* =====================================================
+   THROWS LOG
+   ===================================================== */
+
+.ta-turn-throws {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.35rem 0.2rem;
+}
+
+.ta-throw-chip {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.22rem 0.55rem;
+    border-radius: 6px;
+    letter-spacing: 0.03em;
+}
+
+.ta-throw-chip.damage {
+    background: rgba(220, 38, 38, 0.18);
+    color: #fca5a5;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.ta-throw-chip.blocked {
+    background: rgba(96, 165, 250, 0.15);
+    color: #93c5fd;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+.ta-throw-chip.none {
+    background: rgba(255,255,255,0.06);
+    color: var(--text-muted, #8a9ba8);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* =====================================================
+   RESULT MESSAGE
+   ===================================================== */
+
+.ta-result-msg {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted, #8a9ba8);
+    padding: 0.4rem 0.7rem;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+    line-height: 1.45;
+}
+
+.ta-result-msg.claimed {
+    color: #fb923c;
+    background: rgba(194, 65, 12, 0.1);
+    border-color: rgba(251, 146, 60, 0.3);
+}
+
+.ta-result-msg.hint {
+    color: #60a5fa;
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(96, 165, 250, 0.2);
+}
+
+/* =====================================================
+   MULTIPLIER ROW
+   ===================================================== */
+
+.ta-multiplier-row {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.ta-multiplier-btn {
+    flex: 1;
+    padding: 0.6rem 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+    border-radius: 9px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    color: var(--text-main, #f5f7fa);
+    cursor: pointer;
+    min-height: 42px;
+    transition: background 0.1s, border-color 0.1s;
+}
+
+.ta-multiplier-btn.active {
+    background: rgba(251, 146, 60, 0.18);
+    border-color: rgba(251, 146, 60, 0.55);
+    color: #fb923c;
+}
+
+.ta-multiplier-btn:active {
+    opacity: 0.8;
+}
+
+/* =====================================================
+   NUMBER GRID
+   ===================================================== */
+
+.ta-number-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.35rem;
+}
+
+.ta-number-btn {
+    padding: 0.6rem 0.3rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 9px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: var(--text-main, #f5f7fa);
+    cursor: pointer;
+    min-height: 42px;
+    transition: background 0.1s;
+}
+
+.ta-number-btn:active {
+    opacity: 0.75;
+}
+
+.ta-number-btn.power-up-target {
+    border-color: rgba(251, 146, 60, 0.7);
+    background: rgba(251, 146, 60, 0.14);
+    color: #fb923c;
+    font-weight: 900;
+}
+
+/* =====================================================
+   ACTION ROW (bulls + miss)
+   ===================================================== */
+
+.ta-action-row {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.ta-bull-btn {
+    flex: 1;
+    padding: 0.6rem 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    border-radius: 9px;
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    background: rgba(251, 191, 36, 0.07);
+    color: #fcd34d;
+    cursor: pointer;
+    min-height: 42px;
+}
+
+.ta-bull-btn:active {
+    opacity: 0.75;
+}
+
+.ta-miss-btn {
+    flex: 1;
+    padding: 0.6rem 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    border-radius: 9px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(148, 163, 184, 0.06);
+    color: #94a3b8;
+    cursor: pointer;
+    min-height: 42px;
+}
+
+.ta-miss-btn:active {
+    opacity: 0.75;
+}
+
+/* =====================================================
+   FINISHED SCREEN
+   ===================================================== */
+
+.ta-badge-row {
+    margin-bottom: 0.5rem;
+}
+
+.ta-finished-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.2rem 1rem;
+    text-align: center;
+}
+
+.ta-winner-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #fb923c;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.ta-winner-name {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--text-main, #f5f7fa);
+}
+
+.ta-finished-summary {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+}
+
+.ta-finished-player-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0.7rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    font-size: 0.84rem;
+    color: var(--text-muted, #8a9ba8);
+}
+
+.ta-finished-player-row.winner {
+    background: rgba(251, 146, 60, 0.12);
+    color: var(--text-main, #f5f7fa);
+    border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+.ta-finished-player-row.eliminated {
+    opacity: 0.5;
+}
+
+.ta-finished-player-row strong {
+    font-weight: 700;
+}
+
+.ta-finished-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 0.4rem;
+}
+
+.ta-rematch-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.92rem;
+    font-weight: 800;
+    border-radius: 10px;
+    border: none;
+    background: #ea580c;
+    color: #fff;
+    cursor: pointer;
+    min-height: 46px;
+}
+
+.ta-rematch-btn:active {
+    opacity: 0.85;
+}
+
+.ta-menu-btn {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    color: var(--text-muted, #8a9ba8);
+    cursor: pointer;
+    min-height: 42px;
+}
+
+.ta-menu-btn:active {
+    opacity: 0.75;
+}

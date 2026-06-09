@@ -95,7 +95,7 @@ const infoContentByMode = {
             </section>
             <section class="info-section">
                 <h3>Heal Target</h3>
-                <p>Every 3–6 rounds a random number becomes a green Heal Target. Hit it to recover HP (S=+1, D=+2, T=+3). It disappears after 2 turns.</p>
+                <p>Every 2–5 rounds a random number becomes a green Heal Target. Hit it to recover HP (S=+1, D=+2, T=+3). It disappears after 2 turns.</p>
             </section>
             <section class="info-section">
                 <h3>Last Chance</h3>
@@ -104,6 +104,35 @@ const infoContentByMode = {
             <section class="info-section">
                 <h3>Next Turn</h3>
                 <p>Tap <strong>Next Turn</strong> to end your turn early without throwing all 3 darts.</p>
+            </section>
+        `
+    },
+    transitArena: {
+        title: "Transit Arena",
+        body: `
+            <section class="info-section">
+                <h3>HP Battle Royale</h3>
+                <p>All players start with <strong>10 HP</strong>. Attack opponents to drain their HP. Last player alive wins.</p>
+            </section>
+            <section class="info-section">
+                <h3>Attack</h3>
+                <p>Hit a number to deal damage to your selected target. Single = −1 HP · Double = −2 HP · Triple = −3 HP. Bull 25 = −2 HP · Bull 50 = −5 HP.</p>
+            </section>
+            <section class="info-section">
+                <h3>Power-Ups</h3>
+                <p>A glowing segment appears periodically on the board. Hit it to unlock the power-up — then tap the coin icon to claim it.</p>
+            </section>
+            <section class="info-section">
+                <h3>Shields</h3>
+                <p>Some power-ups grant shield points that absorb incoming damage before HP is lost.</p>
+            </section>
+            <section class="info-section">
+                <h3>Target &amp; Multiplier</h3>
+                <p>Tap a player card to change your target. Use the <strong>S / D / T</strong> row to set your multiplier before throwing.</p>
+            </section>
+            <section class="info-section">
+                <h3>Undo</h3>
+                <p>Tap <strong>↶ Undo</strong> to reverse your last throw, including power-up claims.</p>
             </section>
         `
     },

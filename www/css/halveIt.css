@@ -249,6 +249,34 @@
     text-align: center;
 }
 
+.halve-it-undo-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.halve-it-undo-score-btn {
+    min-height: 34px;
+    padding: 0.35rem 0.85rem;
+    border-radius: 10px;
+    border: 1px solid rgba(251, 146, 60, 0.4);
+    background: rgba(251, 146, 60, 0.1);
+    color: #fb923c;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.halve-it-undo-score-btn:active {
+    background: rgba(251, 146, 60, 0.22);
+}
+
+.halve-it-finished-panel .halve-it-undo-score-btn {
+    margin: 0.75rem auto 0.5rem;
+    display: block;
+}
+
 .halve-it-final-scores {
     margin: 1rem 0;
     text-align: left;

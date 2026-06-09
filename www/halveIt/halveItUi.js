@@ -41,6 +41,20 @@ export function renderHalveItMode(halveItGame, actions = {}) {
         return;
     }
 
+    if (actions.canUndo) {
+        const undoRow = document.createElement("div");
+        undoRow.classList.add("halve-it-undo-row");
+        const undoBtn = document.createElement("button");
+        undoBtn.type = "button";
+        undoBtn.classList.add("halve-it-undo-score-btn");
+        undoBtn.textContent = "↶ Undo";
+        undoBtn.addEventListener("click", () => {
+            if (typeof actions.onUndoScore === "function") actions.onUndoScore();
+        });
+        undoRow.appendChild(undoBtn);
+        screen.appendChild(undoRow);
+    }
+
     screen.appendChild(createPlayerContractCard(halveItGame, round, player, actions));
     screen.appendChild(createMiniScoreboard(halveItGame));
 
@@ -199,6 +213,18 @@ function createFinishedPanel(halveItGame, actions) {
     });
 
     panel.appendChild(finalScores);
+
+    if (actions.canUndo) {
+        const undoBtn = document.createElement("button");
+        undoBtn.type = "button";
+        undoBtn.classList.add("halve-it-undo-score-btn");
+        undoBtn.textContent = "↶ Undo last round";
+        undoBtn.addEventListener("click", () => {
+            if (typeof actions.onUndoScore === "function") actions.onUndoScore();
+        });
+        panel.appendChild(undoBtn);
+    }
+
     panel.appendChild(menuButton);
 
     return panel;

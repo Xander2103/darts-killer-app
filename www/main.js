@@ -78,6 +78,7 @@ const checkoutEngine = new CheckoutEngine();
 const duelEngine = new DuelEngine();
 const transitArenaEngine = new TransitArenaEngine();
 let halveItGame = null;
+let halveItHistory = [];
 
 // Chaos modifiers registreren
 chaosEngine.register(new DoubleTrouble());
@@ -160,6 +161,7 @@ function resetGameToClassicSetup() {
     duelEngine.reset();
     transitArenaEngine.reset();
     halveItGame = null;
+    halveItHistory = [];
 
     if (game.chaosEngine) {
         game.chaosEngine.activeModifier = null;
@@ -200,6 +202,7 @@ function resetGameCompletely() {
     duelEngine.reset();
     transitArenaEngine.reset();
     halveItGame = null;
+    halveItHistory = [];
 
     clearSetupError();
 
@@ -269,6 +272,7 @@ function startHalveItGame() {
     }
 
     halveItGame = createHalveItGame(game.players);
+    halveItHistory = [];
 
     game.phase = "game";
     game.isStarted = true;
@@ -310,8 +314,17 @@ function showHalveItGame() {
             showHalveItGame();
         },
 
+        canUndo: halveItHistory.length > 0,
+
         onSubmitScore: (score) => {
+            halveItHistory.push(halveItGame);
             halveItGame = submitHalveItScore(halveItGame, score);
+            showHalveItGame();
+        },
+
+        onUndoScore: () => {
+            if (halveItHistory.length === 0) return;
+            halveItGame = halveItHistory.pop();
             showHalveItGame();
         },
 
@@ -323,6 +336,7 @@ function showHalveItGame() {
             }
 
             halveItGame = null;
+            halveItHistory = [];
             game.phase = "setup";
             game.isStarted = false;
 
@@ -484,25 +498,25 @@ function showTransitArenaGame() {
         },
 
         onThrowSegment: (segment) => {
-            const result = transitArenaEngine.throwSegment(segment);
+            const result = transitArenaEngine.throwSegment(segment) || {};
             playTransitArenaResultSounds(result);
             showTransitArenaGame();
         },
 
         onOuterBull: () => {
-            const result = transitArenaEngine.throwBull("outer");
+            const result = transitArenaEngine.throwBull("outer") || {};
             playTransitArenaResultSounds(result);
             showTransitArenaGame();
         },
 
         onBull: () => {
-            const result = transitArenaEngine.throwBull("bull");
+            const result = transitArenaEngine.throwBull("bull") || {};
             playTransitArenaResultSounds(result);
             showTransitArenaGame();
         },
 
         onMiss: () => {
-            const result = transitArenaEngine.miss();
+            const result = transitArenaEngine.miss() || {};
             playTransitArenaResultSounds(result);
             showTransitArenaGame();
         },
