@@ -126,26 +126,22 @@ function _renderPlaying(duelEngine, actions) {
     const screen = document.createElement("section");
     screen.classList.add("duel-screen");
 
-    // Main info card
+    const currentPlayer = duelEngine.players[duelEngine.currentPlayerIndex];
+    const opponentIndex = 1 - duelEngine.currentPlayerIndex;
+    const opponent = duelEngine.players[opponentIndex];
+    const dartsLeft = duelEngine.settings.dartsPerTurn - duelEngine.dartsThisTurn;
+
+    // ── TOP CARD ─────────────────────────────────────────────
     const topCard = document.createElement("article");
     topCard.classList.add("duel-card", "duel-main-card");
 
-    // Title row: [DUEL badge]  [ℹ info] [↶ undo]
+    // Title row: [DUEL badge]  [↶ Undo]
     const titleRow = document.createElement("div");
     titleRow.classList.add("duel-title-row");
 
     const modeBadge = document.createElement("span");
     modeBadge.classList.add("duel-mode-badge");
     modeBadge.textContent = "Duel";
-
-    const titleActions = document.createElement("div");
-    titleActions.classList.add("duel-title-actions");
-
-    const infoBtn = document.createElement("button");
-    infoBtn.type = "button";
-    infoBtn.classList.add("duel-info-button");
-    infoBtn.textContent = "ℹ";
-    infoBtn.setAttribute("aria-label", "How to play");
 
     const undoBtn = document.createElement("button");
     undoBtn.type = "button";
@@ -156,34 +152,9 @@ function _renderPlaying(duelEngine, actions) {
         if (typeof actions.onUndo === "function") actions.onUndo();
     });
 
-    // Info panel (hidden by default, toggled by infoBtn)
-    const infoPanel = document.createElement("div");
-    infoPanel.classList.add("duel-info-panel");
-    infoBtn.addEventListener("click", () => {
-        infoPanel.classList.toggle("visible");
-    });
-    const infoPanelItems = [
-        ["Attack", "Hit the red number to deal damage (S=1, D=2, T=3 HP)."],
-        ["Heal", "Outer Bull 25 = +1 HP · Bull 50 = +2 HP. Always heal you."],
-        ["Heal Target", "Every 3–6 rounds a green number appears. Hit it to recover HP (S=+1, D=+2, T=+3 HP)."],
-        ["Last Chance", "If your HP drops to 0 or below, you get one full turn to heal back above 0. Fail → eliminated."],
-        ["Undo", "Tap ↶ Undo to reverse your last dart."],
-    ];
-    infoPanelItems.forEach(([title, desc]) => {
-        const p = document.createElement("p");
-        const strong = document.createElement("strong");
-        strong.textContent = title + ": ";
-        p.appendChild(strong);
-        p.appendChild(document.createTextNode(desc));
-        infoPanel.appendChild(p);
-    });
-
-    titleActions.appendChild(infoBtn);
-    titleActions.appendChild(undoBtn);
     titleRow.appendChild(modeBadge);
-    titleRow.appendChild(titleActions);
+    titleRow.appendChild(undoBtn);
     topCard.appendChild(titleRow);
-    topCard.appendChild(infoPanel);
 
     // HP section — both players side by side with VS between
     const hpSection = document.createElement("div");
@@ -252,7 +223,7 @@ function _renderPlaying(duelEngine, actions) {
 
     topCard.appendChild(hpSection);
 
-    // Heal target card
+    // Heal target banner
     if (duelEngine.activeHealTarget !== null) {
         const healCard = document.createElement("div");
         healCard.classList.add("duel-heal-card");
@@ -270,9 +241,7 @@ function _renderPlaying(duelEngine, actions) {
         topCard.appendChild(healCard);
     }
 
-    // Current player turn info
-    const currentPlayer = duelEngine.players[duelEngine.currentPlayerIndex];
-    const dartsLeft = duelEngine.settings.dartsPerTurn - duelEngine.dartsThisTurn;
+    // Turn strip
     const turnCard = document.createElement("div");
     turnCard.classList.add("duel-turn-card");
     const turnName = document.createElement("span");
@@ -300,7 +269,7 @@ function _renderPlaying(duelEngine, actions) {
 
     screen.appendChild(topCard);
 
-    // LAST CHANCE banner — shown when current player's HP is <= 0
+    // LAST CHANCE banner
     if (currentPlayer.hp <= 0) {
         const banner = document.createElement("div");
         banner.classList.add("duel-last-chance-banner");
@@ -308,80 +277,153 @@ function _renderPlaying(duelEngine, actions) {
         screen.appendChild(banner);
     }
 
-    // Multiplier row
-    const multiplierRow = document.createElement("div");
-    multiplierRow.classList.add("duel-multiplier-row");
-    [{ value: 1, label: "Single" }, { value: 2, label: "Double" }, { value: 3, label: "Triple" }].forEach(item => {
+    // ── ATTACK SECTION ───────────────────────────────────────
+    const attackSection = document.createElement("div");
+    attackSection.classList.add("duel-action-section");
+
+    const attackHeader = document.createElement("div");
+    attackHeader.classList.add("duel-section-header", "duel-section-header-attack");
+    attackHeader.textContent = `Attack ${opponent.name}  ·  #${opponent.number}`;
+    attackSection.appendChild(attackHeader);
+
+    const attackGrid = document.createElement("div");
+    attackGrid.classList.add("duel-action-grid", "duel-action-grid-3");
+
+    [
+        { m: 1, label: `S${opponent.number}`, desc: "−1 HP" },
+        { m: 2, label: `D${opponent.number}`, desc: "−2 HP" },
+        { m: 3, label: `T${opponent.number}`, desc: "−3 HP" },
+    ].forEach(({ m, label, desc }) => {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.classList.add("duel-multiplier-button");
-        if (duelEngine.selectedMultiplier === item.value) btn.classList.add("active");
-        btn.textContent = item.label;
-        btn.addEventListener("click", () => {
-            if (typeof actions.onSelectMultiplier === "function") actions.onSelectMultiplier(item.value);
-        });
-        multiplierRow.appendChild(btn);
-    });
-
-    // Number grid
-    const numberGrid = document.createElement("div");
-    numberGrid.classList.add("duel-number-grid");
-    const opponentNumber = duelEngine.players[1 - duelEngine.currentPlayerIndex].number;
-
-    for (let n = 1; n <= 20; n++) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.textContent = n;
-        if (n === opponentNumber) {
-            btn.classList.add("duel-attack-target");
-        } else if (n === duelEngine.activeHealTarget) {
-            btn.classList.add("duel-heal-target");
-        } else {
-            btn.classList.add("duel-irrelevant");
-        }
+        btn.classList.add("duel-action-btn", "duel-action-attack");
+        const labelSpan = document.createElement("span");
+        labelSpan.classList.add("duel-action-label");
+        labelSpan.textContent = label;
+        const descSpan = document.createElement("span");
+        descSpan.classList.add("duel-action-desc");
+        descSpan.textContent = desc;
+        btn.appendChild(labelSpan);
+        btn.appendChild(descSpan);
         btn.addEventListener("click", () => {
             if (typeof actions.onThrowNumber === "function") {
-                actions.onThrowNumber(n, duelEngine.selectedMultiplier);
+                actions.onThrowNumber(opponent.number, m);
             }
         });
-        numberGrid.appendChild(btn);
-    }
+        attackGrid.appendChild(btn);
+    });
 
-    // Bull + Miss row
-    const actionRow = document.createElement("div");
-    actionRow.classList.add("duel-action-row");
+    attackSection.appendChild(attackGrid);
+    screen.appendChild(attackSection);
+
+    // ── HEAL SECTION ─────────────────────────────────────────
+    const healSection = document.createElement("div");
+    healSection.classList.add("duel-action-section");
+
+    const healHeader = document.createElement("div");
+    healHeader.classList.add("duel-section-header", "duel-section-header-heal");
+    healHeader.textContent = "Healing";
+    healSection.appendChild(healHeader);
+
+    // Outer Bull + Bull 50
+    const bullGrid = document.createElement("div");
+    bullGrid.classList.add("duel-action-grid", "duel-action-grid-2");
 
     const outerBullBtn = document.createElement("button");
     outerBullBtn.type = "button";
-    outerBullBtn.textContent = "Outer Bull 25";
-    outerBullBtn.classList.add("duel-bull-button", "duel-bull-heal");
+    outerBullBtn.classList.add("duel-action-btn", "duel-action-heal");
+    const obLabel = document.createElement("span");
+    obLabel.classList.add("duel-action-label");
+    obLabel.textContent = "Outer Bull";
+    const obDesc = document.createElement("span");
+    obDesc.classList.add("duel-action-desc");
+    obDesc.textContent = "+1 HP";
+    outerBullBtn.appendChild(obLabel);
+    outerBullBtn.appendChild(obDesc);
     outerBullBtn.addEventListener("click", () => {
         if (typeof actions.onOuterBull === "function") actions.onOuterBull();
     });
+    bullGrid.appendChild(outerBullBtn);
 
     const bullBtn = document.createElement("button");
     bullBtn.type = "button";
-    bullBtn.textContent = "Bull 50";
-    bullBtn.classList.add("duel-bull-button", "duel-bull-heal");
+    bullBtn.classList.add("duel-action-btn", "duel-action-heal");
+    const bLabel = document.createElement("span");
+    bLabel.classList.add("duel-action-label");
+    bLabel.textContent = "Bull 50";
+    const bDesc = document.createElement("span");
+    bDesc.classList.add("duel-action-desc");
+    bDesc.textContent = "+2 HP";
+    bullBtn.appendChild(bLabel);
+    bullBtn.appendChild(bDesc);
     bullBtn.addEventListener("click", () => {
         if (typeof actions.onBull === "function") actions.onBull();
     });
+    bullGrid.appendChild(bullBtn);
+
+    healSection.appendChild(bullGrid);
+
+    // Heal target buttons (if active)
+    if (duelEngine.activeHealTarget !== null) {
+        const htGrid = document.createElement("div");
+        htGrid.classList.add("duel-action-grid", "duel-action-grid-3");
+
+        [
+            { m: 1, label: `S${duelEngine.activeHealTarget}`, desc: "+1 HP" },
+            { m: 2, label: `D${duelEngine.activeHealTarget}`, desc: "+2 HP" },
+            { m: 3, label: `T${duelEngine.activeHealTarget}`, desc: "+3 HP" },
+        ].forEach(({ m, label, desc }) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.classList.add("duel-action-btn", "duel-action-heal");
+            const labelSpan = document.createElement("span");
+            labelSpan.classList.add("duel-action-label");
+            labelSpan.textContent = label;
+            const descSpan = document.createElement("span");
+            descSpan.classList.add("duel-action-desc");
+            descSpan.textContent = desc;
+            btn.appendChild(labelSpan);
+            btn.appendChild(descSpan);
+            btn.addEventListener("click", () => {
+                if (typeof actions.onThrowNumber === "function") {
+                    actions.onThrowNumber(duelEngine.activeHealTarget, m);
+                }
+            });
+            htGrid.appendChild(btn);
+        });
+
+        healSection.appendChild(htGrid);
+    }
+
+    screen.appendChild(healSection);
+
+    // ── UTILITY SECTION ──────────────────────────────────────
+    const utilSection = document.createElement("div");
+    utilSection.classList.add("duel-action-section");
+
+    const utilGrid = document.createElement("div");
+    utilGrid.classList.add("duel-action-grid", "duel-action-grid-2");
 
     const missBtn = document.createElement("button");
     missBtn.type = "button";
+    missBtn.classList.add("duel-action-btn", "duel-action-miss");
     missBtn.textContent = "Miss";
-    missBtn.classList.add("duel-miss-button");
     missBtn.addEventListener("click", () => {
         if (typeof actions.onMiss === "function") actions.onMiss();
     });
+    utilGrid.appendChild(missBtn);
 
-    actionRow.appendChild(outerBullBtn);
-    actionRow.appendChild(bullBtn);
-    actionRow.appendChild(missBtn);
+    const nextTurnBtn = document.createElement("button");
+    nextTurnBtn.type = "button";
+    nextTurnBtn.classList.add("duel-action-btn", "duel-action-next-turn");
+    nextTurnBtn.textContent = "Next Turn →";
+    nextTurnBtn.addEventListener("click", () => {
+        if (typeof actions.onEndTurnEarly === "function") actions.onEndTurnEarly();
+    });
+    utilGrid.appendChild(nextTurnBtn);
 
-    screen.appendChild(multiplierRow);
-    screen.appendChild(numberGrid);
-    screen.appendChild(actionRow);
+    utilSection.appendChild(utilGrid);
+    screen.appendChild(utilSection);
 
     gameBoard.appendChild(screen);
 }

@@ -78,6 +78,35 @@ const infoContentByMode = {
             </section>
         `
     },
+    duel: {
+        title: "How Duel Works",
+        body: `
+            <section class="info-section">
+                <h3>1v1 HP Battle</h3>
+                <p>Both players start with <strong>10 HP</strong> (max 15). First player to reach 0 HP and fail to recover is eliminated.</p>
+            </section>
+            <section class="info-section">
+                <h3>Attack</h3>
+                <p>Hit your opponent's number to deal damage. Single = −1 HP · Double = −2 HP · Triple = −3 HP.</p>
+            </section>
+            <section class="info-section">
+                <h3>Healing</h3>
+                <p><strong>Outer Bull 25</strong> always heals you +1 HP. <strong>Bull 50</strong> always heals you +2 HP.</p>
+            </section>
+            <section class="info-section">
+                <h3>Heal Target</h3>
+                <p>Every 3–6 rounds a random number becomes a green Heal Target. Hit it to recover HP (S=+1, D=+2, T=+3). It disappears after 2 turns.</p>
+            </section>
+            <section class="info-section">
+                <h3>Last Chance</h3>
+                <p>If your HP drops to <strong>0 or below</strong>, you get one full turn to heal back above 0. If you're still at 0 or below at the end of your turn, you are eliminated.</p>
+            </section>
+            <section class="info-section">
+                <h3>Next Turn</h3>
+                <p>Tap <strong>Next Turn</strong> to end your turn early without throwing all 3 darts.</p>
+            </section>
+        `
+    },
     drink: {
         title: "Drink Mode Info",
         body: `

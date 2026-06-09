@@ -148,6 +148,12 @@ export class DuelEngine {
         }
     }
 
+    endTurnEarly() {
+        if (this.phase !== "playing") return;
+        this.saveState();
+        this._endTurn();
+    }
+
     _endTurn() {
         const currentPlayer = this.players[this.currentPlayerIndex];
         if (currentPlayer.hp <= 0) {

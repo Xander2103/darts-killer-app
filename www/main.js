@@ -9,6 +9,7 @@ import { ChaosEngine } from "./chaos/chaos-engine.js";
 // Drink engine
 import { DrinkEngine } from "./drink/drink-engine.js";
 import { CheckoutEngine } from "./checkout/checkout-engine.js";
+import { DuelEngine } from "./duel/duel-engine.js";
 
 // Chaos modifiers
 import { DoubleTrouble } from "./chaos/modifiers/double-trouble.js";
@@ -60,11 +61,22 @@ import {
 } from "./halveIt/halveItEngine.js";
 
 import { renderHalveItMode } from "./halveIt/halveItUi.js";
+import { renderDuelMode } from "./duel/duel-ui.js";
+import { TransitArenaEngine } from "./transitArena/transit-arena-engine.js";
+import {
+    renderTransitArenaMode,
+    playTransitPowerUpSpawnSound,
+    playTransitPowerUpUnlockSound,
+    playTransitPowerUpClaimSound,
+    playTransitPowerUpExpireSound
+} from "./transitArena/transit-arena-ui.js";
 
 const game = new KillerGame();
 const chaosEngine = new ChaosEngine(game);
 const drinkEngine = new DrinkEngine();
 const checkoutEngine = new CheckoutEngine();
+const duelEngine = new DuelEngine();
+const transitArenaEngine = new TransitArenaEngine();
 let halveItGame = null;
 
 // Chaos modifiers registreren
@@ -102,6 +114,8 @@ const chaosModeBtn = document.getElementById("chaosModeBtn");
 const drinkModeBtn = document.getElementById("drinkModeBtn");
 const checkoutModeBtn = document.getElementById("checkoutModeBtn");
 const halveItModeBtn = document.getElementById("halveItModeBtn");
+const duelModeBtn = document.getElementById("duelModeBtn");
+const transitArenaModeBtn = document.getElementById("transitArenaModeBtn");
 
 const setupError = document.getElementById("setupError");
 
@@ -143,6 +157,8 @@ function resetGameToClassicSetup() {
     game.chaosRevivedPlayerName = "";
     game.playersWhoPlayedThisRound = [];
     checkoutEngine.reset();
+    duelEngine.reset();
+    transitArenaEngine.reset();
     halveItGame = null;
 
     if (game.chaosEngine) {
@@ -181,6 +197,8 @@ function resetGameCompletely() {
     game.chaosRevivedPlayerName = "";
     game.playersWhoPlayedThisRound = [];
     checkoutEngine.reset();
+    duelEngine.reset();
+    transitArenaEngine.reset();
     halveItGame = null;
 
     clearSetupError();
@@ -318,6 +336,251 @@ function showHalveItGame() {
         }
     });
 }
+function startDuelGame() {
+    clearSetupError();
+
+    if (game.players.length !== 2) {
+        showSetupError("Duel requires exactly 2 players.");
+        return;
+    }
+
+    duelEngine.start(game.players);
+    game.phase = "game";
+    game.isStarted = true;
+
+    showDuelGame();
+}
+
+function showDuelGame() {
+    renderDuelMode(duelEngine, {
+        onRender: () => showDuelGame(),
+
+        onSelectMultiplier: (m) => {
+            duelEngine.selectMultiplier(m);
+            showDuelGame();
+        },
+
+        onThrowNumber: (number, multiplier) => {
+            duelEngine.throwNumber(number, multiplier);
+            duelEngine.selectMultiplier(1);
+            showDuelGame();
+        },
+
+        onOuterBull: () => {
+            duelEngine.throwOuterBull();
+            showDuelGame();
+        },
+
+        onBull: () => {
+            duelEngine.throwBull();
+            showDuelGame();
+        },
+
+        onMiss: () => {
+            duelEngine.miss();
+            showDuelGame();
+        },
+
+        onEndTurnEarly: () => {
+            duelEngine.endTurnEarly();
+            showDuelGame();
+        },
+
+        onUndo: () => {
+            duelEngine.undo();
+            showDuelGame();
+        },
+
+        onRematch: () => {
+            duelEngine.start(game.players);
+            showDuelGame();
+        },
+
+        onBackToMenu: () => {
+            duelEngine.reset();
+            game.phase = "setup";
+            game.isStarted = false;
+            resetGameCompletely();
+            showHomeScreen();
+
+            renderApp(game, {
+                resetGameCompletely,
+                showHomeScreen,
+                startCheckoutGame,
+                startHalveItGame,
+                startDuelGame,
+                checkoutEngine
+            });
+        },
+
+        onBack: () => {
+            if (duelEngine.phase === "finished") {
+                duelEngine.reset();
+                game.phase = "setup";
+                game.isStarted = false;
+
+                renderApp(game, {
+                    resetGameCompletely,
+                    showHomeScreen,
+                    startCheckoutGame,
+                    startHalveItGame,
+                    startDuelGame,
+                    checkoutEngine
+                });
+                return;
+            }
+
+            const isSure = confirm("Are you sure you want to stop the current Duel?");
+            if (!isSure) return;
+
+            duelEngine.reset();
+            game.phase = "setup";
+            game.isStarted = false;
+
+            renderApp(game, {
+                resetGameCompletely,
+                showHomeScreen,
+                startCheckoutGame,
+                startHalveItGame,
+                startDuelGame,
+                checkoutEngine
+            });
+        }
+    });
+}
+
+function playTransitArenaResultSounds(result = {}) {
+    if (result.powerUpSpawned)  playTransitPowerUpSpawnSound();
+    if (result.powerUpUnlocked) playTransitPowerUpUnlockSound();
+    if (result.powerUpExpired)  playTransitPowerUpExpireSound();
+    if (result.claimed)         playTransitPowerUpClaimSound();
+}
+
+function startTransitArenaGame() {
+    clearSetupError();
+
+    if (game.players.length < 2) {
+        showSetupError("Transit Arena requires at least 2 players.");
+        return;
+    }
+
+    transitArenaEngine.start(game.players);
+    game.phase = "game";
+    game.isStarted = true;
+
+    showTransitArenaGame();
+}
+
+function showTransitArenaGame() {
+    renderTransitArenaMode(transitArenaEngine, {
+        onSelectTarget: (index) => {
+            transitArenaEngine.selectTarget(index);
+            showTransitArenaGame();
+        },
+
+        onSelectMultiplier: (m) => {
+            transitArenaEngine.selectMultiplier(m);
+            showTransitArenaGame();
+        },
+
+        onThrowSegment: (segment) => {
+            const result = transitArenaEngine.throwSegment(segment);
+            playTransitArenaResultSounds(result);
+            showTransitArenaGame();
+        },
+
+        onOuterBull: () => {
+            const result = transitArenaEngine.throwBull("outer");
+            playTransitArenaResultSounds(result);
+            showTransitArenaGame();
+        },
+
+        onBull: () => {
+            const result = transitArenaEngine.throwBull("bull");
+            playTransitArenaResultSounds(result);
+            showTransitArenaGame();
+        },
+
+        onMiss: () => {
+            const result = transitArenaEngine.miss();
+            playTransitArenaResultSounds(result);
+            showTransitArenaGame();
+        },
+
+        onClaimCoin: () => {
+            const result = transitArenaEngine.claimPendingPowerUp();
+            playTransitArenaResultSounds(result);
+            showTransitArenaGame();
+        },
+
+        onCoinInfo: () => {
+            transitArenaEngine.coinInfo();
+            showTransitArenaGame();
+        },
+
+        onUndo: () => {
+            transitArenaEngine.undo();
+            showTransitArenaGame();
+        },
+
+        onRematch: () => {
+            transitArenaEngine.start(game.players);
+            showTransitArenaGame();
+        },
+
+        onBackToMenu: () => {
+            transitArenaEngine.reset();
+            game.phase = "setup";
+            game.isStarted = false;
+            showHomeScreen();
+            renderApp(game, {
+                resetGameCompletely,
+                showHomeScreen,
+                startCheckoutGame,
+                startHalveItGame,
+                startDuelGame,
+                startTransitArenaGame,
+                checkoutEngine
+            });
+        },
+
+        onBack: () => {
+            if (transitArenaEngine.status === "finished") {
+                transitArenaEngine.reset();
+                game.phase = "setup";
+                game.isStarted = false;
+                renderApp(game, {
+                    resetGameCompletely,
+                    showHomeScreen,
+                    startCheckoutGame,
+                    startHalveItGame,
+                    startDuelGame,
+                    startTransitArenaGame,
+                    checkoutEngine
+                });
+                return;
+            }
+
+            const isSure = confirm("Stop the current Transit Arena match?");
+            if (!isSure) return;
+
+            transitArenaEngine.reset();
+            game.phase = "setup";
+            game.isStarted = false;
+
+            renderApp(game, {
+                resetGameCompletely,
+                showHomeScreen,
+                startCheckoutGame,
+                startHalveItGame,
+                startDuelGame,
+                startTransitArenaGame,
+                checkoutEngine
+            });
+        }
+    });
+}
+
 // Settings initialiseren
 const settingsApi = initSettings(game, renderApp, {
     resetGameCompletely,
@@ -354,6 +617,16 @@ startGameButton.addEventListener("click", () => {
 
     if (game.gameMode === "halveIt") {
         startHalveItGame();
+        return;
+    }
+
+    if (game.gameMode === "duel") {
+        startDuelGame();
+        return;
+    }
+
+    if (game.gameMode === "transitArena") {
+        startTransitArenaGame();
         return;
     }
 
@@ -465,6 +738,43 @@ if (halveItModeBtn) {
     });
 }
 
+if (duelModeBtn) {
+    duelModeBtn.addEventListener("click", () => {
+        resetGameCompletely();
+        game.setGameMode("duel");
+        document.body.dataset.currentMode = "duel";
+        showClassicScreen();
+
+        renderApp(game, {
+            resetGameCompletely,
+            showHomeScreen,
+            startCheckoutGame,
+            startHalveItGame,
+            startDuelGame,
+            checkoutEngine
+        });
+    });
+}
+
+if (transitArenaModeBtn) {
+    transitArenaModeBtn.addEventListener("click", () => {
+        resetGameCompletely();
+        game.setGameMode("transitArena");
+        document.body.dataset.currentMode = "transitArena";
+        showClassicScreen();
+
+        renderApp(game, {
+            resetGameCompletely,
+            showHomeScreen,
+            startCheckoutGame,
+            startHalveItGame,
+            startDuelGame,
+            startTransitArenaGame,
+            checkoutEngine
+        });
+    });
+}
+
 drinkModeBtn.addEventListener("click", () => {
     resetGameCompletely();
     game.setGameMode("drink");
@@ -481,6 +791,14 @@ backToHomeButton.addEventListener("click", () => {
     if (game.gameMode === "drink") {
         resetGameCompletely();
         showHomeScreen();
+        return;
+    }
+
+    if (game.gameMode === "duel" && game.phase === "game") {
+        return;
+    }
+
+    if (game.gameMode === "transitArena" && game.phase === "game") {
         return;
     }
 
