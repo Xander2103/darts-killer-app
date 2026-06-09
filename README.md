@@ -1,5 +1,7 @@
 🎯 Darts Killer App
 
+Google play store download link : https://play.google.com/store/apps/details?id=com.vmstudios.killerdarts&hl=en_IE )
+
 An advanced browser-based darts game built in JavaScript, featuring classic Killer mode and an extended Chaos mode with dynamic gameplay modifiers.
 
 This project focuses on game logic, modular architecture, player state management, and interactive UI design.
