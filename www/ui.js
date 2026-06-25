@@ -1262,6 +1262,12 @@ function renderCheckoutSetup(game, checkoutEngine, actions = {}) {
 // 121 CHECKOUT MODE
 // =====================================================
 
+let checkoutDartPanelOpen = false;
+
+function resetCheckoutDartPanel() {
+    checkoutDartPanelOpen = false;
+}
+
 function scrollCheckoutToTop() {
     window.setTimeout(() => {
         const checkoutCard = document.querySelector(".checkout-main-card");
@@ -1364,29 +1370,24 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
     const screen = document.createElement("section");
     screen.classList.add("checkout-screen");
 
-    const topCard = document.createElement("article");
-    topCard.classList.add("checkout-main-card");
-
     const currentPlayer = checkoutEngine.players[checkoutEngine.currentPlayerIndex];
-    const dartsLeft = checkoutEngine.settings.maxDarts - checkoutEngine.dartsUsed;
     const playerDartsLeft = Math.max(checkoutEngine.settings.dartsPerPlayerTurn - checkoutEngine.currentPlayerTurnDarts, 0);
     const isInfiniteRoundLimit = checkoutEngine.settings.roundLimit === "infinite";
-    const roundLimitText = isInfiniteRoundLimit
-        ? "∞"
-        : checkoutEngine.settings.roundLimit;
+    const roundLimitText = isInfiniteRoundLimit ? "∞" : checkoutEngine.settings.roundLimit;
     const currentRoundText = isInfiniteRoundLimit
         ? checkoutEngine.round
         : Math.min(checkoutEngine.round, checkoutEngine.settings.roundLimit);
-
     const undoDisabled = checkoutEngine.history.length === 0 || checkoutEngine.status === "finished";
 
+    // ── MAIN CARD ──────────────────────────────────────────
+    const topCard = document.createElement("article");
+    topCard.classList.add("checkout-main-card");
+
     topCard.innerHTML = `
-        <div class="checkout-title-row">
+        <div class="checkout-header-bar">
             <span class="checkout-mode-badge">121 Checkout</span>
-            <div class="checkout-title-right">
-                <button type="button" class="checkout-undo-button"${undoDisabled ? " disabled" : ""}>↶ Undo last throw</button>
-                <span class="checkout-round-pill">Round ${currentRoundText} / ${roundLimitText}</span>
-            </div>
+            <span class="checkout-round-pill">Round ${currentRoundText} / ${roundLimitText}</span>
+            <button type="button" class="checkout-undo-button"${undoDisabled ? " disabled" : ""}>↶ Undo</button>
         </div>
 
         <div class="checkout-score-grid">
@@ -1398,18 +1399,14 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
                 <span>Remaining</span>
                 <strong>${checkoutEngine.remainingScore}</strong>
             </div>
-            <div class="checkout-score-box">
-                <span>Darts left</span>
-                <strong>${Math.max(dartsLeft, 0)}</strong>
+            <div class="checkout-score-box checkout-score-box-player">
+                <span>Player</span>
+                <strong class="checkout-player-pulse"></strong>
             </div>
         </div>
-
-        <div class="checkout-player-card checkout-current-player-card">
-            <span>Current player</span>
-            <strong>${currentPlayer ? currentPlayer.name : "Player"}</strong>
-            <small>${playerDartsLeft} dart${playerDartsLeft === 1 ? "" : "s"} left in this turn</small>
-        </div>
     `;
+
+    topCard.querySelector(".checkout-player-pulse").textContent = currentPlayer ? currentPlayer.name : "–";
 
     topCard.querySelector(".checkout-undo-button").addEventListener("click", () => {
         checkoutEngine.undo();
@@ -1417,30 +1414,9 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
         scrollCheckoutToTop();
     });
 
-    const shouldShowResult = checkoutEngine.lastResult &&
-        (!checkoutEngine.lastResultCreatedAt || Date.now() - checkoutEngine.lastResultCreatedAt < 5000);
-
-    if (shouldShowResult) {
-        const resultBox = document.createElement("div");
-        resultBox.classList.add("checkout-result-box", `checkout-result-${checkoutEngine.lastResult.type}`);
-        resultBox.textContent = checkoutEngine.lastResult.message;
-        topCard.appendChild(resultBox);
-
-        if (checkoutEngine.resultDismissTimer) {
-            clearTimeout(checkoutEngine.resultDismissTimer);
-        }
-
-        checkoutEngine.resultDismissTimer = setTimeout(() => {
-            checkoutEngine.clearLastResult();
-            renderCheckoutMode(checkoutEngine, actions);
-        }, 5000);
-    } else if (checkoutEngine.lastResult) {
-        checkoutEngine.clearLastResult();
-    }
-
-    topCard.appendChild(createCheckoutThrowsPanel(checkoutEngine));
     screen.appendChild(topCard);
 
+    // ── FINISHED SCREEN ────────────────────────────────────
     if (checkoutEngine.status === "finished") {
         const finishedBox = document.createElement("div");
         finishedBox.classList.add("checkout-finished-box");
@@ -1458,6 +1434,7 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
         rematchButton.classList.add("checkout-start-button");
         rematchButton.textContent = "Rematch same setup";
         rematchButton.addEventListener("click", () => {
+            checkoutDartPanelOpen = false;
             if (typeof actions.startCheckoutGame === "function") {
                 actions.startCheckoutGame();
             }
@@ -1468,10 +1445,10 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
         menuButton.classList.add("winner-menu-button");
         menuButton.textContent = "Back to main menu";
         menuButton.addEventListener("click", () => {
+            checkoutDartPanelOpen = false;
             if (typeof actions.resetGameCompletely === "function") {
                 actions.resetGameCompletely();
             }
-
             if (typeof actions.showHomeScreen === "function") {
                 actions.showHomeScreen();
             }
@@ -1481,114 +1458,264 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
         actionWrap.appendChild(menuButton);
         finishedBox.appendChild(actionWrap);
         screen.appendChild(finishedBox);
+
     } else {
-        const checkoutAdvice = checkoutEngine.getCurrentAdvice(Math.max(dartsLeft, 1));
-        const checkoutRuleNote = document.createElement("div");
-        checkoutRuleNote.classList.add("checkout-rule-note");
-        const adviceLabel = document.createElement("span");
-        adviceLabel.textContent = checkoutAdvice.title;
-        const adviceRoute = document.createElement("strong");
-        adviceRoute.textContent = checkoutAdvice.route;
-        checkoutRuleNote.appendChild(adviceLabel);
-        checkoutRuleNote.appendChild(adviceRoute);
+        // ── PLAYING ────────────────────────────────────────
+
+        // Route / advice (based on current player's darts left)
+        const adviceDartsLeft = Math.max(playerDartsLeft, 1);
+        const checkoutAdvice = checkoutEngine.getCurrentAdvice(adviceDartsLeft);
+        const ruleNote = document.createElement("div");
+        ruleNote.classList.add("checkout-rule-note");
+        ruleNote.innerHTML = `<span>${checkoutAdvice.title}</span><strong>${checkoutAdvice.route}</strong>`;
         if (checkoutAdvice.helper) {
             const adviceHelper = document.createElement("small");
             adviceHelper.textContent = checkoutAdvice.helper;
-            checkoutRuleNote.appendChild(adviceHelper);
+            ruleNote.appendChild(adviceHelper);
         }
-        screen.appendChild(checkoutRuleNote);
+        topCard.appendChild(ruleNote);
 
-        const multiplierRow = document.createElement("div");
-        multiplierRow.classList.add("checkout-multiplier-row");
+        // Total score input area
+        const totalArea = document.createElement("div");
+        totalArea.classList.add("checkout-total-area");
 
-        [
-            { value: 1, label: "Single" },
-            { value: 2, label: "Double" },
-            { value: 3, label: "Triple" }
-        ].forEach(item => {
-            const button = document.createElement("button");
-            button.type = "button";
-            button.classList.add("checkout-multiplier-button");
+        const totalRow = document.createElement("div");
+        totalRow.classList.add("checkout-total-row");
 
-            if (checkoutEngine.selectedMultiplier === item.value) {
-                button.classList.add("active");
+        const totalInput = document.createElement("input");
+        totalInput.type = "number";
+        totalInput.classList.add("checkout-total-input");
+        totalInput.min = "0";
+        totalInput.max = "180";
+        totalInput.placeholder = "0 – 180";
+        totalInput.autocomplete = "off";
+        totalInput.inputMode = "numeric";
+        totalInput.pattern = "[0-9]*";
+
+        const submitBtn = document.createElement("button");
+        submitBtn.type = "button";
+        submitBtn.classList.add("checkout-submit-btn");
+        submitBtn.textContent = "Submit";
+
+        const handleSubmit = () => {
+            const raw = totalInput.value.trim();
+            const score = raw === "" ? 0 : Math.max(0, Math.min(180, Math.round(Number(raw) || 0)));
+            checkoutEngine.submitTotalScore(score);
+            totalInput.value = "";
+            renderCheckoutMode(checkoutEngine, actions);
+            scrollCheckoutToTop();
+        };
+
+        submitBtn.addEventListener("click", handleSubmit);
+        totalInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") handleSubmit();
+        });
+
+        totalRow.appendChild(totalInput);
+        totalRow.appendChild(submitBtn);
+        totalArea.appendChild(totalRow);
+
+        // Quick score shortcuts
+        const quickBtns = document.createElement("div");
+        quickBtns.classList.add("checkout-quick-btns");
+        [0, 26, 41, 60, 100].forEach(val => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.classList.add("checkout-quick-btn");
+            btn.textContent = val;
+            btn.addEventListener("click", () => {
+                totalInput.value = val;
+                totalInput.focus();
+            });
+            quickBtns.appendChild(btn);
+        });
+        totalArea.appendChild(quickBtns);
+        topCard.appendChild(totalArea);
+
+        // Result zone — reserved height so buttons don't jump
+        const resultZone = document.createElement("div");
+        resultZone.classList.add("checkout-result-zone");
+
+        const shouldShowResult = checkoutEngine.lastResult &&
+            (!checkoutEngine.lastResultCreatedAt || Date.now() - checkoutEngine.lastResultCreatedAt < 5000);
+
+        if (shouldShowResult) {
+            const resultBox = document.createElement("div");
+            resultBox.classList.add("checkout-result-box", `checkout-result-${checkoutEngine.lastResult.type}`);
+            resultBox.textContent = checkoutEngine.lastResult.message;
+            resultZone.appendChild(resultBox);
+
+            if (checkoutEngine.resultDismissTimer) {
+                clearTimeout(checkoutEngine.resultDismissTimer);
+            }
+            checkoutEngine.resultDismissTimer = setTimeout(() => {
+                checkoutEngine.clearLastResult();
+                renderCheckoutMode(checkoutEngine, actions);
+            }, 5000);
+        } else if (checkoutEngine.lastResult) {
+            checkoutEngine.clearLastResult();
+        }
+
+        topCard.appendChild(resultZone);
+
+        // 3-dart turn visual + compact darts-used counter
+        const turnVisual = document.createElement("div");
+        turnVisual.classList.add("checkout-turn-visual");
+
+        const dartSlots = document.createElement("div");
+        dartSlots.classList.add("checkout-dart-slots");
+        for (let i = 0; i < 3; i++) {
+            const slot = document.createElement("span");
+            slot.classList.add("checkout-dart-slot");
+            dartSlots.appendChild(slot);
+        }
+
+        const turnLabel = document.createElement("span");
+        turnLabel.classList.add("checkout-turn-label");
+        turnLabel.textContent = "3-dart turn";
+
+        const dartsCounter = document.createElement("span");
+        dartsCounter.classList.add("checkout-darts-counter");
+        dartsCounter.textContent = `${checkoutEngine.dartsUsed}/${checkoutEngine.settings.maxDarts} darts`;
+
+        turnVisual.appendChild(dartSlots);
+        turnVisual.appendChild(turnLabel);
+        turnVisual.appendChild(dartsCounter);
+        topCard.appendChild(turnVisual);
+
+        // Lower action buttons
+        const lowerActions = document.createElement("div");
+        lowerActions.classList.add("checkout-lower-actions");
+
+        const failBtn = document.createElement("button");
+        failBtn.type = "button";
+        failBtn.classList.add("checkout-fail-btn");
+        failBtn.textContent = "Fail / Next round";
+        failBtn.addEventListener("click", () => {
+            checkoutEngine.failTarget();
+            checkoutDartPanelOpen = false;
+            renderCheckoutMode(checkoutEngine, actions);
+            scrollCheckoutToTop();
+        });
+
+        const dartToggleBtn = document.createElement("button");
+        dartToggleBtn.type = "button";
+        dartToggleBtn.classList.add("checkout-dart-toggle-btn");
+        dartToggleBtn.textContent = checkoutDartPanelOpen ? "✕ Close dart input" : "🎯 Dart input";
+        dartToggleBtn.addEventListener("click", () => {
+            checkoutDartPanelOpen = !checkoutDartPanelOpen;
+            renderCheckoutMode(checkoutEngine, actions);
+        });
+
+        lowerActions.appendChild(failBtn);
+        lowerActions.appendChild(dartToggleBtn);
+        topCard.appendChild(lowerActions);
+
+        // ── DART-BY-DART PANEL (collapsible) ───────────────
+        if (checkoutDartPanelOpen) {
+            const dartPanel = document.createElement("div");
+            dartPanel.classList.add("checkout-dart-panel");
+
+            const dartPanelHeader = document.createElement("div");
+            dartPanelHeader.classList.add("checkout-dart-panel-header");
+            dartPanelHeader.textContent = "Dart-by-dart input";
+            dartPanel.appendChild(dartPanelHeader);
+
+            const multiplierRow = document.createElement("div");
+            multiplierRow.classList.add("checkout-multiplier-row");
+
+            [
+                { value: 1, label: "Single" },
+                { value: 2, label: "Double" },
+                { value: 3, label: "Triple" }
+            ].forEach(item => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.classList.add("checkout-multiplier-button");
+                if (checkoutEngine.selectedMultiplier === item.value) {
+                    btn.classList.add("active");
+                }
+                btn.textContent = item.label;
+                btn.addEventListener("click", () => {
+                    checkoutEngine.selectMultiplier(item.value);
+                    renderCheckoutMode(checkoutEngine, actions);
+                });
+                multiplierRow.appendChild(btn);
+            });
+
+            const numberGrid = document.createElement("div");
+            numberGrid.classList.add("checkout-number-grid");
+
+            for (let number = 1; number <= 20; number++) {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.textContent = number;
+                btn.addEventListener("click", () => {
+                    const selectedMultiplier = checkoutEngine.selectedMultiplier;
+                    checkoutEngine.throwNumber(number);
+                    checkoutEngine.selectMultiplier(1);
+                    playHitSound(selectedMultiplier);
+                    renderCheckoutMode(checkoutEngine, actions);
+                    scrollCheckoutToTop();
+                });
+                numberGrid.appendChild(btn);
             }
 
-            button.textContent = item.label;
-            button.addEventListener("click", () => {
-                checkoutEngine.selectMultiplier(item.value);
-                renderCheckoutMode(checkoutEngine, actions);
-                scrollCheckoutToTop();
-            });
+            const actionRow = document.createElement("div");
+            actionRow.classList.add("checkout-action-row");
 
-            multiplierRow.appendChild(button);
-        });
-
-        const numberGrid = document.createElement("div");
-        numberGrid.classList.add("checkout-number-grid");
-
-        for (let number = 1; number <= 20; number++) {
-            const button = document.createElement("button");
-            button.type = "button";
-            button.textContent = number;
-            button.addEventListener("click", () => {
-                const selectedMultiplier = checkoutEngine.selectedMultiplier;
-                checkoutEngine.throwNumber(number);
+            const outerBullBtn = document.createElement("button");
+            outerBullBtn.type = "button";
+            outerBullBtn.textContent = "Outer Bull 25";
+            outerBullBtn.addEventListener("click", () => {
+                checkoutEngine.throwBull(25);
                 checkoutEngine.selectMultiplier(1);
-                playHitSound(selectedMultiplier);
+                playHitSound(2);
                 renderCheckoutMode(checkoutEngine, actions);
                 scrollCheckoutToTop();
             });
 
-            numberGrid.appendChild(button);
+            const bullBtn = document.createElement("button");
+            bullBtn.type = "button";
+            bullBtn.textContent = "Bull 50";
+            bullBtn.addEventListener("click", () => {
+                checkoutEngine.throwBull(50);
+                checkoutEngine.selectMultiplier(1);
+                playHitSound(3);
+                renderCheckoutMode(checkoutEngine, actions);
+                scrollCheckoutToTop();
+            });
+
+            const missBtn = document.createElement("button");
+            missBtn.type = "button";
+            missBtn.classList.add("checkout-miss-button");
+            missBtn.textContent = "Miss";
+            missBtn.addEventListener("click", () => {
+                checkoutEngine.miss();
+                checkoutEngine.selectMultiplier(1);
+                playMissSound();
+                renderCheckoutMode(checkoutEngine, actions);
+                scrollCheckoutToTop();
+            });
+
+            actionRow.appendChild(outerBullBtn);
+            actionRow.appendChild(bullBtn);
+            actionRow.appendChild(missBtn);
+
+            dartPanel.appendChild(multiplierRow);
+            dartPanel.appendChild(numberGrid);
+            dartPanel.appendChild(actionRow);
+
+            screen.appendChild(dartPanel);
         }
-
-        const actionRow = document.createElement("div");
-        actionRow.classList.add("checkout-action-row");
-
-        const outerBullButton = document.createElement("button");
-        outerBullButton.type = "button";
-        outerBullButton.textContent = "Outer Bull 25";
-        outerBullButton.addEventListener("click", () => {
-            checkoutEngine.throwBull(25);
-            checkoutEngine.selectMultiplier(1);
-            playHitSound(2);
-            renderCheckoutMode(checkoutEngine, actions);
-            scrollCheckoutToTop();
-        });
-
-        const bullButton = document.createElement("button");
-        bullButton.type = "button";
-        bullButton.textContent = "Bull 50";
-        bullButton.addEventListener("click", () => {
-            checkoutEngine.throwBull(50);
-            checkoutEngine.selectMultiplier(1);
-            playHitSound(3);
-            renderCheckoutMode(checkoutEngine, actions);
-            scrollCheckoutToTop();
-        });
-
-        const missButton = document.createElement("button");
-        missButton.type = "button";
-        missButton.classList.add("checkout-miss-button");
-        missButton.textContent = "Miss";
-        missButton.addEventListener("click", () => {
-            checkoutEngine.miss();
-            checkoutEngine.selectMultiplier(1);
-            playMissSound();
-            renderCheckoutMode(checkoutEngine, actions);
-            scrollCheckoutToTop();
-        });
-
-        actionRow.appendChild(outerBullButton);
-        actionRow.appendChild(bullButton);
-        actionRow.appendChild(missButton);
-
-        screen.appendChild(multiplierRow);
-        screen.appendChild(numberGrid);
-        screen.appendChild(actionRow);
     }
 
+    // ── THIS ROUND THROWS ──────────────────────────────────
+    if (checkoutEngine.throws.length > 0) {
+        screen.appendChild(createCheckoutThrowsPanel(checkoutEngine));
+    }
+
+    // ── HISTORY ────────────────────────────────────────────
     if (checkoutEngine.roundHistory.length > 0) {
         const historyPanel = document.createElement("div");
         historyPanel.classList.add("checkout-history-panel");
@@ -1731,6 +1858,7 @@ export {
     renderApp,
     renderDrinkMode,
     renderCheckoutMode,
+    resetCheckoutDartPanel,
     playerNameInput,
     addPlayerButton,
     startGameButton,

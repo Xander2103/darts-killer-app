@@ -86,6 +86,13 @@
     padding: 0.28rem 0.6rem;
     cursor: pointer;
     min-height: 32px;
+    transition: border-color 0.1s, background 0.1s, color 0.1s;
+}
+
+.ta-undo-button--active {
+    color: #fb923c;
+    background: rgba(251, 146, 60, 0.12);
+    border-color: rgba(251, 146, 60, 0.5);
 }
 
 .ta-undo-button:disabled {
@@ -93,7 +100,7 @@
     cursor: default;
 }
 
-.ta-undo-button:not(:disabled):active {
+.ta-undo-button--active:active {
     opacity: 0.75;
 }
 
@@ -122,7 +129,15 @@
 
 .ta-player-card.active {
     border-color: #fb923c;
-    background: rgba(251, 146, 60, 0.08);
+    border-width: 2px;
+    background: rgba(251, 146, 60, 0.1);
+    box-shadow: 0 0 10px 2px rgba(251, 146, 60, 0.25);
+    animation: ta-active-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ta-active-pulse {
+    0%, 100% { box-shadow: 0 0 8px 2px rgba(251, 146, 60, 0.2); }
+    50%       { box-shadow: 0 0 16px 4px rgba(251, 146, 60, 0.45); }
 }
 
 .ta-player-card.targeted {
@@ -130,9 +145,45 @@
     background: rgba(220, 38, 38, 0.07);
 }
 
+/* Danger = low HP; deliberately weaker than active so active always wins */
+.ta-player-card.danger {
+    border-color: rgba(248, 113, 113, 0.35);
+    background: rgba(220, 38, 38, 0.05);
+}
+
+/* Active + danger: active styling wins entirely */
+.ta-player-card.active.danger {
+    border-color: #fb923c;
+    background: rgba(251, 146, 60, 0.1);
+}
+
 .ta-player-card.dead {
     opacity: 0.45;
     border-color: rgba(255,255,255,0.06);
+}
+
+/* TURN badge inside active player card */
+.ta-turn-badge {
+    flex-shrink: 0;
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #fb923c;
+    background: rgba(251, 146, 60, 0.18);
+    border: 1px solid rgba(251, 146, 60, 0.45);
+    border-radius: 4px;
+    padding: 0.08rem 0.32rem;
+    line-height: 1.3;
+}
+
+/* Darts-left sub-line on active player card */
+.ta-player-darts-left {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #fb923c;
+    opacity: 0.85;
+    margin-top: 1px;
 }
 
 .ta-player-name-row {
@@ -586,19 +637,37 @@
 
 .ta-bull-btn {
     flex: 1;
-    padding: 0.6rem 0.3rem;
-    font-size: 0.78rem;
-    font-weight: 800;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    padding: 0.55rem 0.3rem;
     border-radius: 9px;
-    border: 1px solid rgba(251, 191, 36, 0.25);
-    background: rgba(251, 191, 36, 0.07);
-    color: #fcd34d;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    background: rgba(96, 165, 250, 0.08);
+    color: #93c5fd;
     cursor: pointer;
-    min-height: 42px;
+    min-height: 48px;
 }
 
 .ta-bull-btn:active {
     opacity: 0.75;
+}
+
+.ta-bull-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #93c5fd;
+}
+
+.ta-bull-desc {
+    font-size: 0.62rem;
+    font-weight: 700;
+    opacity: 0.8;
+    line-height: 1;
+    color: #60a5fa;
 }
 
 .ta-miss-btn {
@@ -616,6 +685,32 @@
 
 .ta-miss-btn:active {
     opacity: 0.75;
+}
+
+.ta-action-row-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.ta-next-turn-btn {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+    border-radius: 9px;
+    border: 1px solid rgba(251, 146, 60, 0.35);
+    background: rgba(251, 146, 60, 0.09);
+    color: #fb923c;
+    cursor: pointer;
+    min-height: 44px;
+    letter-spacing: 0.02em;
+    transition: background 0.1s, border-color 0.1s;
+}
+
+.ta-next-turn-btn:active {
+    background: rgba(251, 146, 60, 0.18);
+    opacity: 0.85;
 }
 
 /* =====================================================
@@ -722,4 +817,442 @@
 
 .ta-menu-btn:active {
     opacity: 0.75;
+}
+
+/* =====================================================
+   PLAYER TARGET NUMBER BADGE
+   ===================================================== */
+
+.ta-player-num-badge {
+    display: inline-block;
+    padding: 0.06rem 0.3rem;
+    border-radius: 5px;
+    background: rgba(251, 146, 60, 0.14);
+    border: 1px solid rgba(251, 146, 60, 0.3);
+    color: #fb923c;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.01em;
+    flex-shrink: 0;
+}
+
+/* =====================================================
+   ACTION SECTIONS (attack + power-up objective)
+   ===================================================== */
+
+.ta-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.65rem 0.7rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ta-section-header {
+    font-size: 0.67rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted, #8a9ba8);
+}
+
+.ta-section-header-attack { color: #fca5a5; }
+.ta-section-header-powerup { color: #fde68a; }
+
+.ta-attack-section {
+    border-color: rgba(220, 38, 38, 0.18);
+}
+
+.ta-powerup-objective-section {
+    border-color: rgba(234, 179, 8, 0.22);
+    background: rgba(234, 179, 8, 0.04);
+}
+
+.ta-attack-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.4rem;
+}
+
+.ta-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.18rem;
+    min-height: 52px;
+    padding: 0.45rem 0.25rem;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.ta-action-btn:active { opacity: 0.75; }
+
+.ta-action-label {
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.ta-action-desc {
+    font-size: 0.58rem;
+    opacity: 0.72;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.ta-action-attack {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.28);
+    color: #fca5a5;
+}
+
+.ta-action-attack .ta-action-label { color: #fca5a5; }
+
+.ta-action-dual {
+    background: rgba(234, 179, 8, 0.13) !important;
+    border-color: rgba(234, 179, 8, 0.45) !important;
+}
+
+.ta-action-dual .ta-action-label { color: #fef08a; }
+
+.ta-action-powerup-obj {
+    background: rgba(234, 179, 8, 0.1);
+    border-color: rgba(234, 179, 8, 0.32);
+}
+
+.ta-action-powerup-obj .ta-action-label { color: #fef08a; }
+.ta-action-powerup-obj .ta-action-desc  { color: #fde68a; opacity: 0.85; }
+
+.ta-no-target-msg {
+    font-size: 0.78rem;
+    color: var(--text-muted, #8a9ba8);
+    margin: 0;
+}
+
+/* =====================================================
+   SHIELD ROW (pips + text)
+   ===================================================== */
+
+.ta-shield-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 1px;
+}
+
+.ta-shield-text {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #60a5fa;
+    letter-spacing: 0.01em;
+    flex-shrink: 0;
+}
+
+/* =====================================================
+   RESULT AREA — fixed min-height so buttons never jump
+   ===================================================== */
+
+.ta-result-area {
+    min-height: 3.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+/* =====================================================
+   RESULT MESSAGE — shield variant
+   ===================================================== */
+
+.ta-result-msg.shield {
+    color: #93c5fd;
+    background: rgba(96, 165, 250, 0.08);
+    border-color: rgba(96, 165, 250, 0.25);
+}
+
+/* =====================================================
+   THROW CHIP — shield variant
+   ===================================================== */
+
+.ta-throw-chip.shield {
+    background: rgba(96, 165, 250, 0.15);
+    color: #93c5fd;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+/* =====================================================
+   NUMBER SELECTION SCREEN
+   ===================================================== */
+
+.ta-numsel-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.1rem 1rem;
+}
+
+.ta-numsel-progress {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted, #8a9ba8);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+h2.ta-numsel-player-name {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text-main, #f5f7fa);
+    margin: 0;
+}
+
+.ta-numsel-help {
+    font-size: 0.8rem;
+    color: var(--text-muted, #8a9ba8);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.ta-numsel-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 1rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    text-align: center;
+    border-radius: 10px;
+    border: 2px solid rgba(251, 146, 60, 0.4);
+    background: rgba(255,255,255,0.05);
+    color: var(--text-main, #f5f7fa);
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.ta-numsel-input:focus {
+    border-color: #fb923c;
+    background: rgba(251, 146, 60, 0.06);
+}
+
+.ta-numsel-input::-webkit-outer-spin-button,
+.ta-numsel-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.ta-numsel-error {
+    min-height: 1.2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #f87171;
+}
+
+.ta-numsel-confirm-btn {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    border-radius: 10px;
+    border: none;
+    background: #ea580c;
+    color: #fff;
+    cursor: pointer;
+    min-height: 48px;
+}
+
+.ta-numsel-confirm-btn:active { opacity: 0.85; }
+
+.ta-numsel-undo-btn {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 1px solid rgba(251, 146, 60, 0.3);
+    background: rgba(251, 146, 60, 0.08);
+    color: #fb923c;
+    cursor: pointer;
+}
+
+.ta-numsel-undo-btn:active { opacity: 0.75; }
+
+.ta-numsel-player-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+}
+
+.ta-numsel-player-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    font-size: 0.82rem;
+    color: var(--text-muted, #8a9ba8);
+}
+
+.ta-numsel-player-row.current {
+    background: rgba(251, 146, 60, 0.1);
+    border: 1px solid rgba(251, 146, 60, 0.3);
+    color: var(--text-main, #f5f7fa);
+}
+
+.ta-numsel-player-row.done {
+    color: #4ade80;
+}
+
+.ta-numsel-player-name-cell { font-weight: 600; }
+
+.ta-numsel-player-status {
+    font-weight: 800;
+    color: #fb923c;
+}
+
+.ta-numsel-player-row.done .ta-numsel-player-status {
+    color: #4ade80;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ta-player-card.active { animation: none; }
+}
+
+/* =====================================================
+   HEALER'S ROUND EVENT CARD
+   ===================================================== */
+
+.ta-event-card {
+    border-color: rgba(74, 222, 128, 0.45);
+    background: rgba(16, 185, 129, 0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    animation: ta-event-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ta-event-pulse {
+    0%, 100% { border-color: rgba(74, 222, 128, 0.35); }
+    50%       { border-color: rgba(74, 222, 128, 0.75); }
+}
+
+.ta-event-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+}
+
+.ta-event-title {
+    font-size: 0.88rem;
+    font-weight: 900;
+    color: #4ade80;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.ta-event-turns {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #86efac;
+    background: rgba(74, 222, 128, 0.12);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    border-radius: 20px;
+    padding: 0.1rem 0.5rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.ta-event-text {
+    font-size: 0.76rem;
+    color: #86efac;
+    margin: 0;
+    line-height: 1.45;
+    opacity: 0.9;
+}
+
+/* =====================================================
+   HEAL SELF SECTION
+   ===================================================== */
+
+.ta-heal-section {
+    border-color: rgba(74, 222, 128, 0.28) !important;
+    background: rgba(16, 185, 129, 0.05) !important;
+}
+
+.ta-section-header-heal { color: #4ade80; }
+
+.ta-action-heal {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(74, 222, 128, 0.35);
+    color: #4ade80;
+}
+
+.ta-action-heal .ta-action-label { color: #4ade80; }
+.ta-action-heal .ta-action-desc  { color: #86efac; opacity: 0.85; }
+
+/* =====================================================
+   THROW CHIP — heal variant
+   ===================================================== */
+
+.ta-throw-chip.heal {
+    background: rgba(74, 222, 128, 0.15);
+    color: #86efac;
+    border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+/* =====================================================
+   RESULT MESSAGE — heal / event / expired / spawned
+   ===================================================== */
+
+.ta-result-msg.heal {
+    color: #4ade80;
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(74, 222, 128, 0.25);
+}
+
+.ta-result-msg.event {
+    color: #fbbf24;
+    background: rgba(217, 119, 6, 0.08);
+    border-color: rgba(251, 191, 36, 0.22);
+}
+
+.ta-result-msg.expired {
+    color: #94a3b8;
+    background: rgba(148, 163, 184, 0.06);
+    border-color: rgba(148, 163, 184, 0.15);
+    font-style: italic;
+}
+
+.ta-result-msg.spawned {
+    color: #fb923c;
+    background: rgba(194, 65, 12, 0.1);
+    border-color: rgba(251, 146, 60, 0.3);
+}
+
+/* =====================================================
+   MULTIPLE POWER-UP CARDS CONTAINER
+   ===================================================== */
+
+.ta-powerup-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+@media (min-width: 480px) {
+    .ta-powerup-cards {
+        flex-direction: row;
+    }
+
+    .ta-powerup-cards .ta-powerup-card {
+        flex: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ta-event-card { animation: none; }
 }

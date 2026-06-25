@@ -87,6 +87,98 @@ export class CheckoutEngine {
         this.throwPoints(0, "Miss", false);
     }
 
+    submitTotalScore(total) {
+        if (!this.canPlay()) return;
+
+        const points = Math.max(0, Math.min(180, Math.round(Number(total) || 0)));
+        const player = this.players[this.currentPlayerIndex];
+
+        this.saveState();
+
+        this.throws.push({
+            playerName: player ? player.name : "Player",
+            playerIndex: this.currentPlayerIndex,
+            playerDartNumber: 1,
+            teamDartNumber: this.dartsUsed + 1,
+            points,
+            label: String(points),
+            isValidCheckoutFinish: true
+        });
+
+        this.dartsUsed += this.settings.dartsPerPlayerTurn;
+        this.currentPlayerTurnDarts = this.settings.dartsPerPlayerTurn;
+        const newRemaining = this.remainingScore - points;
+        this.remainingScore = newRemaining;
+        this.clearPlannedRoute();
+
+        if (newRemaining === 0) {
+            this.completeRound(true);
+            return;
+        }
+
+        if (newRemaining < 0) {
+            this.remainingScore = this.turnStartRemainingScore;
+            if (this.dartsUsed >= this.settings.maxDarts) {
+                this.completeRound(false, "Bust! Score too high. No darts left.");
+                return;
+            }
+            this.setLastResult("warning", `Bust! Score too high. Remaining stays at ${this.remainingScore}.`);
+            this.nextPlayer();
+            return;
+        }
+
+        if (this.dartsUsed >= this.settings.maxDarts) {
+            this.completeRound(false);
+            return;
+        }
+
+        this.nextPlayer();
+    }
+
+    failTarget() {
+        if (!this.canPlay()) return;
+
+        this.saveState();
+        this.clearPlannedRoute();
+
+        this.roundHistory.unshift({
+            round: this.round,
+            target: this.currentTarget,
+            result: "failed",
+            dartsUsed: this.dartsUsed,
+            throws: JSON.parse(JSON.stringify(this.throws))
+        });
+
+        const fallbackScore = this.settings.safehouseEnabled
+            ? this.safehouseScore
+            : Math.max(this.settings.startScore, this.currentTarget - 1);
+
+        this.currentTarget = fallbackScore;
+        this.setLastResult("failed", `Target failed. Back to ${fallbackScore}.`);
+
+        this.round++;
+
+        const nextPlayerIndex = (this.currentPlayerIndex + 1) % (this.players.length || 1);
+
+        if (this.isFinished()) {
+            this.status = "finished";
+            this.remainingScore = this.currentTarget;
+            this.throws = [];
+            this.dartsUsed = 0;
+            this.currentPlayerTurnDarts = 0;
+            this.currentPlayerIndex = nextPlayerIndex;
+            return;
+        }
+
+        this.remainingScore = this.currentTarget;
+        this.turnStartRemainingScore = this.currentTarget;
+        this.dartsUsed = 0;
+        this.currentPlayerTurnDarts = 0;
+        this.throws = [];
+        this.currentPlayerIndex = nextPlayerIndex;
+        this.status = "playing";
+    }
+
     throwPoints(points, label, isValidCheckoutFinish = false) {
         if (!this.canPlay()) {
             return;
@@ -191,7 +283,7 @@ export class CheckoutEngine {
         } else {
             const fallbackScore = this.settings.safehouseEnabled
                 ? this.safehouseScore
-                : this.previousTarget;
+                : Math.max(this.settings.startScore, this.currentTarget - 1);
 
             this.currentTarget = fallbackScore;
             this.setLastResult(
@@ -202,13 +294,15 @@ export class CheckoutEngine {
 
         this.round++;
 
+        const nextPlayerIndex = (this.currentPlayerIndex + 1) % (this.players.length || 1);
+
         if (this.isFinished()) {
             this.status = "finished";
             this.remainingScore = this.currentTarget;
             this.throws = [];
             this.dartsUsed = 0;
             this.currentPlayerTurnDarts = 0;
-            this.currentPlayerIndex = 0;
+            this.currentPlayerIndex = nextPlayerIndex;
             return;
         }
 
@@ -217,7 +311,7 @@ export class CheckoutEngine {
         this.dartsUsed = 0;
         this.currentPlayerTurnDarts = 0;
         this.throws = [];
-        this.currentPlayerIndex = 0;
+        this.currentPlayerIndex = nextPlayerIndex;
         this.status = "playing";
     }
 

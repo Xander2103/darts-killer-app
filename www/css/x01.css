@@ -1,0 +1,644 @@
+/* www/css/x01.css */
+
+/* =====================================================
+   X01 MODE — home screen card
+   ===================================================== */
+
+.mode-card-x01 {
+    border-color: rgba(34, 197, 94, 0.32);
+    background:
+        radial-gradient(circle at top left, rgba(34, 197, 94, 0.18), transparent 44%),
+        linear-gradient(180deg, rgba(10, 25, 15, 0.98), rgba(14, 14, 20, 0.98));
+}
+
+.mode-badge-x01 {
+    color: #f0fff4;
+    background: rgba(21, 128, 61, 0.85);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+/* =====================================================
+   X01 — setup screen
+   ===================================================== */
+
+.x01-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding-bottom: 2rem;
+}
+
+.x01-section-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 14px;
+    padding: 1rem;
+}
+
+.x01-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.6rem;
+}
+
+/* Pill buttons (score selection, legs) */
+.x01-pill-row {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.x01-pill {
+    flex: 1;
+    min-width: 60px;
+    padding: 0.55rem 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, border-color 0.15s;
+    font-family: inherit;
+}
+
+.x01-pill.active {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.6);
+    color: #86efac;
+}
+
+/* Toggle buttons (play type, finish rule) */
+.x01-toggle-row {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.x01-toggle-btn {
+    flex: 1;
+    padding: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    font-family: inherit;
+}
+
+.x01-toggle-btn.active {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.6);
+    color: #86efac;
+}
+
+/* Player list in setup */
+.x01-player-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.x01-player-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 0.5rem 0.6rem;
+}
+
+.x01-player-name-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-family: inherit;
+    min-width: 0;
+}
+
+.x01-player-name-input::placeholder {
+    color: var(--text-muted);
+}
+
+.x01-player-remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.2rem 0.3rem;
+    border-radius: 6px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color 0.12s;
+}
+
+.x01-player-remove-btn:hover:not(:disabled) {
+    color: #f87171;
+}
+
+.x01-player-remove-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.x01-add-player-btn {
+    width: 100%;
+    padding: 0.55rem;
+    background: transparent;
+    border: 1px dashed var(--border-card);
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    font-family: inherit;
+}
+
+.x01-add-player-btn:hover {
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #86efac;
+}
+
+/* Team setup */
+.x01-team-block {
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    padding: 0.7rem;
+    margin-bottom: 0.5rem;
+}
+
+.x01-team-name-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-card);
+    outline: none;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-family: inherit;
+    margin-bottom: 0.5rem;
+    padding: 0.2rem 0;
+    box-sizing: border-box;
+}
+
+.x01-team-name-input::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* Custom number inputs */
+.x01-custom-score-input {
+    width: 100%;
+    padding: 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 1rem;
+    font-family: inherit;
+    text-align: center;
+    margin-top: 0.5rem;
+    box-sizing: border-box;
+}
+
+.x01-custom-score-input:focus {
+    outline: none;
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+/* Start button */
+.x01-start-btn {
+    width: 100%;
+    padding: 0.9rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 14px;
+    background: rgba(34, 197, 94, 0.85);
+    color: #fff;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.x01-start-btn:hover {
+    background: rgba(34, 197, 94, 1);
+}
+
+.x01-error-msg {
+    color: #f87171;
+    font-size: 0.8rem;
+    min-height: 1.2em;
+    margin-bottom: 0.2rem;
+}
+
+/* =====================================================
+   X01 — gameplay screen
+   ===================================================== */
+
+.x01-game-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-bottom: 1.5rem;
+}
+
+/* Compact top scorebar */
+.x01-scorebar {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 12px;
+    padding: 0.6rem;
+}
+
+.x01-score-chip {
+    flex: 1;
+    min-width: 64px;
+    text-align: center;
+    padding: 0.35rem 0.3rem;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    transition: background 0.15s;
+}
+
+.x01-score-chip.active {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+.x01-score-chip-name {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90px;
+    margin: 0 auto;
+}
+
+.x01-score-chip-score {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+.x01-score-chip-legs {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+}
+
+/* Active player card */
+.x01-active-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 14px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.x01-active-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #86efac;
+    margin-bottom: 0.3rem;
+}
+
+.x01-active-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.4rem;
+}
+
+.x01-remaining-score {
+    font-size: 3.2rem;
+    font-weight: 900;
+    color: var(--text-main);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.02em;
+}
+
+.x01-checkout-hint {
+    display: inline-block;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 8px;
+    padding: 0.3rem 0.7rem;
+    margin-bottom: 0.3rem;
+}
+
+.x01-checkout-hint-label {
+    display: block;
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    margin-bottom: 0.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.x01-checkout-hint-route {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #86efac;
+}
+
+.x01-checkout-hint-helper {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+/* Score input card */
+.x01-input-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 14px;
+    padding: 0.8rem;
+}
+
+.x01-score-input {
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    background: transparent;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    color: var(--text-main);
+    font-family: inherit;
+    margin-bottom: 0.6rem;
+    box-sizing: border-box;
+}
+
+.x01-score-input:focus {
+    outline: none;
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+.x01-action-row {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.x01-btn-enter {
+    flex: 2;
+    padding: 0.8rem;
+    font-size: 1rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 10px;
+    background: rgba(34, 197, 94, 0.85);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.x01-btn-enter:hover {
+    background: rgba(34, 197, 94, 1);
+}
+
+.x01-btn-miss {
+    flex: 1;
+    padding: 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.x01-btn-miss:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+}
+
+.x01-btn-undo {
+    flex: 1;
+    padding: 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.x01-btn-undo:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+}
+
+.x01-btn-undo:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+/* Turn log */
+.x01-turn-log {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.x01-turn-log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-card);
+}
+
+.x01-turn-log-item.bust {
+    border-color: rgba(248, 113, 113, 0.25);
+}
+
+.x01-turn-log-name {
+    color: var(--text-muted);
+    max-width: 48%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.x01-turn-log-score {
+    font-weight: 700;
+    color: var(--text-main);
+    text-align: right;
+}
+
+.x01-turn-log-score.x01-turn-log-bust {
+    color: #f87171;
+}
+
+/* =====================================================
+   X01 — leg won / match won screens
+   ===================================================== */
+
+.x01-result-card {
+    background: var(--bg-card);
+    border: 2px solid rgba(34, 197, 94, 0.45);
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+}
+
+.x01-result-badge {
+    display: inline-block;
+    background: rgba(34, 197, 94, 0.18);
+    color: #86efac;
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    margin-bottom: 0.6rem;
+}
+
+.x01-result-winner {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--text-main);
+    margin: 0.3rem 0 0.2rem;
+}
+
+.x01-result-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.x01-legs-summary {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.x01-legs-chip {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+    padding: 0.3rem 0.7rem;
+    text-align: center;
+    min-width: 60px;
+}
+
+.x01-legs-chip-name {
+    color: var(--text-muted);
+    font-size: 0.65rem;
+}
+
+.x01-legs-chip-count {
+    font-weight: 800;
+    color: var(--text-main);
+    font-size: 0.85rem;
+}
+
+.x01-result-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.x01-btn-continue {
+    flex: 1;
+    max-width: 200px;
+    padding: 0.8rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 12px;
+    background: rgba(34, 197, 94, 0.85);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.x01-btn-continue:hover {
+    background: rgba(34, 197, 94, 1);
+}
+
+.x01-btn-rematch {
+    flex: 1;
+    max-width: 160px;
+    padding: 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid var(--border-card);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.x01-btn-rematch:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.x01-btn-back-menu {
+    flex: 1;
+    max-width: 160px;
+    padding: 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid var(--border-card);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.x01-btn-back-menu:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+}

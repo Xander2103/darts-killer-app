@@ -62,6 +62,12 @@ export const TRANSIT_ARENA_POWERUPS = [
         name: "Nuke",
         symbol: "☢",
         effectText: "All alive opponents immediately lose 2 HP. Applied on claim."
+    },
+    {
+        id: "maxAmmo",
+        name: "Max Ammo",
+        symbol: "🔴",
+        effectText: "Reset your remaining darts this turn back to full."
     }
 ];
 
@@ -84,4 +90,30 @@ export function matchesPowerUpSegment(hit, powerUpSegment) {
     if (!hit || !powerUpSegment) return false;
     if (hit === "B25" || hit === "B50" || hit === "MISS") return false;
     return hit === powerUpSegment;
+}
+
+export function getEligiblePowerUps(alivePlayers) {
+    if (!alivePlayers || alivePlayers.length === 0) return [];
+    return TRANSIT_ARENA_POWERUPS.filter(pu => {
+        switch (pu.id) {
+            case "quickRevive":  return alivePlayers.some(p => !p.quickRevive);
+            case "juggernog":    return alivePlayers.some(p => p.maxHp < 20 || p.hp < p.maxHp);
+            case "doubleTap":   return alivePlayers.some(p => !p.doubleTap);
+            case "speedCola":   return alivePlayers.some(p => !p.speedCola);
+            case "deadshot":    return alivePlayers.some(p => !p.deadshot);
+            case "shield":      return alivePlayers.some(p => p.shield < 5);
+            case "carpenter":   return alivePlayers.some(p => p.shield < 5);
+            case "widowWine":   return alivePlayers.some(p => !p.widowWine);
+            case "instaKill":   return alivePlayers.some(p => !p.instaKill);
+            case "nuke":        return alivePlayers.length >= 2;
+            case "maxAmmo":     return true;
+            default:            return true;
+        }
+    });
+}
+
+export function getRandomEligiblePowerUp(alivePlayers) {
+    const eligible = getEligiblePowerUps(alivePlayers);
+    if (eligible.length === 0) return null;
+    return eligible[Math.floor(Math.random() * eligible.length)];
 }

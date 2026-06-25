@@ -1,9 +1,8 @@
 // www/transitArena/transit-arena-engine.js
 
 import {
-    getRandomPowerUp,
+    getRandomEligiblePowerUp,
     getRandomPowerUpSegment,
-    matchesPowerUpSegment,
     getPowerUpById
 } from "./transit-arena-powerups.js";
 
@@ -22,19 +21,22 @@ export class TransitArenaEngine {
     reset() {
         this.players = [];
         this.currentPlayerIndex = 0;
+        this.numberSelectionIndex = 0;
         this.selectedTargetIndex = null;
         this.selectedMultiplier = 1;
         this.currentRound = 1;
         this.dartsThisTurn = 0;
         this.maxDartsThisTurn = BASE_DARTS;
         this.turnThrows = [];
-        this.activePowerUp = null;
-        this.powerUpSegment = null;
-        this.pendingPowerUpClaim = false;
-        this.pendingPowerUpPlayerIndex = null;
-        this.pendingPowerUp = null;
-        this.powerUpTurnsRemaining = 0;
-        this.roundsUntilNextPowerUp = this._randomPowerUpInterval();
+        // Power-ups: array of { uid, id, segment, turnsRemaining }
+        this.activePowerUps = [];
+        this.turnsUntilNextPowerUp = this._randomPowerUpTurnInterval();
+        this.currentTurnHadAction = false;
+        this._nextPowerUpUid = 0;
+        // Special events
+        this.activeSpecialEvent = null;     // null | "healers_round"
+        this.healerTurnsRemaining = 0;
+        this.roundsUntilNextHealerEvent = this._randomHealerInterval();
         this.history = [];
         this.status = "setup";
         this.winner = null;
@@ -50,6 +52,7 @@ export class TransitArenaEngine {
             maxHp: START_MAX_HP,
             shield: 0,
             isAlive: true,
+            targetNumber: null,
             quickRevive: false,
             doubleTap: false,
             speedCola: false,
@@ -57,9 +60,35 @@ export class TransitArenaEngine {
             widowWine: false,
             instaKill: false
         }));
-        this.status = "playing";
-        const opponents = this.getAliveOpponentIndexes();
-        this.selectedTargetIndex = opponents.length > 0 ? opponents[0] : null;
+        this.numberSelectionIndex = 0;
+        this.status = "numberSelection";
+    }
+
+    // ─── Number selection phase ──────────────────────────────────────────────
+
+    confirmPlayerNumber(number) {
+        const n = Number(number);
+        if (!Number.isInteger(n) || n < 1 || n > 20) {
+            return { success: false, message: "Enter a number between 1 and 20." };
+        }
+        const taken = this.players.some(
+            (p, i) => i !== this.numberSelectionIndex && p.targetNumber === n
+        );
+        if (taken) {
+            return { success: false, message: "That number is already taken. Choose another." };
+        }
+
+        this.saveState();
+        this.players[this.numberSelectionIndex].targetNumber = n;
+        this.numberSelectionIndex++;
+
+        if (this.numberSelectionIndex >= this.players.length) {
+            this.status = "playing";
+            const opponents = this.getAliveOpponentIndexes();
+            this.selectedTargetIndex = opponents.length > 0 ? opponents[0] : null;
+        }
+
+        return { success: true };
     }
 
     // ─── Player / target helpers ─────────────────────────────────────────────
@@ -175,7 +204,6 @@ export class TransitArenaEngine {
             type: "throw",
             segment,
             powerUpSpawned: false,
-            powerUpUnlocked: false,
             powerUpExpired: false,
             claimed: false,
             matchFinished: false,
@@ -194,8 +222,9 @@ export class TransitArenaEngine {
 
         this.saveState();
 
-        // Calculate damage with attacker power-ups
-        let damage = segmentMultiplier;
+        const segmentNumber = parseInt(segment.slice(1), 10);
+        const isAttack = segmentNumber === target.targetNumber;
+        let damage = isAttack ? segmentMultiplier : 0;
         const willUseDoubleTap = currentPlayer.doubleTap && damage > 0;
         const willUseDeadshot = currentPlayer.deadshot && damage > 0;
         const willUseInstaKill = currentPlayer.instaKill && damage > 0;
@@ -206,7 +235,6 @@ export class TransitArenaEngine {
 
         const dmg = this.applyDamage(target, damage, currentPlayer);
 
-        // Consume attacker power-ups only if the attack was not blocked
         if (!dmg.blockedByWidowWine) {
             if (willUseDoubleTap) currentPlayer.doubleTap = false;
             if (willUseDeadshot) currentPlayer.deadshot = false;
@@ -219,7 +247,6 @@ export class TransitArenaEngine {
 
         this.turnThrows.push({ label: segment, effect, value: damage });
 
-        // Build message
         if (dmg.blockedByWidowWine) {
             result.message = `${target.name}'s Widow's Wine blocked the attack!`;
         } else if (dmg.eliminated) {
@@ -237,24 +264,9 @@ export class TransitArenaEngine {
 
         this.lastResult = { type: "hit", message: result.message };
 
-        // Check if segment unlocks the active power-up
-        if (
-            this.activePowerUp !== null &&
-            !this.pendingPowerUpClaim &&
-            matchesPowerUpSegment(segment, this.powerUpSegment)
-        ) {
-            this.pendingPowerUpClaim = true;
-            this.pendingPowerUpPlayerIndex = this.currentPlayerIndex;
-            this.pendingPowerUp = this.activePowerUp;
-            result.powerUpUnlocked = true;
-            const puName = getPowerUpById(this.activePowerUp)?.name || this.activePowerUp;
-            result.message += ` ${currentPlayer.name} unlocked ${puName}! Tap the coin to claim.`;
-            this.lastResult.message = result.message;
-        }
-
+        this.currentTurnHadAction = true;
         this.dartsThisTurn++;
 
-        // Check winner before advancing turn
         if (this.checkWinner()) {
             result.matchFinished = true;
             return result;
@@ -262,82 +274,57 @@ export class TransitArenaEngine {
 
         if (this.dartsThisTurn >= this.maxDartsThisTurn) {
             const endResult = this._endTurn();
-            result.powerUpSpawned = endResult.powerUpSpawned;
+            result.powerUpSpawned = result.powerUpSpawned || endResult.powerUpSpawned;
             result.powerUpExpired = endResult.powerUpExpired;
+            if (endResult.spawnedPowerUpId) result.spawnedPowerUpId = endResult.spawnedPowerUpId;
         }
 
         return result;
     }
 
+    throwSegmentAtTarget(segment, targetIndex) {
+        if (this.status !== "playing") return { type: "idle" };
+        const idx = Number(targetIndex);
+        const target = this.players[idx];
+        if (!target || !target.isAlive || idx === this.currentPlayerIndex) {
+            return { type: "idle", message: "Invalid target." };
+        }
+        this.selectedTargetIndex = idx;
+        return this.throwSegment(segment);
+    }
+
     throwBull(type) {
         if (this.status !== "playing") return { type: "idle" };
 
-        const damage = type === "bull" ? 5 : 2;
+        // B50: +3 shield, B25: +1 shield
+        const shieldGain = type === "bull" ? 3 : 1;
         const label = type === "bull" ? "B50" : "B25";
 
         const result = {
             type: "throw",
             powerUpSpawned: false,
-            powerUpUnlocked: false,
             powerUpExpired: false,
             claimed: false,
             matchFinished: false,
             message: ""
         };
 
-        this._ensureValidTarget();
-        const currentPlayer = this.players[this.currentPlayerIndex];
-        const target = this.players[this.selectedTargetIndex];
-
-        if (!target) {
-            result.message = "No valid target selected.";
-            this.lastResult = { type: "miss", message: result.message };
-            return result;
-        }
-
         this.saveState();
 
-        let totalDamage = damage;
-        const willUseDoubleTap = currentPlayer.doubleTap && totalDamage > 0;
-        const willUseDeadshot = currentPlayer.deadshot && totalDamage > 0;
-        const willUseInstaKill = currentPlayer.instaKill && totalDamage > 0;
+        const currentPlayer = this.players[this.currentPlayerIndex];
+        const oldShield = currentPlayer.shield;
+        currentPlayer.shield = Math.min(currentPlayer.shield + shieldGain, MAX_SHIELD);
+        const gained = currentPlayer.shield - oldShield;
 
-        if (willUseDoubleTap) totalDamage *= 2;
-        if (willUseDeadshot) totalDamage += 2;
-        if (willUseInstaKill) totalDamage += 5;
+        this.turnThrows.push({ label, effect: "shield", value: gained });
 
-        const dmg = this.applyDamage(target, totalDamage, currentPlayer);
+        result.message = gained > 0
+            ? `${label} — ${currentPlayer.name} gained ${gained} shield (${currentPlayer.shield}/${MAX_SHIELD}).`
+            : `${label} — shield already full.`;
 
-        if (!dmg.blockedByWidowWine) {
-            if (willUseDoubleTap) currentPlayer.doubleTap = false;
-            if (willUseDeadshot) currentPlayer.deadshot = false;
-            if (willUseInstaKill) currentPlayer.instaKill = false;
-        }
+        this.lastResult = { type: "shield", message: result.message };
 
-        const effect = dmg.blockedByWidowWine
-            ? "blocked"
-            : (dmg.shieldDamage > 0 || dmg.hpDamage > 0) ? "damage" : "none";
-
-        this.turnThrows.push({ label, effect, value: totalDamage });
-
-        // Bulls do NOT unlock power-up segments
-        if (dmg.blockedByWidowWine) {
-            result.message = `${target.name}'s Widow's Wine blocked the ${label}!`;
-        } else if (dmg.eliminated) {
-            result.message = `${label} — ${target.name} eliminated!`;
-        } else if (dmg.revived) {
-            result.message = `${label} — ${target.name} revived by Quick Revive (3 HP)!`;
-        } else if (dmg.shieldDamage > 0 || dmg.hpDamage > 0) {
-            const parts = [];
-            if (dmg.shieldDamage > 0) parts.push(`${dmg.shieldDamage} shield`);
-            if (dmg.hpDamage > 0) parts.push(`${dmg.hpDamage} HP`);
-            result.message = `${label} — ${parts.join(" + ")} damage to ${target.name}.`;
-        } else {
-            result.message = `${label} — no damage.`;
-        }
-
-        this.lastResult = { type: "hit", message: result.message };
-
+        this.currentTurnHadAction = true;
         this.dartsThisTurn++;
 
         if (this.checkWinner()) {
@@ -347,9 +334,82 @@ export class TransitArenaEngine {
 
         if (this.dartsThisTurn >= this.maxDartsThisTurn) {
             const endResult = this._endTurn();
-            result.powerUpSpawned = endResult.powerUpSpawned;
+            result.powerUpSpawned = result.powerUpSpawned || endResult.powerUpSpawned;
             result.powerUpExpired = endResult.powerUpExpired;
+            if (endResult.spawnedPowerUpId) result.spawnedPowerUpId = endResult.spawnedPowerUpId;
         }
+
+        return result;
+    }
+
+    throwHealSelf(prefix) {
+        if (this.status !== "playing") return { type: "idle" };
+        if (this.activeSpecialEvent !== "healers_round") return { type: "idle" };
+
+        const prefixMap = { S: 1, D: 2, T: 3 };
+        const multiplier = prefixMap[prefix] || 1;
+        const currentPlayer = this.players[this.currentPlayerIndex];
+        const healSeg = `${prefix}${currentPlayer.targetNumber}`;
+
+        const result = {
+            type: "throw",
+            powerUpSpawned: false,
+            powerUpExpired: false,
+            claimed: false,
+            matchFinished: false,
+            message: ""
+        };
+
+        this.saveState();
+
+        const oldHp = currentPlayer.hp;
+        currentPlayer.hp = Math.min(currentPlayer.hp + multiplier, currentPlayer.maxHp);
+        const gained = currentPlayer.hp - oldHp;
+
+        this.turnThrows.push({ label: healSeg, effect: "heal", value: gained });
+
+        result.message = gained > 0
+            ? `${healSeg} — ${currentPlayer.name} healed +${gained} HP (${currentPlayer.hp}/${currentPlayer.maxHp}).`
+            : `${healSeg} — ${currentPlayer.name} is already at full HP.`;
+
+        this.lastResult = { type: "heal", message: result.message };
+
+        this.currentTurnHadAction = true;
+        this.dartsThisTurn++;
+
+        if (this.dartsThisTurn >= this.maxDartsThisTurn) {
+            const endResult = this._endTurn();
+            result.powerUpSpawned = result.powerUpSpawned || endResult.powerUpSpawned;
+            result.powerUpExpired = endResult.powerUpExpired;
+            if (endResult.spawnedPowerUpId) result.spawnedPowerUpId = endResult.spawnedPowerUpId;
+        }
+
+        return result;
+    }
+
+    endTurnManually() {
+        if (this.status !== "playing") return { type: "idle" };
+
+        this.saveState();
+
+        const currentPlayer = this.players[this.currentPlayerIndex];
+        const result = {
+            type: "endTurn",
+            powerUpSpawned: false,
+            powerUpExpired: false,
+            claimed: false,
+            matchFinished: false,
+            message: `${currentPlayer.name} ended their turn.`
+        };
+
+        this.lastResult = { type: "endTurn", message: result.message };
+
+        // Counts as a played turn regardless of darts thrown
+        this.currentTurnHadAction = true;
+        const endResult = this._endTurn();
+        result.powerUpSpawned = endResult.powerUpSpawned;
+        result.powerUpExpired = endResult.powerUpExpired;
+        if (endResult.spawnedPowerUpId) result.spawnedPowerUpId = endResult.spawnedPowerUpId;
 
         return result;
     }
@@ -362,7 +422,6 @@ export class TransitArenaEngine {
         const result = {
             type: "throw",
             powerUpSpawned: false,
-            powerUpUnlocked: false,
             powerUpExpired: false,
             claimed: false,
             matchFinished: false,
@@ -372,12 +431,14 @@ export class TransitArenaEngine {
         this.turnThrows.push({ label: "Miss", effect: "none", value: 0 });
         this.lastResult = { type: "miss", message: "Miss — 0 damage." };
 
+        this.currentTurnHadAction = true;
         this.dartsThisTurn++;
 
         if (this.dartsThisTurn >= this.maxDartsThisTurn) {
             const endResult = this._endTurn();
-            result.powerUpSpawned = endResult.powerUpSpawned;
+            result.powerUpSpawned = result.powerUpSpawned || endResult.powerUpSpawned;
             result.powerUpExpired = endResult.powerUpExpired;
+            if (endResult.spawnedPowerUpId) result.spawnedPowerUpId = endResult.spawnedPowerUpId;
         }
 
         return result;
@@ -385,7 +446,8 @@ export class TransitArenaEngine {
 
     // ─── Power-up claim ──────────────────────────────────────────────────────
 
-    claimPendingPowerUp() {
+    claimPowerUp(uid) {
+        const idx = this.activePowerUps.findIndex(p => p.uid === uid);
         const result = {
             claimed: false,
             powerUpName: null,
@@ -393,41 +455,35 @@ export class TransitArenaEngine {
             matchFinished: false,
             message: ""
         };
-
-        if (!this.pendingPowerUpClaim || this.pendingPowerUpPlayerIndex === null) {
-            return result;
-        }
+        if (idx === -1) return result;
 
         this.saveState();
 
-        const claimingPlayer = this.players[this.pendingPowerUpPlayerIndex];
-        const powerUpId = this.pendingPowerUp;
-        const powerUp = getPowerUpById(powerUpId);
+        const puEntry = this.activePowerUps[idx];
+        const powerUp = getPowerUpById(puEntry.id);
+        const claimingPlayer = this.players[this.currentPlayerIndex];
 
         result.claimed = true;
-        result.powerUpName = powerUp?.name || powerUpId;
+        result.powerUpName = powerUp?.name || puEntry.id;
         result.playerName = claimingPlayer.name;
         result.message = `${claimingPlayer.name} claimed ${result.powerUpName}!`;
 
-        this._applyPowerUpEffect(powerUpId, claimingPlayer);
-
-        // Clear all power-up state
-        this.activePowerUp = null;
-        this.powerUpSegment = null;
-        this.pendingPowerUpClaim = false;
-        this.pendingPowerUpPlayerIndex = null;
-        this.pendingPowerUp = null;
-        this.powerUpTurnsRemaining = 0;
-
-        this.scheduleNextPowerUp();
+        this._applyPowerUpEffect(puEntry.id, claimingPlayer);
+        this.activePowerUps.splice(idx, 1);
 
         this.lastResult = { type: "powerUpClaimed", message: result.message };
 
-        if (this.checkWinner()) {
-            result.matchFinished = true;
-        }
+        if (this.checkWinner()) result.matchFinished = true;
 
         return result;
+    }
+
+    // Backwards-compat: claims first active power-up
+    claimPowerUpDirectly() {
+        if (this.activePowerUps.length === 0) {
+            return { claimed: false, powerUpName: null, playerName: null, matchFinished: false, message: "" };
+        }
+        return this.claimPowerUp(this.activePowerUps[0].uid);
     }
 
     _applyPowerUpEffect(powerUpId, player) {
@@ -435,40 +491,31 @@ export class TransitArenaEngine {
             case "quickRevive":
                 player.quickRevive = true;
                 break;
-
             case "juggernog":
                 player.maxHp = Math.min(player.maxHp + 2, ABSOLUTE_MAX_HP);
                 player.hp = Math.min(player.hp + 5, player.maxHp);
                 break;
-
             case "doubleTap":
                 player.doubleTap = true;
                 break;
-
             case "speedCola":
                 player.speedCola = true;
                 break;
-
             case "deadshot":
                 player.deadshot = true;
                 break;
-
             case "shield":
                 player.shield = Math.min(player.shield + 3, MAX_SHIELD);
                 break;
-
             case "carpenter":
                 player.shield = MAX_SHIELD;
                 break;
-
             case "widowWine":
                 player.widowWine = true;
                 break;
-
             case "instaKill":
                 player.instaKill = true;
                 break;
-
             case "nuke": {
                 const claimerIndex = this.players.indexOf(player);
                 this.players.forEach((p, idx) => {
@@ -478,45 +525,36 @@ export class TransitArenaEngine {
                 });
                 break;
             }
+            case "maxAmmo":
+                // Reset darts used this turn — remaining darts become maxDartsThisTurn
+                this.dartsThisTurn = 0;
+                break;
         }
     }
 
     // ─── Power-up lifecycle ──────────────────────────────────────────────────
 
-    spawnPowerUp() {
-        const pu = getRandomPowerUp();
+    _spawnPowerUpNow() {
+        const pu = getRandomEligiblePowerUp(this.getAlivePlayers());
+        if (!pu) return null;
         const seg = getRandomPowerUpSegment();
-        this.activePowerUp = pu.id;
-        this.powerUpSegment = seg;
-        this.powerUpTurnsRemaining = 1;
-        this.pendingPowerUpClaim = false;
-        this.pendingPowerUpPlayerIndex = null;
-        this.pendingPowerUp = null;
-    }
-
-    expirePowerUp() {
-        this.activePowerUp = null;
-        this.powerUpSegment = null;
-        this.powerUpTurnsRemaining = 0;
-        this.pendingPowerUpClaim = false;
-        this.pendingPowerUpPlayerIndex = null;
-        this.pendingPowerUp = null;
-        this.scheduleNextPowerUp();
-    }
-
-    scheduleNextPowerUp() {
-        this.roundsUntilNextPowerUp = this._randomPowerUpInterval();
-    }
-
-    coinInfo() {
-        // Display-only hint; no saveState
-        const seg = this.powerUpSegment || "—";
+        const turnsRemaining = this.getAlivePlayers().length * 2;
+        this.activePowerUps.push({
+            uid: this._nextPowerUpUid++,
+            id: pu.id,
+            segment: seg,
+            turnsRemaining
+        });
         this.lastResult = {
-            type: "hint",
-            message: this.activePowerUp
-                ? `Hit ${seg} first to unlock this power-up.`
-                : "No active power-up."
+            type: "powerUpSpawned",
+            message: `Power-up appeared: ${pu.name}! Hit ${seg} to claim.`
         };
+        return pu.id; // caller uses this to select the correct spawn sound
+    }
+
+    // Legacy public method
+    spawnPowerUp() {
+        this._spawnPowerUpNow();
     }
 
     // ─── Winner check ────────────────────────────────────────────────────────
@@ -534,14 +572,59 @@ export class TransitArenaEngine {
     // ─── Turn / round advancement ────────────────────────────────────────────
 
     _endTurn() {
-        const result = { powerUpSpawned: false, powerUpExpired: false };
+        const result = { powerUpSpawned: false, powerUpExpired: false, healersRoundEnded: false, spawnedPowerUpId: null };
 
-        // Record that the current player completed a turn this round
+        // Record current player's completed turn
         if (!this.playersWhoTookTurnThisRound.includes(this.currentPlayerIndex)) {
             this.playersWhoTookTurnThisRound.push(this.currentPlayerIndex);
         }
 
-        // Check full round: every currently-alive player has had a turn
+        // Decrement power-up turn counters per turn (not per round)
+        const expiredNames = [];
+        this.activePowerUps = this.activePowerUps.filter(pu => {
+            pu.turnsRemaining--;
+            if (pu.turnsRemaining <= 0) {
+                expiredNames.push(getPowerUpById(pu.id)?.name || pu.id);
+                return false;
+            }
+            return true;
+        });
+        if (expiredNames.length > 0) {
+            result.powerUpExpired = true;
+            this.lastResult = { type: "powerUpExpired", message: `${expiredNames.join(", ")} expired.` };
+        }
+
+        // Spawn power-up after a counted played turn
+        if (this.currentTurnHadAction) {
+            this.turnsUntilNextPowerUp--;
+            if (this.turnsUntilNextPowerUp <= 0) {
+                this.turnsUntilNextPowerUp = this._randomPowerUpTurnInterval();
+                if (this.activePowerUps.length < 2) {
+                    const spawnedId = this._spawnPowerUpNow();
+                    if (spawnedId) {
+                        result.powerUpSpawned = true;
+                        result.spawnedPowerUpId = spawnedId;
+                    }
+                }
+            }
+        }
+        this.currentTurnHadAction = false;
+
+        // Decrement healer's round turns per turn
+        if (this.activeSpecialEvent === "healers_round") {
+            this.healerTurnsRemaining--;
+            if (this.healerTurnsRemaining <= 0) {
+                this.activeSpecialEvent = null;
+                this.healerTurnsRemaining = 0;
+                this.roundsUntilNextHealerEvent = this._randomHealerInterval();
+                result.healersRoundEnded = true;
+                if (!result.powerUpExpired) {
+                    this.lastResult = { type: "event", message: "Healer's Round ended." };
+                }
+            }
+        }
+
+        // Check if full round completed
         const alivePlayers = this.getAlivePlayers();
         const allHadTurn = alivePlayers.every(p => {
             const idx = this.players.indexOf(p);
@@ -552,24 +635,18 @@ export class TransitArenaEngine {
             this.currentRound++;
             this.playersWhoTookTurnThisRound = [];
 
-            let justExpired = false;
-
-            // Decrement power-up timer only when active and not pending claim
-            if (this.activePowerUp !== null && !this.pendingPowerUpClaim) {
-                this.powerUpTurnsRemaining--;
-                if (this.powerUpTurnsRemaining <= 0) {
-                    this.expirePowerUp();
-                    result.powerUpExpired = true;
-                    justExpired = true;
-                }
-            }
-
-            // Spawn check — skip if we just scheduled via expiry
-            if (this.activePowerUp === null && !justExpired) {
-                this.roundsUntilNextPowerUp--;
-                if (this.roundsUntilNextPowerUp <= 0) {
-                    this.spawnPowerUp();
-                    result.powerUpSpawned = true;
+            // Schedule Healer's Round at end of full rounds
+            if (this.activeSpecialEvent === null) {
+                this.roundsUntilNextHealerEvent--;
+                if (this.roundsUntilNextHealerEvent <= 0) {
+                    this.activeSpecialEvent = "healers_round";
+                    this.healerTurnsRemaining = this.getAlivePlayers().length;
+                    if (!result.powerUpExpired && !result.healersRoundEnded) {
+                        this.lastResult = {
+                            type: "event",
+                            message: "Healer's Round begins! Hit your own number to heal."
+                        };
+                    }
                 }
             }
         }
@@ -589,7 +666,6 @@ export class TransitArenaEngine {
             this.maxDartsThisTurn = BASE_DARTS;
         }
 
-        // Ensure the next player has a valid target
         this._ensureValidTarget();
 
         return result;
@@ -601,19 +677,20 @@ export class TransitArenaEngine {
         this.history.push({
             players: JSON.parse(JSON.stringify(this.players)),
             currentPlayerIndex: this.currentPlayerIndex,
+            numberSelectionIndex: this.numberSelectionIndex,
             selectedTargetIndex: this.selectedTargetIndex,
             selectedMultiplier: this.selectedMultiplier,
             currentRound: this.currentRound,
             dartsThisTurn: this.dartsThisTurn,
             maxDartsThisTurn: this.maxDartsThisTurn,
             turnThrows: JSON.parse(JSON.stringify(this.turnThrows)),
-            activePowerUp: this.activePowerUp,
-            powerUpSegment: this.powerUpSegment,
-            pendingPowerUpClaim: this.pendingPowerUpClaim,
-            pendingPowerUpPlayerIndex: this.pendingPowerUpPlayerIndex,
-            pendingPowerUp: this.pendingPowerUp,
-            powerUpTurnsRemaining: this.powerUpTurnsRemaining,
-            roundsUntilNextPowerUp: this.roundsUntilNextPowerUp,
+            activePowerUps: JSON.parse(JSON.stringify(this.activePowerUps)),
+            turnsUntilNextPowerUp: this.turnsUntilNextPowerUp,
+            currentTurnHadAction: this.currentTurnHadAction,
+            _nextPowerUpUid: this._nextPowerUpUid,
+            activeSpecialEvent: this.activeSpecialEvent,
+            healerTurnsRemaining: this.healerTurnsRemaining,
+            roundsUntilNextHealerEvent: this.roundsUntilNextHealerEvent,
             status: this.status,
             winner: this.winner,
             lastResult: this.lastResult ? { ...this.lastResult } : null,
@@ -629,7 +706,11 @@ export class TransitArenaEngine {
 
     // ─── Private helpers ─────────────────────────────────────────────────────
 
-    _randomPowerUpInterval() {
-        return Math.floor(Math.random() * 4) + 3; // 3–6
+    _randomPowerUpTurnInterval() {
+        return Math.floor(Math.random() * 13) + 3; // 3–15 played turns
+    }
+
+    _randomHealerInterval() {
+        return Math.floor(Math.random() * 5) + 6; // 6–10 rounds
     }
 }

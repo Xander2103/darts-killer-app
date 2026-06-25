@@ -19,8 +19,8 @@ export const drinkingChallenges = [
     },
     {
         title: "Bull or Drink",
-        description: "Try to hit the bull. Outer bull counts, inner bull counts double.",
-        success: "Give 6 sips.",
+        description: "Try to hit the bull.",
+        success: "Outer Bull (25): give out 3 sips. Inner Bull (50): give out 6 sips.",
         fail: "Take 1 sip."
     },
     {
@@ -92,8 +92,8 @@ export const drinkingChallenges = [
     {
         title: "Shanghai",
         description: "Choose a number. Hit single, double and triple of that number.",
-        success: "Everyone else takes 3 sips.",
-        fail: "Take 2 sips."
+        success: "Give out 4 sips.",
+        fail: "Take 1 sip."
     },
     {
         title: "Highest Score",
@@ -193,7 +193,7 @@ export const drinkingChallenges = [
     },
     {
         title: "Green Machine",
-        description: "Hit green scoring segments with all 3 darts.",
+        description: "Hit at least 1 green scoring segment.",
         success: "Give 5 sips.",
         fail: "Take 1 sip."
     },

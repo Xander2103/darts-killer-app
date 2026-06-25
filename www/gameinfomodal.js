@@ -108,31 +108,39 @@ const infoContentByMode = {
         `
     },
     transitArena: {
-        title: "Transit Arena",
+        title: "How Transit Arena Works",
         body: `
             <section class="info-section">
                 <h3>HP Battle Royale</h3>
-                <p>All players start with <strong>10 HP</strong>. Attack opponents to drain their HP. Last player alive wins.</p>
+                <p>All players start with <strong>10 HP</strong>. Last player standing wins.</p>
             </section>
             <section class="info-section">
-                <h3>Attack</h3>
-                <p>Hit a number to deal damage to your selected target. Single = −1 HP · Double = −2 HP · Triple = −3 HP. Bull 25 = −2 HP · Bull 50 = −5 HP.</p>
+                <h3>Target Numbers</h3>
+                <p>Before the match starts, every player throws one dart with their weak hand and enters the number they hit. This becomes their personal target number — the number opponents must hit to deal damage to them.</p>
+            </section>
+            <section class="info-section">
+                <h3>Active Player</h3>
+                <p>The current player's card is highlighted with an orange glow and a <strong>TURN</strong> badge. Low-HP players have a subtle red tint but the active-player glow always takes priority.</p>
+            </section>
+            <section class="info-section">
+                <h3>Attacking</h3>
+                <p>Each alive opponent has direct <strong>S / D / T</strong> attack buttons. Single = −1 HP · Double = −2 HP · Triple = −3 HP. Shield absorbs damage before HP.</p>
+            </section>
+            <section class="info-section">
+                <h3>Bulls — Shield</h3>
+                <p><strong>Outer Bull 25</strong> gives YOU +1 shield. <strong>Bull 50</strong> gives YOU +3 shield. Bulls do not damage opponents. Max shield is 5.</p>
+            </section>
+            <section class="info-section">
+                <h3>Healer's Round</h3>
+                <p>Occasionally the arena enters a Healer's Round. Every player gets one turn to heal by hitting their own target number: Single = +1 HP · Double = +2 HP · Triple = +3 HP. HP cannot exceed your maximum. Normal attacks still work during Healer's Round.</p>
             </section>
             <section class="info-section">
                 <h3>Power-Ups</h3>
-                <p>A glowing segment appears periodically on the board. Hit it to unlock the power-up — then tap the coin icon to claim it.</p>
-            </section>
-            <section class="info-section">
-                <h3>Shields</h3>
-                <p>Some power-ups grant shield points that absorb incoming damage before HP is lost.</p>
-            </section>
-            <section class="info-section">
-                <h3>Target &amp; Multiplier</h3>
-                <p>Tap a player card to change your target. Use the <strong>S / D / T</strong> row to set your multiplier before throwing.</p>
+                <p>Power-up coins spawn after a random number of played turns (3–15). Only turns where you actually throw at least one dart count — skipping with Next Turn does not advance the counter. Up to 2 coins can be active at once. Each coin shows a segment to hit (e.g. D7) and how many turns it has left. Physically throw that dart — if you hit it, tap the spinning coin to claim it. The app trusts your aim. Unclaimed coins expire after 2 turns per alive player.</p>
             </section>
             <section class="info-section">
                 <h3>Undo</h3>
-                <p>Tap <strong>↶ Undo</strong> to reverse your last throw, including power-up claims.</p>
+                <p>Tap <strong>↶ Undo</strong> (orange, top right) to reverse your last throw — including shield gains, heals, and power-up claims.</p>
             </section>
         `
     },

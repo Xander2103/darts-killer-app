@@ -2608,6 +2608,228 @@ body.theme-clean .clickable-setting * {
 }
 
 /* =====================================================
+   121 CHECKOUT — COMPACT MOBILE LAYOUT
+   ===================================================== */
+
+.checkout-header-bar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+}
+
+.checkout-header-bar .checkout-round-pill {
+    text-align: center;
+}
+
+/* Player column in score grid */
+.checkout-score-box-player {
+    border-color: rgba(255, 155, 34, 0.42);
+    background: rgba(255, 155, 34, 0.10);
+}
+
+.checkout-score-box-player strong {
+    display: block;
+    font-family: inherit;
+    font-size: 0.95rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+@keyframes checkout-player-pulse {
+    0%, 100% { text-shadow: 0 0 0 rgba(255, 155, 34, 0); }
+    50% { text-shadow: 0 0 10px rgba(255, 155, 34, 0.65); }
+}
+
+.checkout-player-pulse {
+    animation: checkout-player-pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .checkout-player-pulse { animation: none; }
+}
+
+/* Total score input */
+.checkout-total-area {
+    margin-top: 0.65rem;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.checkout-total-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+}
+
+.checkout-total-input {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 1rem;
+    border: 1px solid rgba(255, 155, 34, 0.45);
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.28);
+    color: var(--text-main);
+    font: inherit;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.checkout-total-input::-webkit-outer-spin-button,
+.checkout-total-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.checkout-total-input:focus {
+    outline: none;
+    border-color: rgba(255, 155, 34, 0.80);
+    box-shadow: 0 0 14px rgba(255, 155, 34, 0.20);
+}
+
+.checkout-submit-btn {
+    min-height: 52px;
+    padding: 0 1.2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(200, 255, 170, 0.55);
+    background: linear-gradient(180deg, #c9ffa8, #9cf071);
+    color: #102014;
+    font-weight: 800;
+    font-size: 1rem;
+    white-space: nowrap;
+}
+
+.checkout-quick-btns {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.4rem;
+}
+
+.checkout-quick-btn {
+    min-height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(0, 0, 0, 0.22);
+    color: var(--text-soft);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+/* Result zone — reserved height so buttons stay fixed */
+.checkout-result-zone {
+    min-height: 2.6rem;
+    margin-top: 0.35rem;
+    display: flex;
+    align-items: stretch;
+}
+
+.checkout-result-zone > .checkout-result-box {
+    margin-top: 0;
+    width: 100%;
+}
+
+/* 3-dart turn visual */
+.checkout-turn-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.4rem;
+}
+
+.checkout-dart-slots {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.checkout-dart-slot {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 155, 34, 0.38);
+    background: rgba(255, 155, 34, 0.07);
+}
+
+.checkout-turn-label {
+    font-size: 0.72rem;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.checkout-darts-counter {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent, #ff9b22);
+    background: rgba(255, 155, 34, 0.12);
+    border: 1px solid rgba(255, 155, 34, 0.28);
+    border-radius: 20px;
+    padding: 0.12rem 0.55rem;
+    margin-left: 0.5rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+/* Lower action buttons */
+.checkout-lower-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.55rem;
+}
+
+.checkout-fail-btn {
+    min-height: 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 103, 103, 0.35);
+    background: rgba(89, 25, 25, 0.32);
+    color: #ffd1d1;
+    font-weight: 800;
+    font-size: 0.83rem;
+}
+
+.checkout-dart-toggle-btn {
+    min-height: 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.22);
+    color: var(--text-soft);
+    font-weight: 700;
+    font-size: 0.83rem;
+}
+
+/* Collapsible dart-by-dart panel */
+.checkout-dart-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 0.85rem;
+    border: 1px solid rgba(255, 155, 34, 0.22);
+    border-radius: 18px;
+    background: rgba(255, 155, 34, 0.04);
+}
+
+.checkout-dart-panel-header {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+/* Prevent throws panel from double-spacing inside the flex screen */
+.checkout-screen > .checkout-throws-panel {
+    margin-top: 0;
+}
+
+/* =====================================================
    DRINKING MODE - FINAL MOBILE OVERRIDE
    ===================================================== */
 

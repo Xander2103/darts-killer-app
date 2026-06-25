@@ -42,6 +42,7 @@ import {
     renderApp,
     renderDrinkMode,
     renderCheckoutMode,
+    resetCheckoutDartPanel,
     playerNameInput,
     addPlayerButton,
     startGameButton,
@@ -65,11 +66,13 @@ import { renderDuelMode } from "./duel/duel-ui.js";
 import { TransitArenaEngine } from "./transitArena/transit-arena-engine.js";
 import {
     renderTransitArenaMode,
-    playTransitPowerUpSpawnSound,
     playTransitPowerUpUnlockSound,
     playTransitPowerUpClaimSound,
     playTransitPowerUpExpireSound
 } from "./transitArena/transit-arena-ui.js";
+import { playTransitPowerUpSpawnSound } from "./transitArena/transit-arena-sounds.js";
+import { X01Engine } from "./x01/x01-engine.js";
+import { renderX01Mode, clearX01SetupState } from "./x01/x01-ui.js";
 
 const game = new KillerGame();
 const chaosEngine = new ChaosEngine(game);
@@ -77,6 +80,7 @@ const drinkEngine = new DrinkEngine();
 const checkoutEngine = new CheckoutEngine();
 const duelEngine = new DuelEngine();
 const transitArenaEngine = new TransitArenaEngine();
+const x01Engine = new X01Engine();
 let halveItGame = null;
 let halveItHistory = [];
 
@@ -117,6 +121,7 @@ const checkoutModeBtn = document.getElementById("checkoutModeBtn");
 const halveItModeBtn = document.getElementById("halveItModeBtn");
 const duelModeBtn = document.getElementById("duelModeBtn");
 const transitArenaModeBtn = document.getElementById("transitArenaModeBtn");
+const x01ModeBtn = document.getElementById("x01ModeBtn");
 
 const setupError = document.getElementById("setupError");
 
@@ -160,6 +165,8 @@ function resetGameToClassicSetup() {
     checkoutEngine.reset();
     duelEngine.reset();
     transitArenaEngine.reset();
+    x01Engine.reset();
+    clearX01SetupState();
     halveItGame = null;
     halveItHistory = [];
 
@@ -201,6 +208,8 @@ function resetGameCompletely() {
     checkoutEngine.reset();
     duelEngine.reset();
     transitArenaEngine.reset();
+    x01Engine.reset();
+    clearX01SetupState();
     halveItGame = null;
     halveItHistory = [];
 
@@ -251,6 +260,7 @@ function showDrinkChallenge() {
 function startCheckoutGame() {
     clearSetupError();
     checkoutEngine.start(game.players);
+    resetCheckoutDartPanel();
     game.phase = "game";
     game.isStarted = true;
 
@@ -464,7 +474,9 @@ function showDuelGame() {
 }
 
 function playTransitArenaResultSounds(result = {}) {
-    if (result.powerUpSpawned)  playTransitPowerUpSpawnSound();
+    if (result.powerUpSpawned && result.spawnedPowerUpId) {
+        playTransitPowerUpSpawnSound(result.spawnedPowerUpId);
+    }
     if (result.powerUpUnlocked) playTransitPowerUpUnlockSound();
     if (result.powerUpExpired)  playTransitPowerUpExpireSound();
     if (result.claimed)         playTransitPowerUpClaimSound();
@@ -503,6 +515,12 @@ function showTransitArenaGame() {
             showTransitArenaGame();
         },
 
+        onThrowSegmentAtTarget: (segment, targetIndex) => {
+            const result = transitArenaEngine.throwSegmentAtTarget(segment, targetIndex) || {};
+            playTransitArenaResultSounds(result);
+            showTransitArenaGame();
+        },
+
         onOuterBull: () => {
             const result = transitArenaEngine.throwBull("outer") || {};
             playTransitArenaResultSounds(result);
@@ -521,14 +539,29 @@ function showTransitArenaGame() {
             showTransitArenaGame();
         },
 
-        onClaimCoin: () => {
-            const result = transitArenaEngine.claimPendingPowerUp();
+        onNextTurn: () => {
+            const result = transitArenaEngine.endTurnManually() || {};
+            playTransitArenaResultSounds(result);
+            showTransitArenaGame();
+        },
+
+        onClaimCoin: (uid) => {
+            const result = transitArenaEngine.claimPowerUp(uid);
+            playTransitArenaResultSounds(result);
+            showTransitArenaGame();
+        },
+
+        onHealSelf: (prefix) => {
+            const result = transitArenaEngine.throwHealSelf(prefix) || {};
             playTransitArenaResultSounds(result);
             showTransitArenaGame();
         },
 
         onCoinInfo: () => {
-            transitArenaEngine.coinInfo();
+            showTransitArenaGame();
+        },
+
+        onNumberConfirmed: () => {
             showTransitArenaGame();
         },
 
@@ -582,6 +615,78 @@ function showTransitArenaGame() {
             game.phase = "setup";
             game.isStarted = false;
 
+            renderApp(game, {
+                resetGameCompletely,
+                showHomeScreen,
+                startCheckoutGame,
+                startHalveItGame,
+                startDuelGame,
+                startTransitArenaGame,
+                checkoutEngine
+            });
+        }
+    });
+}
+
+function showX01Mode() {
+    renderX01Mode(x01Engine, {
+        onStartMatch: (config) => {
+            x01Engine.start(config);
+            showX01Mode();
+        },
+        onRender: () => showX01Mode(),
+        onRematch: () => {
+            x01Engine.reset();
+            showX01Mode();
+        },
+        onBackToMenu: () => {
+            x01Engine.reset();
+            clearX01SetupState();
+            game.phase = "setup";
+            game.isStarted = false;
+            resetGameCompletely();
+            showHomeScreen();
+            renderApp(game, {
+                resetGameCompletely,
+                showHomeScreen,
+                startCheckoutGame,
+                startHalveItGame,
+                startDuelGame,
+                startTransitArenaGame,
+                checkoutEngine
+            });
+        },
+        onBack: () => {
+            if (x01Engine.status === "matchWon") {
+                x01Engine.reset();
+                clearX01SetupState();
+                game.phase = "setup";
+                game.isStarted = false;
+                resetGameCompletely();
+                showHomeScreen();
+                renderApp(game, {
+                    resetGameCompletely,
+                    showHomeScreen,
+                    startCheckoutGame,
+                    startHalveItGame,
+                    startDuelGame,
+                    startTransitArenaGame,
+                    checkoutEngine
+                });
+                return;
+            }
+
+            if (x01Engine.status !== "setup") {
+                const isSure = confirm("Stop the current X01 match?");
+                if (!isSure) return;
+            }
+
+            x01Engine.reset();
+            clearX01SetupState();
+            game.phase = "setup";
+            game.isStarted = false;
+            resetGameCompletely();
+            showHomeScreen();
             renderApp(game, {
                 resetGameCompletely,
                 showHomeScreen,
@@ -789,6 +894,21 @@ if (transitArenaModeBtn) {
     });
 }
 
+if (x01ModeBtn) {
+    x01ModeBtn.addEventListener("click", () => {
+        resetGameCompletely();
+        x01Engine.reset();
+        game.setGameMode("x01");
+        document.body.dataset.currentMode = "x01";
+        // Set phase to "game" immediately so the global backToHomeButton handler
+        // defers to x01-ui.js's own onclick (same pattern as duel/transitArena).
+        game.phase = "game";
+        game.isStarted = true;
+        showClassicScreen();
+        showX01Mode();
+    });
+}
+
 drinkModeBtn.addEventListener("click", () => {
     resetGameCompletely();
     game.setGameMode("drink");
@@ -802,6 +922,11 @@ drinkModeBtn.addEventListener("click", () => {
 });
 
 backToHomeButton.addEventListener("click", () => {
+    if (game.gameMode === "x01" && game.phase === "game") {
+        // X01 manages its own back button via backToHomeButton.onclick in x01-ui.js
+        return;
+    }
+
     if (game.gameMode === "drink") {
         resetGameCompletely();
         showHomeScreen();
