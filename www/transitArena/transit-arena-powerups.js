@@ -79,10 +79,14 @@ export function getRandomPowerUp() {
     return TRANSIT_ARENA_POWERUPS[Math.floor(Math.random() * TRANSIT_ARENA_POWERUPS.length)];
 }
 
-export function getRandomPowerUpSegment() {
+// occupiedNumbers: array of base numbers (1-20) assigned to players — never used for power-up segments
+export function getRandomPowerUpSegment(occupiedNumbers = []) {
+    const allNums = Array.from({ length: 20 }, (_, i) => i + 1);
+    const validNums = allNums.filter(n => !occupiedNumbers.includes(n));
+    if (validNums.length === 0) return null;
     const r = Math.random();
     const prefix = r < 0.20 ? "S" : r < 0.65 ? "D" : "T";
-    const num = Math.floor(Math.random() * 20) + 1;
+    const num = validNums[Math.floor(Math.random() * validNums.length)];
     return prefix + num;
 }
 

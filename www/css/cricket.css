@@ -112,6 +112,34 @@
     cursor: default;
 }
 
+.cricket-order-btn {
+    background: transparent;
+    border: 1px solid var(--border-card);
+    color: var(--text-muted);
+    border-radius: 7px;
+    padding: 0.28rem 0.5rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: inherit;
+    transition: color 0.12s, border-color 0.12s;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    min-width: 36px;
+    min-height: 36px;
+}
+
+.cricket-order-btn:hover:not(:disabled) {
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.cricket-order-btn:disabled {
+    opacity: 0.2;
+    cursor: default;
+}
+
 .cricket-add-btn {
     background: transparent;
     border: 1px dashed var(--border-card);

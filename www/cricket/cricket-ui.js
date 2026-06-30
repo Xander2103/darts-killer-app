@@ -23,7 +23,7 @@ let _cricketSetup = null;
 let _selectedMultiplier = 1;
 
 function freshSetup() {
-    return { players: [{ name: "" }, { name: "" }], variant: "standard" };
+    return { players: [{ name: "Player 1" }, { name: "Player 2" }], variant: "standard" };
 }
 
 export function clearCricketSetupState() {
@@ -108,6 +108,11 @@ function _renderSetup(engine, actions) {
 
     const list = document.createElement("ul");
     list.className = "cricket-player-list";
+
+    // inputRefs: flush live DOM values to s.players before any mutation so typed names
+    // are not lost when a button tap blurs the input without firing an input event.
+    const inputRefs = [];
+
     s.players.forEach((p, i) => {
         const item = document.createElement("li");
         item.className = "cricket-player-item";
@@ -118,6 +123,7 @@ function _renderSetup(engine, actions) {
         input.placeholder = `Player ${i + 1}`;
         input.value = p.name;
         input.addEventListener("input", e => { s.players[i].name = e.target.value; });
+        inputRefs.push(input);
 
         const rmBtn = document.createElement("button");
         rmBtn.type = "button";
@@ -125,10 +131,40 @@ function _renderSetup(engine, actions) {
         rmBtn.textContent = "✕";
         rmBtn.disabled = s.players.length <= 1;
         rmBtn.title = s.players.length <= 1 ? "Minimum 1 player" : "Remove";
-        rmBtn.addEventListener("click", () => { s.players.splice(i, 1); reRender(); });
+        rmBtn.addEventListener("click", () => {
+            inputRefs.forEach((inp, idx) => { if (s.players[idx]) s.players[idx].name = inp.value; });
+            s.players.splice(i, 1);
+            reRender();
+        });
+
+        const upBtn = document.createElement("button");
+        upBtn.type = "button";
+        upBtn.className = "cricket-order-btn";
+        upBtn.textContent = "↑";
+        upBtn.disabled = i === 0;
+        upBtn.title = "Move up";
+        upBtn.addEventListener("click", () => {
+            inputRefs.forEach((inp, idx) => { if (s.players[idx]) s.players[idx].name = inp.value; });
+            [s.players[i - 1], s.players[i]] = [s.players[i], s.players[i - 1]];
+            reRender();
+        });
+
+        const downBtn = document.createElement("button");
+        downBtn.type = "button";
+        downBtn.className = "cricket-order-btn";
+        downBtn.textContent = "↓";
+        downBtn.disabled = i === s.players.length - 1;
+        downBtn.title = "Move down";
+        downBtn.addEventListener("click", () => {
+            inputRefs.forEach((inp, idx) => { if (s.players[idx]) s.players[idx].name = inp.value; });
+            [s.players[i], s.players[i + 1]] = [s.players[i + 1], s.players[i]];
+            reRender();
+        });
 
         item.appendChild(input);
         item.appendChild(rmBtn);
+        item.appendChild(upBtn);
+        item.appendChild(downBtn);
         list.appendChild(item);
     });
     playersCard.appendChild(list);
@@ -138,7 +174,11 @@ function _renderSetup(engine, actions) {
         addBtn.type = "button";
         addBtn.className = "cricket-add-btn";
         addBtn.textContent = "+ Add Player";
-        addBtn.addEventListener("click", () => { s.players.push({ name: "" }); reRender(); });
+        addBtn.addEventListener("click", () => {
+            inputRefs.forEach((inp, idx) => { if (s.players[idx]) s.players[idx].name = inp.value; });
+            s.players.push({ name: `Player ${s.players.length + 1}` });
+            reRender();
+        });
         playersCard.appendChild(addBtn);
     }
     screen.appendChild(playersCard);
@@ -148,6 +188,7 @@ function _renderSetup(engine, actions) {
     startBtn.className = "cricket-start-btn";
     startBtn.textContent = "▶ Start Game";
     startBtn.addEventListener("click", () => {
+        inputRefs.forEach((inp, idx) => { if (s.players[idx]) s.players[idx].name = inp.value; });
         const names = s.players.map((p, i) => p.name.trim() || `Player ${i + 1}`);
         if (typeof actions.onStart === "function") actions.onStart(names, s.variant);
     });

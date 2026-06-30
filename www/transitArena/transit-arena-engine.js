@@ -537,7 +537,9 @@ export class TransitArenaEngine {
     _spawnPowerUpNow() {
         const pu = getRandomEligiblePowerUp(this.getAlivePlayers());
         if (!pu) return null;
-        const seg = getRandomPowerUpSegment();
+        const occupiedNums = this.players.map(p => p.targetNumber).filter(n => n !== null);
+        const seg = getRandomPowerUpSegment(occupiedNums);
+        if (!seg) return null; // all board numbers are occupied by players — skip spawn
         const turnsRemaining = this.getAlivePlayers().length * 2;
         this.activePowerUps.push({
             uid: this._nextPowerUpUid++,
