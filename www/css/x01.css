@@ -642,3 +642,469 @@
     background: rgba(255, 255, 255, 0.06);
     color: var(--text-main);
 }
+
+/* ─── Hide killer-game header controls while X01 is active ────────────────── */
+body[data-current-mode="x01"] #gamePanel .panel-header {
+    display: none;
+}
+
+/* ─── Next Turn button (shared by total and dart-by-dart modes) ──────────── */
+.x01-btn-next-turn {
+    flex: 1;
+    padding: 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.x01-btn-next-turn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* ─── Dart tracker ────────────────────────────────────────────────────────── */
+.x01-dart-tracker {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 14px;
+    padding: 0.75rem;
+    text-align: center;
+}
+
+.x01-dart-tracker-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.x01-dart-slots {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.x01-dart-slot {
+    flex: 1;
+    max-width: 72px;
+    padding: 0.45rem 0.2rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-card);
+    text-align: center;
+}
+
+.x01-dart-slot.current {
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.08);
+}
+
+.x01-dart-slot.thrown {
+    border-color: var(--border-card);
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── Dart input card ─────────────────────────────────────────────────────── */
+.x01-dart-input-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 14px;
+    padding: 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.x01-multiplier-row {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.x01-mult-btn {
+    flex: 1;
+    padding: 0.55rem 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    font-family: inherit;
+}
+
+.x01-mult-btn.active {
+    background: rgba(34, 197, 94, 0.18);
+    border-color: rgba(34, 197, 94, 0.55);
+    color: #86efac;
+}
+
+.x01-mult-btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+}
+
+.x01-dart-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.3rem;
+}
+
+.x01-dart-num-btn {
+    padding: 0.65rem 0.2rem;
+    font-size: 0.9rem;
+    font-weight: 800;
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.1s, border-color 0.1s;
+    font-family: inherit;
+    text-align: center;
+}
+
+.x01-dart-num-btn:hover {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #86efac;
+}
+
+.x01-dart-num-btn:active {
+    background: rgba(34, 197, 94, 0.3);
+}
+
+.x01-dart-special-row {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.x01-dart-special-btn {
+    flex: 1;
+    padding: 0.65rem 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.12s;
+    font-family: inherit;
+}
+
+.x01-dart-miss-btn {
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    background: rgba(248, 113, 113, 0.08);
+    color: #f87171;
+}
+
+.x01-dart-miss-btn:hover {
+    background: rgba(248, 113, 113, 0.18);
+}
+
+.x01-dart-bull-btn {
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    background: rgba(251, 191, 36, 0.08);
+    color: #fbbf24;
+}
+
+.x01-dart-bull-btn:hover {
+    background: rgba(251, 191, 36, 0.18);
+}
+
+/* ─── Double-out confirmation screen ─────────────────────────────────────── */
+.x01-confirm-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.x01-confirm-player {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.x01-confirm-question {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #fbbf24;
+}
+
+.x01-confirm-info {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+}
+
+.x01-confirm-actions {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+}
+
+.x01-confirm-yes-btn {
+    flex: 1;
+    max-width: 180px;
+    padding: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 12px;
+    background: rgba(34, 197, 94, 0.85);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.x01-confirm-yes-btn:hover {
+    background: rgba(34, 197, 94, 1);
+}
+
+.x01-confirm-no-btn {
+    flex: 1;
+    max-width: 180px;
+    padding: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    border-radius: 12px;
+    background: rgba(248, 113, 113, 0.1);
+    color: #f87171;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.x01-confirm-no-btn:hover {
+    background: rgba(248, 113, 113, 0.2);
+}
+
+/* ─── Player averages display ─────────────────────────────────────────────── */
+.x01-avg-row {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.x01-avg-item {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.01em;
+}
+
+/* ─── In-game input mode widget ──────────────────────────────────────────── */
+.x01-input-mode-widget {
+    position: relative;
+}
+
+.x01-input-mode-toggle {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s, color 0.12s;
+    font-family: inherit;
+    letter-spacing: 0.01em;
+}
+
+.x01-input-mode-toggle:hover,
+.x01-input-mode-toggle.open {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.x01-input-mode-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 100;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.x01-input-mode-item {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.1s;
+    font-family: inherit;
+    display: block;
+}
+
+.x01-input-mode-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.x01-input-mode-item.active {
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.1);
+}
+
+/* ─── Player / team reorder buttons ─────────────────────────────────────── */
+.x01-order-btn {
+    background: transparent;
+    border: 1px solid var(--border-card);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0.18rem 0.42rem;
+    border-radius: 5px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color 0.12s, border-color 0.12s;
+    font-family: inherit;
+}
+
+.x01-order-btn:hover:not(:disabled) {
+    color: var(--text-main);
+    border-color: rgba(34, 197, 94, 0.45);
+}
+
+.x01-order-btn:disabled {
+    opacity: 0.2;
+    cursor: default;
+}
+
+/* Team block header (name input + order arrows in one row) */
+.x01-team-header {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border-card);
+}
+
+.x01-team-header .x01-team-name-input {
+    flex: 1;
+    width: auto;
+    border-bottom: none;
+    margin-bottom: 0;
+    padding: 0.2rem 0;
+}
+
+/* ─── Add Player modal / bottom sheet ────────────────────────────────────── */
+.x01-add-player-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: flex-end;
+    z-index: 500;
+}
+
+.x01-add-player-sheet {
+    width: 100%;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    padding: 1.5rem 1.2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.x01-add-player-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.x01-add-player-input {
+    width: 100%;
+    padding: 0.8rem 0.9rem;
+    font-size: 1rem;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    color: var(--text-main);
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.x01-add-player-input:focus {
+    outline: none;
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+.x01-add-player-btn-row {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.x01-add-guest-btn {
+    flex: 1;
+    padding: 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 1px solid var(--border-card);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+}
+
+.x01-add-guest-btn:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text-main);
+}
+
+.x01-add-named-btn {
+    flex: 2;
+    padding: 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 12px;
+    background: rgba(34, 197, 94, 0.85);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.x01-add-named-btn:hover {
+    background: rgba(34, 197, 94, 1);
+}

@@ -73,6 +73,10 @@ import {
 import { playTransitPowerUpSpawnSound } from "./transitArena/transit-arena-sounds.js";
 import { X01Engine } from "./x01/x01-engine.js";
 import { renderX01Mode, clearX01SetupState } from "./x01/x01-ui.js";
+import { ATCEngine } from "./aroundTheClock/atc-engine.js";
+import { renderATCMode, clearATCSetupState } from "./aroundTheClock/atc-ui.js";
+import { CricketEngine } from "./cricket/cricket-engine.js";
+import { renderCricketMode, clearCricketSetupState } from "./cricket/cricket-ui.js";
 
 const game = new KillerGame();
 const chaosEngine = new ChaosEngine(game);
@@ -81,6 +85,8 @@ const checkoutEngine = new CheckoutEngine();
 const duelEngine = new DuelEngine();
 const transitArenaEngine = new TransitArenaEngine();
 const x01Engine = new X01Engine();
+const atcEngine = new ATCEngine();
+const cricketEngine = new CricketEngine();
 let halveItGame = null;
 let halveItHistory = [];
 
@@ -122,6 +128,8 @@ const halveItModeBtn = document.getElementById("halveItModeBtn");
 const duelModeBtn = document.getElementById("duelModeBtn");
 const transitArenaModeBtn = document.getElementById("transitArenaModeBtn");
 const x01ModeBtn = document.getElementById("x01ModeBtn");
+const atcModeBtn = document.getElementById("atcModeBtn");
+const cricketModeBtn = document.getElementById("cricketModeBtn");
 
 const setupError = document.getElementById("setupError");
 
@@ -167,6 +175,10 @@ function resetGameToClassicSetup() {
     transitArenaEngine.reset();
     x01Engine.reset();
     clearX01SetupState();
+    atcEngine.reset();
+    clearATCSetupState();
+    cricketEngine.reset();
+    clearCricketSetupState();
     halveItGame = null;
     halveItHistory = [];
 
@@ -210,6 +222,10 @@ function resetGameCompletely() {
     transitArenaEngine.reset();
     x01Engine.reset();
     clearX01SetupState();
+    atcEngine.reset();
+    clearATCSetupState();
+    cricketEngine.reset();
+    clearCricketSetupState();
     halveItGame = null;
     halveItHistory = [];
 
@@ -700,6 +716,136 @@ function showX01Mode() {
     });
 }
 
+function showATCMode() {
+    renderATCMode(atcEngine, {
+        onStart: (names) => {
+            atcEngine.start(names);
+            showATCMode();
+        },
+        onRender: () => showATCMode(),
+        onRematch: () => {
+            atcEngine.reset();
+            clearATCSetupState();
+            showATCMode();
+        },
+        onBackToMenu: () => {
+            atcEngine.reset();
+            clearATCSetupState();
+            game.phase = "setup";
+            game.isStarted = false;
+            resetGameCompletely();
+            showHomeScreen();
+            renderApp(game, {
+                resetGameCompletely,
+                showHomeScreen,
+                startCheckoutGame,
+                startHalveItGame,
+                checkoutEngine
+            });
+        },
+        onBack: () => {
+            if (atcEngine.status === "finished") {
+                atcEngine.reset();
+                clearATCSetupState();
+                game.phase = "setup";
+                game.isStarted = false;
+                resetGameCompletely();
+                showHomeScreen();
+                renderApp(game, {
+                    resetGameCompletely,
+                    showHomeScreen,
+                    startCheckoutGame,
+                    startHalveItGame,
+                    checkoutEngine
+                });
+                return;
+            }
+            if (atcEngine.status !== "setup") {
+                const isSure = confirm("Stop the current Around the Clock game?");
+                if (!isSure) return;
+            }
+            atcEngine.reset();
+            clearATCSetupState();
+            game.phase = "setup";
+            game.isStarted = false;
+            resetGameCompletely();
+            showHomeScreen();
+            renderApp(game, {
+                resetGameCompletely,
+                showHomeScreen,
+                startCheckoutGame,
+                startHalveItGame,
+                checkoutEngine
+            });
+        }
+    });
+}
+
+function showCricketMode() {
+    renderCricketMode(cricketEngine, {
+        onStart: (names, variant) => {
+            cricketEngine.start(names, variant);
+            showCricketMode();
+        },
+        onRender: () => showCricketMode(),
+        onRematch: () => {
+            cricketEngine.reset();
+            clearCricketSetupState();
+            showCricketMode();
+        },
+        onBackToMenu: () => {
+            cricketEngine.reset();
+            clearCricketSetupState();
+            game.phase = "setup";
+            game.isStarted = false;
+            resetGameCompletely();
+            showHomeScreen();
+            renderApp(game, {
+                resetGameCompletely,
+                showHomeScreen,
+                startCheckoutGame,
+                startHalveItGame,
+                checkoutEngine
+            });
+        },
+        onBack: () => {
+            if (cricketEngine.status === "finished") {
+                cricketEngine.reset();
+                clearCricketSetupState();
+                game.phase = "setup";
+                game.isStarted = false;
+                resetGameCompletely();
+                showHomeScreen();
+                renderApp(game, {
+                    resetGameCompletely,
+                    showHomeScreen,
+                    startCheckoutGame,
+                    startHalveItGame,
+                    checkoutEngine
+                });
+                return;
+            }
+            if (cricketEngine.status !== "setup") {
+                const isSure = confirm("Stop the current Cricket game?");
+                if (!isSure) return;
+            }
+            cricketEngine.reset();
+            clearCricketSetupState();
+            game.phase = "setup";
+            game.isStarted = false;
+            resetGameCompletely();
+            showHomeScreen();
+            renderApp(game, {
+                resetGameCompletely,
+                showHomeScreen,
+                startCheckoutGame,
+                startHalveItGame,
+                checkoutEngine
+            });
+        }
+    });
+}
+
 // Settings initialiseren
 const settingsApi = initSettings(game, renderApp, {
     resetGameCompletely,
@@ -774,6 +920,7 @@ playerNameInput.addEventListener("keydown", event => {
 });
 
 undoButton.addEventListener("click", () => {
+    if (game.gameMode === "x01") return; // X01 manages its own undo inside gameBoard
     if (game.gameMode === "checkout") {
         checkoutEngine.undo();
     } else if (game.gameMode === "halveIt" && halveItGame) {
@@ -909,6 +1056,32 @@ if (x01ModeBtn) {
     });
 }
 
+if (atcModeBtn) {
+    atcModeBtn.addEventListener("click", () => {
+        resetGameCompletely();
+        atcEngine.reset();
+        game.setGameMode("atc");
+        document.body.dataset.currentMode = "aroundTheClock";
+        game.phase = "game";
+        game.isStarted = true;
+        showClassicScreen();
+        showATCMode();
+    });
+}
+
+if (cricketModeBtn) {
+    cricketModeBtn.addEventListener("click", () => {
+        resetGameCompletely();
+        cricketEngine.reset();
+        game.setGameMode("cricket");
+        document.body.dataset.currentMode = "cricket";
+        game.phase = "game";
+        game.isStarted = true;
+        showClassicScreen();
+        showCricketMode();
+    });
+}
+
 drinkModeBtn.addEventListener("click", () => {
     resetGameCompletely();
     game.setGameMode("drink");
@@ -938,6 +1111,14 @@ backToHomeButton.addEventListener("click", () => {
     }
 
     if (game.gameMode === "transitArena" && game.phase === "game") {
+        return;
+    }
+
+    if (game.gameMode === "atc" && game.phase === "game") {
+        return;
+    }
+
+    if (game.gameMode === "cricket" && game.phase === "game") {
         return;
     }
 

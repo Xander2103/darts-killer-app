@@ -1,0 +1,626 @@
+/* www/css/cricket.css */
+
+/* =====================================================
+   CRICKET — home screen card
+   ===================================================== */
+
+.mode-card-cricket {
+    border-color: rgba(59, 130, 246, 0.32);
+    background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.15), transparent 44%),
+        linear-gradient(180deg, rgba(4, 10, 30, 0.98), rgba(14, 14, 20, 0.98));
+}
+
+.mode-badge-cricket {
+    color: #eff6ff;
+    background: rgba(29, 78, 216, 0.85);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+/* =====================================================
+   CRICKET — shared layout
+   ===================================================== */
+
+.cricket-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-bottom: 2rem;
+}
+
+.cricket-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 14px;
+    padding: 1rem;
+}
+
+.cricket-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.6rem;
+}
+
+/* =====================================================
+   CRICKET — setup
+   ===================================================== */
+
+.cricket-mode-badge {
+    display: inline-block;
+    background: rgba(59, 130, 246, 0.15);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.55rem;
+    margin-bottom: 0.55rem;
+}
+
+.cricket-setup-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.45;
+}
+
+.cricket-player-list {
+    list-style: none;
+    margin: 0 0 0.6rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.cricket-player-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.cricket-player-name-input {
+    flex: 1;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    padding: 0.45rem 0.6rem;
+    font-family: inherit;
+}
+
+.cricket-remove-btn {
+    background: transparent;
+    border: 1px solid var(--border-card);
+    color: var(--text-muted);
+    border-radius: 7px;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: inherit;
+}
+
+.cricket-remove-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+
+.cricket-add-btn {
+    background: transparent;
+    border: 1px dashed var(--border-card);
+    color: var(--text-muted);
+    border-radius: 9px;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 0.3rem;
+    font-family: inherit;
+    transition: color 0.12s, border-color 0.12s;
+}
+
+.cricket-add-btn:hover {
+    color: var(--text-main);
+    border-color: rgba(59, 130, 246, 0.45);
+}
+
+.cricket-setup-error {
+    font-size: 0.82rem;
+    color: #fca5a5;
+    margin: 0;
+}
+
+.cricket-setup-error.hidden {
+    display: none;
+}
+
+.cricket-start-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(180deg, #1d4ed8, #1e40af);
+    color: #eff6ff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.03em;
+    transition: opacity 0.15s;
+}
+
+.cricket-start-btn:hover {
+    opacity: 0.9;
+}
+
+/* =====================================================
+   CRICKET — game: player banner
+   ===================================================== */
+
+.cricket-player-banner {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.28);
+    border-radius: 12px;
+    padding: 0.7rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.cricket-banner-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.cricket-banner-name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #93c5fd;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cricket-banner-score {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #eff6ff;
+    line-height: 1;
+}
+
+.cricket-banner-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.28rem;
+    flex-shrink: 0;
+}
+
+.cricket-dart-pips {
+    display: flex;
+    gap: 0.28rem;
+    align-items: center;
+}
+
+.cricket-dart-pip {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(59, 130, 246, 0.4);
+    background: transparent;
+    transition: background 0.15s;
+}
+
+.cricket-dart-pip.used {
+    background: rgba(59, 130, 246, 0.55);
+    border-color: rgba(59, 130, 246, 0.8);
+}
+
+.cricket-banner-darts {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* =====================================================
+   CRICKET — scoreboard table
+   ===================================================== */
+
+.cricket-scoreboard-card {
+    overflow-x: auto;
+}
+
+.cricket-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.cricket-th-target {
+    text-align: left;
+    padding: 0.3rem 0.4rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    width: 3.5rem;
+}
+
+.cricket-th-player {
+    text-align: center;
+    padding: 0.3rem 0.4rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 7rem;
+}
+
+.cricket-th-player.cricket-active-player {
+    color: #93c5fd;
+}
+
+.cricket-td-target {
+    padding: 0.38rem 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-main);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cricket-td-marks {
+    text-align: center;
+    padding: 0.38rem 0.2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cricket-td-marks.cricket-active-player {
+    background: rgba(59, 130, 246, 0.06);
+}
+
+/* Marks symbols */
+.cricket-marks-sym {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.cricket-marks-0 {
+    color: rgba(255, 255, 255, 0.12);
+}
+
+.cricket-marks-1 {
+    color: #fbbf24;
+}
+
+.cricket-marks-2 {
+    color: #fb923c;
+}
+
+.cricket-marks-3 {
+    color: #4ade80;
+    font-size: 1.1rem;
+}
+
+/* Points row */
+.cricket-points-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cricket-td-points {
+    text-align: center;
+    padding: 0.45rem 0.2rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #93c5fd;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cricket-td-points.cricket-active-player {
+    background: rgba(59, 130, 246, 0.06);
+}
+
+/* =====================================================
+   CRICKET — input area
+   ===================================================== */
+
+.cricket-top-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.cricket-undo-btn {
+    background: rgba(251, 146, 60, 0.12);
+    border: 1px solid rgba(251, 146, 60, 0.35);
+    color: #fb923c;
+    border-radius: 9px;
+    padding: 0.38rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.12s;
+}
+
+.cricket-undo-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.cricket-input-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+/* Target grid */
+.cricket-target-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
+}
+
+.cricket-target-btn {
+    padding: 0.7rem 0.3rem;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #93c5fd;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+}
+
+.cricket-target-btn:hover {
+    background: rgba(59, 130, 246, 0.22);
+}
+
+.cricket-target-btn.closed {
+    background: rgba(74, 222, 128, 0.1);
+    border-color: rgba(74, 222, 128, 0.35);
+    color: #4ade80;
+}
+
+/* Multiplier buttons */
+.cricket-mult-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+}
+
+.cricket-mult-btn {
+    padding: 0.8rem 0.3rem;
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #bfdbfe;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+}
+
+.cricket-mult-btn:hover {
+    background: rgba(59, 130, 246, 0.28);
+}
+
+.cricket-miss-btn {
+    width: 100%;
+    padding: 0.6rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    border-radius: 9px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+}
+
+.cricket-miss-btn:hover {
+    background: rgba(239, 68, 68, 0.18);
+}
+
+.cricket-cancel-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0.25rem 0;
+    text-align: left;
+    text-decoration: underline;
+}
+
+.cricket-end-turn-btn {
+    width: 100%;
+    padding: 0.6rem;
+    background: transparent;
+    border: 1px solid var(--border-card);
+    color: var(--text-muted);
+    border-radius: 9px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.12s, border-color 0.12s;
+}
+
+.cricket-end-turn-btn:hover {
+    color: var(--text-main);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+/* =====================================================
+   CRICKET — winner screen
+   ===================================================== */
+
+.cricket-winner-card {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cricket-winner-emoji {
+    font-size: 3rem;
+    margin: 0.3rem 0;
+}
+
+.cricket-winner-title {
+    font-size: 1.6rem;
+    font-weight: 900;
+    margin: 0;
+    color: #93c5fd;
+}
+
+.cricket-winner-stats {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0 0 0.5rem;
+}
+
+.cricket-result-row {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: left;
+    width: 100%;
+    padding: 0.25rem 0;
+}
+
+/* =====================================================
+   CRICKET — variant selector (setup polish)
+   ===================================================== */
+
+.cricket-variant-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.cricket-variant-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.18rem;
+    padding: 0.65rem 0.5rem;
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s, border-color 0.12s;
+}
+
+.cricket-variant-btn.cricket-variant-active {
+    background: rgba(29, 78, 216, 0.25);
+    border-color: rgba(59, 130, 246, 0.65);
+}
+
+.cricket-variant-label {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #93c5fd;
+}
+
+.cricket-variant-sub {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+/* =====================================================
+   CRICKET — multiplier selector (game play polish)
+   ===================================================== */
+
+.cricket-mult-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    margin-bottom: 0.2rem;
+}
+
+.cricket-mult-sel-btn {
+    padding: 0.65rem 0.3rem;
+    background: rgba(59, 130, 246, 0.09);
+    border: 1px solid rgba(59, 130, 246, 0.28);
+    color: #bfdbfe;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s, border-color 0.12s;
+}
+
+.cricket-mult-sel-btn.active {
+    background: rgba(29, 78, 216, 0.38);
+    border-color: rgba(59, 130, 246, 0.75);
+    color: #eff6ff;
+}
+
+.cricket-mult-sel-btn:hover:not(.active) {
+    background: rgba(59, 130, 246, 0.18);
+}
+
+/* =====================================================
+   CRICKET — closed-by-all row styles
+   ===================================================== */
+
+.cricket-row-all-closed .cricket-td-target,
+.cricket-row-all-closed .cricket-td-marks,
+.cricket-row-all-closed .cricket-marks-sym {
+    text-decoration: line-through;
+    opacity: 0.35;
+}
+
+.cricket-target-btn.all-closed {
+    opacity: 0.25;
+    cursor: default;
+    text-decoration: line-through;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+}
+
+/* =====================================================
+   CRICKET — Bull buttons (O.Bull / I.Bull row)
+   ===================================================== */
+
+.cricket-bull-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+}
+
+.cricket-target-btn-bull {
+    background: rgba(251, 146, 60, 0.1);
+    border-color: rgba(251, 146, 60, 0.35);
+    color: #fed7aa;
+}
+
+.cricket-target-btn-bull:hover:not(.all-closed):not(:disabled) {
+    background: rgba(251, 146, 60, 0.22);
+}

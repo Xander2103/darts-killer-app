@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="css/duel.css">
     <link rel="stylesheet" href="css/transit-arena.css">
     <link rel="stylesheet" href="css/x01.css">
+    <link rel="stylesheet" href="css/atc.css">
+    <link rel="stylesheet" href="css/cricket.css">
 </head>
 
 <body class="theme-neon">
@@ -34,86 +36,104 @@
                     </button>
                 </div>
 
-                <div class="mode-grid mode-grid-compact">
-                    <button id="classicModeBtn" type="button" class="mode-card mode-card-classic mode-card-compact">
-                        <div class="mode-card-body">
-                            <h3>Classic Killer</h3>
-                        </div>
-
-                        <div class="mode-card-top">
-                            <span class="mode-badge mode-badge-live">Live</span>
-                        </div>
-                    </button>
-
-                    <button id="chaosModeBtn" type="button" class="mode-card mode-card-compact">
-                        <div class="mode-card-body">
-                            <h3>Chaos Mode</h3>
-                        </div>
-
-                        <div class="mode-card-top">
-                            <span class="mode-badge mode-badge-progress">Chaos</span>
-                        </div>
-                    </button>
-
-                    <button id="checkoutModeBtn" type="button" class="mode-card mode-card-checkout mode-card-compact">
-                        <div class="mode-card-body">
-                            <h3>121 Checkout</h3>
-                        </div>
-
-                        <div class="mode-card-top">
-                            <span class="mode-badge mode-badge-checkout">Training</span>
-                        </div>
-                    </button>
-
-                    <button id="halveItModeBtn" type="button" class="mode-card mode-card-halve-it mode-card-compact">
-                        <div class="mode-card-body">
-                            <h3>Halve It</h3>
-                        </div>
-
-                        <div class="mode-card-top">
-                            <span class="mode-badge mode-badge-progress">New</span>
-                        </div>
-                    </button>
-
-                    <button id="duelModeBtn" type="button" class="mode-card mode-card-duel mode-card-compact">
-                        <div class="mode-card-body">
-                            <h3>Duel</h3>
-                        </div>
-
-                        <div class="mode-card-top">
-                            <span class="mode-badge mode-badge-duel">New</span>
-                        </div>
-                    </button>
-
-                    <button id="transitArenaModeBtn" type="button" class="mode-card mode-card-transit-arena mode-card-compact">
-                        <div class="mode-card-body">
-                            <h3>Transit Arena</h3>
-                            <p class="mode-card-desc">Multiplayer HP battle with board-segment power-ups.</p>
-                        </div>
-
-                        <div class="mode-card-top">
-                            <span class="mode-badge mode-badge-transit-arena">Beta</span>
-                        </div>
-                    </button>
-
-                    <button id="x01ModeBtn" type="button" class="mode-card mode-card-x01 mode-card-compact">
-                        <div class="mode-card-body">
-                            <h3>X01 Darts</h3>
-                            <p class="mode-card-desc">Play 301, 501 or 701 solo or in teams.</p>
-                        </div>
-
+                <div class="mode-grid mode-grid-2col">
+                    <button id="x01ModeBtn" type="button" class="mode-card mode-card-x01 mode-card-2col">
                         <div class="mode-card-top">
                             <span class="mode-badge mode-badge-x01">New</span>
                         </div>
+                        <div class="mode-card-body">
+                            <h3>Classic</h3>
+                            <p>301 / 501 / 701</p>
+                        </div>
                     </button>
 
-                    <button id="drinkModeBtn" type="button" class="mode-card mode-card-disabled mode-card-compact">
-                        <div class="mode-card-body">
-                            <h3>Drink Mode</h3>
+                    <button id="cricketModeBtn" type="button" class="mode-card mode-card-cricket mode-card-2col">
+                        <div class="mode-card-top">
+                            <span class="mode-badge mode-badge-cricket">New</span>
                         </div>
+                        <div class="mode-card-body">
+                            <h3>Cricket</h3>
+                            <p>20 to 15 + Bull</p>
+                        </div>
+                    </button>
 
+                    <button id="atcModeBtn" type="button" class="mode-card mode-card-atc mode-card-2col">
+                        <div class="mode-card-top">
+                            <span class="mode-badge mode-badge-atc">Training</span>
+                        </div>
+                        <div class="mode-card-body">
+                            <h3>Around the Clock</h3>
+                            <p>1 to 20 + Bull</p>
+                        </div>
+                    </button>
+
+                    <button id="classicModeBtn" type="button" class="mode-card mode-card-classic mode-card-2col">
+                        <div class="mode-card-top">
+                            <span class="mode-badge mode-badge-live">Live</span>
+                        </div>
+                        <div class="mode-card-body">
+                            <h3>Classic Killer</h3>
+                            <p>Original Killer mode</p>
+                        </div>
+                    </button>
+
+                    <button id="chaosModeBtn" type="button" class="mode-card mode-card-2col">
+                        <div class="mode-card-top">
+                            <span class="mode-badge mode-badge-progress">Chaos</span>
+                        </div>
+                        <div class="mode-card-body">
+                            <h3>Chaos Mode</h3>
+                            <p>Killer + modifiers</p>
+                        </div>
+                    </button>
+
+                    <button id="checkoutModeBtn" type="button" class="mode-card mode-card-checkout mode-card-2col">
+                        <div class="mode-card-top">
+                            <span class="mode-badge mode-badge-checkout">Training</span>
+                        </div>
+                        <div class="mode-card-body">
+                            <h3>121 Checkout</h3>
+                            <p>Checkout training</p>
+                        </div>
+                    </button>
+
+                    <button id="halveItModeBtn" type="button" class="mode-card mode-card-halve-it mode-card-2col">
+                        <div class="mode-card-top">
+                            <span class="mode-badge mode-badge-progress">New</span>
+                        </div>
+                        <div class="mode-card-body">
+                            <h3>Halve It</h3>
+                            <p>Round scoring</p>
+                        </div>
+                    </button>
+
+                    <button id="duelModeBtn" type="button" class="mode-card mode-card-duel mode-card-2col">
+                        <div class="mode-card-top">
+                            <span class="mode-badge mode-badge-duel">New</span>
+                        </div>
+                        <div class="mode-card-body">
+                            <h3>Duel</h3>
+                            <p>1v1 HP battle</p>
+                        </div>
+                    </button>
+
+                    <button id="transitArenaModeBtn" type="button" class="mode-card mode-card-transit-arena mode-card-2col">
+                        <div class="mode-card-top">
+                            <span class="mode-badge mode-badge-transit-arena">Beta</span>
+                        </div>
+                        <div class="mode-card-body">
+                            <h3>Transit Arena</h3>
+                            <p>Arena HP battle</p>
+                        </div>
+                    </button>
+
+                    <button id="drinkModeBtn" type="button" class="mode-card mode-card-disabled mode-card-2col">
                         <div class="mode-card-top">
                             <span class="mode-badge mode-badge-progress">Drink</span>
+                        </div>
+                        <div class="mode-card-body">
+                            <h3>Drink Mode</h3>
+                            <p>Party challenges</p>
                         </div>
                     </button>
                 </div>

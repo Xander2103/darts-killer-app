@@ -11,15 +11,135 @@ const gameInfoBody = document.querySelector("#gameInfoModal .info-modal-body");
 
 const infoContentByMode = {
     home: {
-        title: "Game Info",
+        title: "Game Modes",
         body: `
             <section class="info-section">
-                <h3>Choose a mode</h3>
-                <p><strong>Classic Killer:</strong> Standard Killer darts with player numbers, killers and elimination.</p>
-                <p><strong>Chaos Mode:</strong> Killer darts with random modifiers and party effects.</p>
-                <p><strong>121 Checkout:</strong> Collaborative checkout training. Bring the target to exactly 0 within the dart limit.</p>
-                <p><strong>Halve It:</strong> Number rounds with random challenges. Miss a round and your score is halved.</p>
-                <p><strong>Drink Mode:</strong> Party challenge cards for darts and drinks. Play responsibly.</p>
+                <h3>Classic</h3>
+                <p>Play 301, 501 or 701 solo, with friends or in teams. Includes legs, checkout suggestions and averages.</p>
+            </section>
+            <section class="info-section">
+                <h3>Cricket</h3>
+                <p>Close 20, 19, 18, 17, 16, 15 and Bull. Score points on targets you have closed while opponents still have them open.</p>
+            </section>
+            <section class="info-section">
+                <h3>Around the Clock</h3>
+                <p>Hit every number from 1 to 20 and finish with Bull. Great for practice and warm-up.</p>
+            </section>
+            <section class="info-section">
+                <h3>Classic Killer</h3>
+                <p>Standard Killer darts with player numbers, killers and elimination.</p>
+            </section>
+            <section class="info-section">
+                <h3>Chaos Mode</h3>
+                <p>Killer darts with random modifiers and party effects.</p>
+            </section>
+            <section class="info-section">
+                <h3>121 Checkout</h3>
+                <p>Checkout training. Bring the target to exactly 0 within the dart limit.</p>
+            </section>
+            <section class="info-section">
+                <h3>Halve It</h3>
+                <p>Round-based scoring. Miss a round and your score is halved.</p>
+            </section>
+            <section class="info-section">
+                <h3>Duel</h3>
+                <p>Head-to-head 1v1 HP battle. Hit your opponent's number to deal damage.</p>
+            </section>
+            <section class="info-section">
+                <h3>Transit Arena</h3>
+                <p>Arena-style HP battle with shields, heals and power-ups. Beta.</p>
+            </section>
+            <section class="info-section">
+                <h3>Drink Mode</h3>
+                <p>Party challenge cards for darts and drinks. Play responsibly.</p>
+            </section>
+        `
+    },
+    aroundTheClock: {
+        title: "Around the Clock — How to Play",
+        body: `
+            <section class="info-section">
+                <h3>Goal</h3>
+                <p>Hit every number from 1 to 20 in order, then finish with Bull. First to complete all 21 targets wins.</p>
+            </section>
+            <section class="info-section">
+                <h3>Single / Double / Triple</h3>
+                <p>Choose how you hit the target before throwing. Single advances you 1 target, Double advances 2, Triple advances 3. This lets you skip ahead when you hit a double or triple. Reaching or passing Bull with a double or triple still wins.</p>
+            </section>
+            <section class="info-section">
+                <h3>Turns</h3>
+                <p>Each player has up to 3 darts per turn. If you advance your target mid-turn, remaining darts aim at the new target.</p>
+            </section>
+            <section class="info-section">
+                <h3>Miss</h3>
+                <p>A miss does not advance your target. Your next dart still aims at the same number.</p>
+            </section>
+            <section class="info-section">
+                <h3>Bull Finish</h3>
+                <p>After hitting 20, your final target is Bull. Hitting Bull (or reaching it via Double/Triple) wins the game.</p>
+            </section>
+            <section class="info-section">
+                <h3>Solo Play</h3>
+                <p>Play alone to practice and track how many darts you need to complete the full clock.</p>
+            </section>
+        `
+    },
+    cricket: {
+        title: "Cricket — How to Play",
+        body: `
+            <section class="info-section">
+                <h3>Targets</h3>
+                <p><strong>Standard:</strong> 20, 19, 18, 17, 16, 15, Bull (7 targets). <strong>Extended:</strong> adds 14 down to 10 (12 targets total). Each target needs 3 marks to close.</p>
+            </section>
+            <section class="info-section">
+                <h3>Bull</h3>
+                <p>Bull is one unified target worth 25 points per mark. <strong>O.Bull</strong> = 1 mark. <strong>I.Bull</strong> = 2 marks. Bull closes at 3 marks total. Extra marks score 25 pts each while any opponent has Bull open.</p>
+            </section>
+            <section class="info-section">
+                <h3>Multiplier</h3>
+                <p>Select Single, Double or Triple before tapping a target. The selected multiplier determines how many marks you award and stays set until you change it or throw a dart (it resets to Single after each dart).</p>
+            </section>
+            <section class="info-section">
+                <h3>Scoring Points</h3>
+                <p>Once you have closed a target (3 marks), extra marks score points — but only while at least one opponent has not yet closed it. Points = target value per extra mark.</p>
+            </section>
+            <section class="info-section">
+                <h3>Winning</h3>
+                <p>Close all targets AND have a score ≥ every opponent. Solo: just close all targets. If all targets become closed by all players simultaneously, highest score wins.</p>
+            </section>
+            <section class="info-section">
+                <h3>Closed rows</h3>
+                <p>When every player has closed a target, its row is struck through in the scoreboard and its button is disabled. No more marks or points can be scored on that target.</p>
+            </section>
+            <section class="info-section">
+                <h3>Undo</h3>
+                <p>Tap Undo to reverse the last dart, restoring marks, points and turn position.</p>
+            </section>
+        `
+    },
+    x01: {
+        title: "Classic — How to Play",
+        body: `
+            <section class="info-section">
+                <h3>Goal</h3>
+                <p>Start from 301, 501 or 701 and reduce your score to exactly zero. First to zero wins the leg.</p>
+            </section>
+            <section class="info-section">
+                <h3>Finish Rule</h3>
+                <p>In Double Out mode, the final dart must land on a double or the inner bull. Single Out has no restriction.</p>
+            </section>
+            <section class="info-section">
+                <h3>Legs</h3>
+                <p>Win the set number of legs to win the match. Leg averages reset each leg; match average carries through.</p>
+            </section>
+            <section class="info-section">
+                <h3>Input Modes</h3>
+                <p><strong>Turn Total:</strong> Enter your 3-dart total after throwing. Leave empty and tap Enter to score 0.</p>
+                <p><strong>Dart by Dart:</strong> Enter each dart individually. Tap End Turn to finish your turn early.</p>
+            </section>
+            <section class="info-section">
+                <h3>Checkout Suggestions</h3>
+                <p>When your score is 170 or below, the app suggests a checkout route.</p>
             </section>
         `
     },
@@ -141,6 +261,23 @@ const infoContentByMode = {
             <section class="info-section">
                 <h3>Undo</h3>
                 <p>Tap <strong>↶ Undo</strong> (orange, top right) to reverse your last throw — including shield gains, heals, and power-up claims.</p>
+            </section>
+        `
+    },
+    halveIt: {
+        title: "Halve It Info",
+        body: `
+            <section class="info-section">
+                <h3>Goal</h3>
+                <p>Score as many points as possible across multiple rounds. Each round has a specific target to hit.</p>
+            </section>
+            <section class="info-section">
+                <h3>Halving</h3>
+                <p>If you miss the round's target with all three darts, your score is halved.</p>
+            </section>
+            <section class="info-section">
+                <h3>Winning</h3>
+                <p>The player with the highest score after all rounds wins.</p>
             </section>
         `
     },

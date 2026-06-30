@@ -5,9 +5,10 @@ const gamePanel = document.getElementById("gamePanel");
 const gameBoard = document.getElementById("gameBoard");
 const backToHomeButton = document.getElementById("backToHomeButton");
 
-// Setup state persists across re-renders within a single mode session.
-// Cleared when a match starts or mode is exited.
 let _setupState = null;
+let _inputModeDropdownOpen = false;
+let _addPlayerPendingTarget = null; // { type: "individual"|"team", teamIndex: number|null }
+let _addPlayerPendingName = "";
 
 function freshSetupState() {
     return {
@@ -28,6 +29,9 @@ function freshSetupState() {
 
 export function clearX01SetupState() {
     _setupState = null;
+    _addPlayerPendingTarget = null;
+    _addPlayerPendingName = "";
+    _inputModeDropdownOpen = false;
 }
 
 export function renderX01Mode(engine, actions = {}) {
@@ -45,26 +49,38 @@ export function renderX01Mode(engine, actions = {}) {
 
     gameBoard.innerHTML = "";
 
-    if (engine.status === "setup") {
-        if (!_setupState) _setupState = freshSetupState();
-        _renderSetup(engine, actions);
-    } else if (engine.status === "playing") {
-        _renderGame(engine, actions);
-    } else if (engine.status === "legWon") {
-        _renderLegWon(engine, actions);
-    } else if (engine.status === "matchWon") {
-        _renderMatchWon(engine, actions);
+    switch (engine.status) {
+        case "setup":
+            if (!_setupState) _setupState = freshSetupState();
+            _renderSetup(engine, actions);
+            break;
+        case "playing":
+            _renderGame(engine, actions);
+            break;
+        case "awaitingDoubleConfirm":
+            _renderDoubleConfirm(engine, actions);
+            break;
+        case "legWon":
+            _renderLegWon(engine, actions);
+            break;
+        case "matchWon":
+            _renderMatchWon(engine, actions);
+            break;
     }
 }
 
 // ─── SETUP ────────────────────────────────────────────────────────────────────
 
 function _renderSetup(engine, actions) {
+    // ROOT FIX: always clear before appending so re-renders don't accumulate screens
+    gameBoard.innerHTML = "";
     const s = _setupState;
+
+    // reRender calls the top-level dispatcher which clears gameBoard first
+    const reRender = () => renderX01Mode(engine, actions);
+
     const screen = document.createElement("section");
     screen.className = "x01-screen";
-
-    const reRender = () => _renderSetup(engine, actions);
 
     screen.appendChild(_makeStartScoreCard(s, reRender));
     screen.appendChild(_makePlayTypeCard(s, reRender));
@@ -95,6 +111,19 @@ function _renderSetup(engine, actions) {
     screen.appendChild(errorDiv);
     screen.appendChild(startBtn);
     gameBoard.appendChild(screen);
+
+    if (_addPlayerPendingTarget) {
+        gameBoard.appendChild(_makeAddPlayerModal(s, reRender));
+    }
+
+    // Auto-focus custom inputs after re-render
+    if (s.startScore === "Custom") {
+        const el = gameBoard.querySelector(".x01-custom-score-input");
+        if (el) setTimeout(() => el.focus(), 40);
+    } else if (s.legsToWin === "Custom") {
+        const el = gameBoard.querySelector(".x01-custom-legs-input");
+        if (el) setTimeout(() => el.focus(), 40);
+    }
 }
 
 function _makeStartScoreCard(s, reRender) {
@@ -192,15 +221,43 @@ function _makeIndividualPlayersCard(s, reRender) {
         removeBtn.type = "button";
         removeBtn.className = "x01-player-remove-btn";
         removeBtn.textContent = "✕";
-        removeBtn.disabled = s.players.length <= 2;
-        removeBtn.title = s.players.length <= 2 ? "Minimum 2 players" : "Remove player";
+        removeBtn.disabled = s.players.length <= 1;
+        removeBtn.title = s.players.length <= 1 ? "Minimum 1 player" : "Remove player";
         removeBtn.addEventListener("click", () => {
             s.players.splice(i, 1);
             reRender();
         });
 
+        const upBtn = document.createElement("button");
+        upBtn.type = "button";
+        upBtn.className = "x01-order-btn";
+        upBtn.textContent = "↑";
+        upBtn.disabled = i === 0;
+        upBtn.title = "Move up";
+        upBtn.addEventListener("click", () => {
+            const tmp = s.players[i - 1];
+            s.players[i - 1] = s.players[i];
+            s.players[i] = tmp;
+            reRender();
+        });
+
+        const downBtn = document.createElement("button");
+        downBtn.type = "button";
+        downBtn.className = "x01-order-btn";
+        downBtn.textContent = "↓";
+        downBtn.disabled = i === s.players.length - 1;
+        downBtn.title = "Move down";
+        downBtn.addEventListener("click", () => {
+            const tmp = s.players[i + 1];
+            s.players[i + 1] = s.players[i];
+            s.players[i] = tmp;
+            reRender();
+        });
+
         item.appendChild(input);
         item.appendChild(removeBtn);
+        item.appendChild(upBtn);
+        item.appendChild(downBtn);
         list.appendChild(item);
     });
 
@@ -210,9 +267,10 @@ function _makeIndividualPlayersCard(s, reRender) {
         const addBtn = document.createElement("button");
         addBtn.type = "button";
         addBtn.className = "x01-add-player-btn";
-        addBtn.textContent = `+ Add Player`;
+        addBtn.textContent = "+ Add Player";
         addBtn.addEventListener("click", () => {
-            s.players.push({ name: "" });
+            _addPlayerPendingTarget = { type: "individual", teamIndex: null };
+            _addPlayerPendingName = "";
             reRender();
         });
         card.appendChild(addBtn);
@@ -234,13 +292,46 @@ function _makeTeamsCard(s, reRender) {
         const block = document.createElement("div");
         block.className = "x01-team-block";
 
+        const teamHeader = document.createElement("div");
+        teamHeader.className = "x01-team-header";
+
         const teamNameInput = document.createElement("input");
         teamNameInput.type = "text";
         teamNameInput.className = "x01-team-name-input";
         teamNameInput.placeholder = `Team ${ti + 1}`;
         teamNameInput.value = team.name;
         teamNameInput.addEventListener("input", e => { s.teams[ti].name = e.target.value; });
-        block.appendChild(teamNameInput);
+
+        const teamUpBtn = document.createElement("button");
+        teamUpBtn.type = "button";
+        teamUpBtn.className = "x01-order-btn";
+        teamUpBtn.textContent = "↑";
+        teamUpBtn.disabled = ti === 0;
+        teamUpBtn.title = "Move team up";
+        teamUpBtn.addEventListener("click", () => {
+            const tmp = s.teams[ti - 1];
+            s.teams[ti - 1] = s.teams[ti];
+            s.teams[ti] = tmp;
+            reRender();
+        });
+
+        const teamDownBtn = document.createElement("button");
+        teamDownBtn.type = "button";
+        teamDownBtn.className = "x01-order-btn";
+        teamDownBtn.textContent = "↓";
+        teamDownBtn.disabled = ti === s.teams.length - 1;
+        teamDownBtn.title = "Move team down";
+        teamDownBtn.addEventListener("click", () => {
+            const tmp = s.teams[ti + 1];
+            s.teams[ti + 1] = s.teams[ti];
+            s.teams[ti] = tmp;
+            reRender();
+        });
+
+        teamHeader.appendChild(teamNameInput);
+        teamHeader.appendChild(teamUpBtn);
+        teamHeader.appendChild(teamDownBtn);
+        block.appendChild(teamHeader);
 
         const playerList = document.createElement("ul");
         playerList.className = "x01-player-list";
@@ -267,8 +358,36 @@ function _makeTeamsCard(s, reRender) {
                 reRender();
             });
 
+            const playerUpBtn = document.createElement("button");
+            playerUpBtn.type = "button";
+            playerUpBtn.className = "x01-order-btn";
+            playerUpBtn.textContent = "↑";
+            playerUpBtn.disabled = pi === 0;
+            playerUpBtn.title = "Move player up";
+            playerUpBtn.addEventListener("click", () => {
+                const tmp = s.teams[ti].players[pi - 1];
+                s.teams[ti].players[pi - 1] = s.teams[ti].players[pi];
+                s.teams[ti].players[pi] = tmp;
+                reRender();
+            });
+
+            const playerDownBtn = document.createElement("button");
+            playerDownBtn.type = "button";
+            playerDownBtn.className = "x01-order-btn";
+            playerDownBtn.textContent = "↓";
+            playerDownBtn.disabled = pi === team.players.length - 1;
+            playerDownBtn.title = "Move player down";
+            playerDownBtn.addEventListener("click", () => {
+                const tmp = s.teams[ti].players[pi + 1];
+                s.teams[ti].players[pi + 1] = s.teams[ti].players[pi];
+                s.teams[ti].players[pi] = tmp;
+                reRender();
+            });
+
             item.appendChild(input);
             item.appendChild(removeBtn);
+            item.appendChild(playerUpBtn);
+            item.appendChild(playerDownBtn);
             playerList.appendChild(item);
         });
 
@@ -278,9 +397,10 @@ function _makeTeamsCard(s, reRender) {
             const addPlayerBtn = document.createElement("button");
             addPlayerBtn.type = "button";
             addPlayerBtn.className = "x01-add-player-btn";
-            addPlayerBtn.textContent = `+ Add Player`;
+            addPlayerBtn.textContent = "+ Add Player";
             addPlayerBtn.addEventListener("click", () => {
-                s.teams[ti].players.push({ name: "" });
+                _addPlayerPendingTarget = { type: "team", teamIndex: ti };
+                _addPlayerPendingName = "";
                 reRender();
             });
             block.appendChild(addPlayerBtn);
@@ -333,9 +453,8 @@ function _makeMatchSettingsCard(s, reRender) {
     title.textContent = "Match Settings";
     card.appendChild(title);
 
-    // Legs to win
-    const legsLabel = _makeSmallLabel("Legs to Win");
-    card.appendChild(legsLabel);
+    // Legs to Win
+    card.appendChild(_makeSmallLabel("Legs to Win"));
 
     const legsRow = document.createElement("div");
     legsRow.className = "x01-pill-row";
@@ -360,16 +479,15 @@ function _makeMatchSettingsCard(s, reRender) {
         input.min = "1";
         input.max = "99";
         input.placeholder = "e.g. 7";
-        input.className = "x01-custom-score-input";
+        input.className = "x01-custom-score-input x01-custom-legs-input";
         input.value = s.customLegs;
         input.style.marginBottom = "0.7rem";
         input.addEventListener("input", e => { s.customLegs = e.target.value; });
         card.appendChild(input);
     }
 
-    // Finish rule
-    const finishLabel = _makeSmallLabel("Finish Rule");
-    card.appendChild(finishLabel);
+    // Finish Rule
+    card.appendChild(_makeSmallLabel("Finish Rule"));
 
     const finishRow = document.createElement("div");
     finishRow.className = "x01-toggle-row";
@@ -388,9 +506,8 @@ function _makeMatchSettingsCard(s, reRender) {
     }
     card.appendChild(finishRow);
 
-    // Checkout suggestions
-    const checkoutLabel = _makeSmallLabel("Checkout Suggestions");
-    card.appendChild(checkoutLabel);
+    // Checkout Suggestions
+    card.appendChild(_makeSmallLabel("Checkout Suggestions"));
 
     const checkoutRow = document.createElement("div");
     checkoutRow.className = "x01-toggle-row";
@@ -441,8 +558,8 @@ function _buildConfig(s) {
     }
 
     if (s.playType === "individual") {
-        if (s.players.length < 2) {
-            showError("Add at least 2 players.");
+        if (s.players.length < 1) {
+            showError("Add at least 1 player.");
             return null;
         }
     } else {
@@ -474,19 +591,31 @@ function _buildConfig(s) {
 // ─── GAME ─────────────────────────────────────────────────────────────────────
 
 function _renderGame(engine, actions) {
+    gameBoard.innerHTML = "";
     const screen = document.createElement("section");
     screen.className = "x01-game-screen";
 
     screen.appendChild(_makeScorebar(engine));
     screen.appendChild(_makeActivePlayerCard(engine));
-    screen.appendChild(_makeInputCard(engine, actions));
-    screen.appendChild(_makeTurnLogCard(engine));
+    screen.appendChild(_makeInputModeWidget(engine, actions));
+
+    if (engine.inputMode === "dartbydart") {
+        screen.appendChild(_makeDartTracker(engine));
+        screen.appendChild(_makeDartInputCard(engine, actions));
+    } else {
+        screen.appendChild(_makeInputCard(engine, actions));
+    }
+
+    if (engine.turnLog.length > 0) {
+        screen.appendChild(_makeTurnLogCard(engine));
+    }
 
     gameBoard.appendChild(screen);
 
-    // Auto-focus score input on mobile
-    const input = gameBoard.querySelector(".x01-score-input");
-    if (input) setTimeout(() => input.focus(), 60);
+    if (engine.inputMode === "total" && !_inputModeDropdownOpen) {
+        const input = gameBoard.querySelector(".x01-score-input");
+        if (input) setTimeout(() => input.focus(), 60);
+    }
 }
 
 function _makeScorebar(engine) {
@@ -494,16 +623,23 @@ function _makeScorebar(engine) {
     bar.className = "x01-scorebar";
 
     const turn = engine.getCurrentTurn();
+    const inFlight = engine.turnDarts.reduce((s, d) => s + d.value, 0);
 
     if (engine.playType === "individual") {
         engine.players.forEach((p, i) => {
             const isActive = turn && turn.playerIndex === i;
-            bar.appendChild(_makeScoreChip(p.name, engine.scores[i], engine.legsWon[i] || 0, isActive));
+            const displayScore = (isActive && engine.inputMode === "dartbydart")
+                ? engine.scores[i] - inFlight
+                : engine.scores[i];
+            bar.appendChild(_makeScoreChip(p.name, displayScore, engine.legsWon[i] || 0, isActive));
         });
     } else {
         engine.teams.forEach((t, i) => {
             const isActive = turn && turn.teamIndex === i;
-            bar.appendChild(_makeScoreChip(t.name, engine.scores[i], engine.legsWon[i] || 0, isActive));
+            const displayScore = (isActive && engine.inputMode === "dartbydart")
+                ? engine.scores[i] - inFlight
+                : engine.scores[i];
+            bar.appendChild(_makeScoreChip(t.name, displayScore, engine.legsWon[i] || 0, isActive));
         });
     }
 
@@ -539,6 +675,7 @@ function _makeActivePlayerCard(engine) {
 
     const turn = engine.getCurrentTurn();
     const score = engine.getCurrentScore();
+    const statsKey = engine._activeStatsKey();
 
     const activeLabel = document.createElement("div");
     activeLabel.className = "x01-active-label";
@@ -555,6 +692,26 @@ function _makeActivePlayerCard(engine) {
     card.appendChild(activeLabel);
     card.appendChild(nameEl);
     card.appendChild(scoreEl);
+
+    const legAvg = engine.getLegAvg(statsKey);
+    const matchAvg = engine.getMatchAvg(statsKey);
+    if (legAvg !== null || matchAvg !== null) {
+        const avgRow = document.createElement("div");
+        avgRow.className = "x01-avg-row";
+        if (legAvg !== null) {
+            const legEl = document.createElement("span");
+            legEl.className = "x01-avg-item";
+            legEl.textContent = `Leg avg: ${legAvg.toFixed(1)}`;
+            avgRow.appendChild(legEl);
+        }
+        if (matchAvg !== null) {
+            const matchEl = document.createElement("span");
+            matchEl.className = "x01-avg-item";
+            matchEl.textContent = `Match avg: ${matchAvg.toFixed(1)}`;
+            avgRow.appendChild(matchEl);
+        }
+        card.appendChild(avgRow);
+    }
 
     const advice = engine.getCheckoutSuggestion();
     if (advice && advice.type !== "none") {
@@ -585,6 +742,8 @@ function _makeActivePlayerCard(engine) {
     return card;
 }
 
+// ─── TOTAL MODE INPUT ─────────────────────────────────────────────────────────
+
 function _makeInputCard(engine, actions) {
     const card = document.createElement("div");
     card.className = "x01-input-card";
@@ -600,8 +759,7 @@ function _makeInputCard(engine, actions) {
 
     function submit() {
         const raw = input.value.trim();
-        if (raw === "") return;
-        const val = parseInt(raw, 10);
+        const val = raw === "" ? 0 : parseInt(raw, 10);
         if (isNaN(val)) return;
         engine.submitScore(val);
         input.value = "";
@@ -612,8 +770,11 @@ function _makeInputCard(engine, actions) {
         if (e.key === "Enter") submit();
     });
 
-    const row = document.createElement("div");
-    row.className = "x01-action-row";
+    card.appendChild(input);
+
+    // Row 1: Enter + Miss
+    const row1 = document.createElement("div");
+    row1.className = "x01-action-row";
 
     const enterBtn = document.createElement("button");
     enterBtn.type = "button";
@@ -631,26 +792,350 @@ function _makeInputCard(engine, actions) {
         if (typeof actions.onRender === "function") actions.onRender();
     });
 
+    row1.appendChild(enterBtn);
+    row1.appendChild(missBtn);
+    card.appendChild(row1);
+
+    // Row 2: Undo only (Next Turn removed — empty Enter Score counts as 0)
+    const row2 = document.createElement("div");
+    row2.className = "x01-action-row";
+    row2.style.marginTop = "0.3rem";
+
     const undoBtn = document.createElement("button");
     undoBtn.type = "button";
     undoBtn.className = "x01-btn-undo";
     undoBtn.textContent = "↶ Undo";
     undoBtn.disabled = engine.history.length === 0;
-
     undoBtn.addEventListener("click", () => {
         engine.undo();
         input.value = "";
         if (typeof actions.onRender === "function") actions.onRender();
     });
 
-    row.appendChild(enterBtn);
-    row.appendChild(missBtn);
-    row.appendChild(undoBtn);
+    row2.appendChild(undoBtn);
+    card.appendChild(row2);
 
-    card.appendChild(input);
-    card.appendChild(row);
     return card;
 }
+
+// ─── INPUT MODE WIDGET ────────────────────────────────────────────────────────
+
+function _makeInputModeWidget(engine, actions) {
+    const wrap = document.createElement("div");
+    wrap.className = "x01-input-mode-widget";
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "x01-input-mode-toggle" + (_inputModeDropdownOpen ? " open" : "");
+    const modeLabel = engine.inputMode === "total" ? "Turn Total" : "Dart by Dart";
+    toggle.textContent = `Input: ${modeLabel} ▾`;
+    toggle.addEventListener("click", () => {
+        _inputModeDropdownOpen = !_inputModeDropdownOpen;
+        if (typeof actions.onRender === "function") actions.onRender();
+    });
+    wrap.appendChild(toggle);
+
+    if (_inputModeDropdownOpen) {
+        const menu = document.createElement("div");
+        menu.className = "x01-input-mode-menu";
+
+        for (const [val, lbl] of [["total", "Turn Total"], ["dartbydart", "Dart by Dart"]]) {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "x01-input-mode-item" + (engine.inputMode === val ? " active" : "");
+            item.textContent = lbl;
+            item.addEventListener("click", () => {
+                engine.switchInputMode(val);
+                _inputModeDropdownOpen = false;
+                if (typeof actions.onRender === "function") actions.onRender();
+            });
+            menu.appendChild(item);
+        }
+
+        wrap.appendChild(menu);
+    }
+
+    return wrap;
+}
+
+// ─── ADD PLAYER MODAL ─────────────────────────────────────────────────────────
+
+function _makeAddPlayerModal(s, reRender) {
+    const overlay = document.createElement("div");
+    overlay.className = "x01-add-player-overlay";
+    overlay.addEventListener("click", e => {
+        if (e.target === overlay) {
+            _addPlayerPendingTarget = null;
+            _addPlayerPendingName = "";
+            reRender();
+        }
+    });
+
+    const sheet = document.createElement("div");
+    sheet.className = "x01-add-player-sheet";
+
+    const title = document.createElement("h3");
+    title.className = "x01-add-player-title";
+    title.textContent = "Add player";
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.className = "x01-add-player-input";
+    nameInput.placeholder = "Player name (optional)";
+    nameInput.value = _addPlayerPendingName;
+    nameInput.maxLength = 30;
+    nameInput.addEventListener("input", e => { _addPlayerPendingName = e.target.value; });
+    nameInput.addEventListener("keydown", e => {
+        if (e.key === "Enter") addWithName();
+        if (e.key === "Escape") { _addPlayerPendingTarget = null; _addPlayerPendingName = ""; reRender(); }
+    });
+
+    function addPlayerToState(name) {
+        const target = _addPlayerPendingTarget;
+        if (!target) return;
+        if (target.type === "individual") {
+            const fallback = `Player ${s.players.length + 1}`;
+            s.players.push({ name: name || fallback });
+        } else {
+            const team = s.teams[target.teamIndex];
+            const fallback = `Player ${team.players.length + 1}`;
+            team.players.push({ name: name || fallback });
+        }
+        _addPlayerPendingTarget = null;
+        _addPlayerPendingName = "";
+        reRender();
+    }
+
+    function addGuest() {
+        const target = _addPlayerPendingTarget;
+        if (!target) return;
+        if (target.type === "individual") {
+            addPlayerToState(`Guest ${s.players.length + 1}`);
+        } else {
+            const team = s.teams[target.teamIndex];
+            addPlayerToState(`Guest ${team.players.length + 1}`);
+        }
+    }
+
+    function addWithName() {
+        addPlayerToState(_addPlayerPendingName.trim());
+    }
+
+    const btnRow = document.createElement("div");
+    btnRow.className = "x01-add-player-btn-row";
+
+    const guestBtn = document.createElement("button");
+    guestBtn.type = "button";
+    guestBtn.className = "x01-add-guest-btn";
+    guestBtn.textContent = "Add Guest";
+    guestBtn.addEventListener("click", addGuest);
+
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.className = "x01-add-named-btn";
+    addBtn.textContent = "Add Player";
+    addBtn.addEventListener("click", addWithName);
+
+    btnRow.appendChild(guestBtn);
+    btnRow.appendChild(addBtn);
+
+    sheet.appendChild(title);
+    sheet.appendChild(nameInput);
+    sheet.appendChild(btnRow);
+    overlay.appendChild(sheet);
+
+    setTimeout(() => nameInput.focus(), 60);
+
+    return overlay;
+}
+
+// ─── DART-BY-DART MODE ────────────────────────────────────────────────────────
+
+function _makeDartTracker(engine) {
+    const card = document.createElement("div");
+    card.className = "x01-dart-tracker";
+
+    const label = document.createElement("div");
+    label.className = "x01-dart-tracker-label";
+    const thrown = engine.turnDarts.length;
+    label.textContent = thrown < 3 ? `Dart ${thrown + 1} of 3` : "3 darts thrown";
+    card.appendChild(label);
+
+    const slots = document.createElement("div");
+    slots.className = "x01-dart-slots";
+
+    for (let i = 0; i < 3; i++) {
+        const slot = document.createElement("div");
+        const d = engine.turnDarts[i];
+        const isCurrent = (i === thrown && thrown < 3);
+        slot.className = "x01-dart-slot"
+            + (d ? " thrown" : "")
+            + (isCurrent ? " current" : "");
+        slot.textContent = d ? d.label : (isCurrent ? "?" : "—");
+        slots.appendChild(slot);
+    }
+
+    card.appendChild(slots);
+    return card;
+}
+
+function _makeDartInputCard(engine, actions) {
+    const card = document.createElement("div");
+    card.className = "x01-dart-input-card";
+
+    // Multiplier row
+    const multRow = document.createElement("div");
+    multRow.className = "x01-multiplier-row";
+
+    for (const [val, label] of [[1, "Single"], [2, "Double"], [3, "Triple"]]) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "x01-mult-btn" + (engine.selectedMultiplier === val ? " active" : "");
+        btn.textContent = label;
+        btn.addEventListener("click", () => {
+            engine.selectMultiplier(val);
+            if (typeof actions.onRender === "function") actions.onRender();
+        });
+        multRow.appendChild(btn);
+    }
+    card.appendChild(multRow);
+
+    // Number grid 1–20
+    const grid = document.createElement("div");
+    grid.className = "x01-dart-grid";
+
+    for (let n = 1; n <= 20; n++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "x01-dart-num-btn";
+        btn.textContent = String(n);
+        btn.addEventListener("click", () => {
+            engine.addDart(n);
+            if (typeof actions.onRender === "function") actions.onRender();
+        });
+        grid.appendChild(btn);
+    }
+    card.appendChild(grid);
+
+    // Special buttons: Miss + Bull
+    const specRow = document.createElement("div");
+    specRow.className = "x01-dart-special-row";
+
+    const missBtn = document.createElement("button");
+    missBtn.type = "button";
+    missBtn.className = "x01-dart-special-btn x01-dart-miss-btn";
+    missBtn.textContent = "Miss";
+    missBtn.addEventListener("click", () => {
+        engine.addDart(0);
+        if (typeof actions.onRender === "function") actions.onRender();
+    });
+
+    const bullBtn = document.createElement("button");
+    bullBtn.type = "button";
+    bullBtn.className = "x01-dart-special-btn x01-dart-bull-btn";
+    bullBtn.textContent = engine.selectedMultiplier === 2 ? "Bull (50)" : "Bull (25)";
+    bullBtn.addEventListener("click", () => {
+        engine.addDart(25); // engine applies selected multiplier
+        if (typeof actions.onRender === "function") actions.onRender();
+    });
+
+    specRow.appendChild(missBtn);
+    specRow.appendChild(bullBtn);
+    card.appendChild(specRow);
+
+    // End Turn + Undo
+    const actionRow = document.createElement("div");
+    actionRow.className = "x01-action-row";
+    actionRow.style.marginTop = "0.4rem";
+
+    const endTurnBtn = document.createElement("button");
+    endTurnBtn.type = "button";
+    endTurnBtn.className = "x01-btn-next-turn";
+    endTurnBtn.textContent = "End Turn";
+    endTurnBtn.addEventListener("click", () => {
+        engine.endTurnEarly();
+        if (typeof actions.onRender === "function") actions.onRender();
+    });
+
+    const undoBtn = document.createElement("button");
+    undoBtn.type = "button";
+    undoBtn.className = "x01-btn-undo";
+    undoBtn.textContent = "↶ Undo";
+    undoBtn.disabled = engine.history.length === 0;
+    undoBtn.addEventListener("click", () => {
+        engine.undo();
+        if (typeof actions.onRender === "function") actions.onRender();
+    });
+
+    actionRow.appendChild(endTurnBtn);
+    actionRow.appendChild(undoBtn);
+    card.appendChild(actionRow);
+
+    return card;
+}
+
+// ─── DOUBLE-OUT CONFIRMATION ──────────────────────────────────────────────────
+
+function _renderDoubleConfirm(engine, actions) {
+    gameBoard.innerHTML = "";
+    const screen = document.createElement("section");
+    screen.className = "x01-game-screen";
+
+    screen.appendChild(_makeScorebar(engine));
+
+    const card = document.createElement("div");
+    card.className = "x01-confirm-card";
+
+    const playerLabel = engine.pendingDoubleConfirm
+        ? engine.pendingDoubleConfirm.turnLabel
+        : "—";
+
+    const playerEl = document.createElement("div");
+    playerEl.className = "x01-confirm-player";
+    playerEl.textContent = playerLabel;
+
+    const question = document.createElement("div");
+    question.className = "x01-confirm-question";
+    question.textContent = "Finish on a double?";
+
+    const info = document.createElement("div");
+    info.className = "x01-confirm-info";
+    info.textContent = "Did the finishing dart land on a double or the inner bull?";
+
+    card.appendChild(playerEl);
+    card.appendChild(question);
+    card.appendChild(info);
+
+    const btnRow = document.createElement("div");
+    btnRow.className = "x01-confirm-actions";
+
+    const yesBtn = document.createElement("button");
+    yesBtn.type = "button";
+    yesBtn.className = "x01-confirm-yes-btn";
+    yesBtn.textContent = "Yes — Leg Won!";
+    yesBtn.addEventListener("click", () => {
+        engine.confirmDoubleOut(true);
+        if (typeof actions.onRender === "function") actions.onRender();
+    });
+
+    const noBtn = document.createElement("button");
+    noBtn.type = "button";
+    noBtn.className = "x01-confirm-no-btn";
+    noBtn.textContent = "No — Bust";
+    noBtn.addEventListener("click", () => {
+        engine.confirmDoubleOut(false);
+        if (typeof actions.onRender === "function") actions.onRender();
+    });
+
+    btnRow.appendChild(yesBtn);
+    btnRow.appendChild(noBtn);
+    card.appendChild(btnRow);
+
+    screen.appendChild(card);
+    gameBoard.appendChild(screen);
+}
+
+// ─── TURN LOG ─────────────────────────────────────────────────────────────────
 
 function _makeTurnLogCard(engine) {
     const card = document.createElement("div");
@@ -660,14 +1145,6 @@ function _makeTurnLogCard(engine) {
     title.className = "x01-section-title";
     title.textContent = "Recent Turns";
     card.appendChild(title);
-
-    if (engine.turnLog.length === 0) {
-        const empty = document.createElement("p");
-        empty.style.cssText = "font-size:0.78rem;color:var(--text-muted);margin:0";
-        empty.textContent = "No turns yet.";
-        card.appendChild(empty);
-        return card;
-    }
 
     const list = document.createElement("ul");
     list.className = "x01-turn-log";
@@ -702,6 +1179,7 @@ function _makeTurnLogCard(engine) {
 // ─── LEG WON ──────────────────────────────────────────────────────────────────
 
 function _renderLegWon(engine, actions) {
+    gameBoard.innerHTML = "";
     const screen = document.createElement("section");
     screen.className = "x01-game-screen";
 
@@ -741,7 +1219,6 @@ function _renderLegWon(engine, actions) {
 
     btnRow.appendChild(continueBtn);
     card.appendChild(btnRow);
-
     screen.appendChild(card);
     gameBoard.appendChild(screen);
 }
@@ -749,6 +1226,7 @@ function _renderLegWon(engine, actions) {
 // ─── MATCH WON ────────────────────────────────────────────────────────────────
 
 function _renderMatchWon(engine, actions) {
+    gameBoard.innerHTML = "";
     const screen = document.createElement("section");
     screen.className = "x01-game-screen";
 
@@ -795,7 +1273,6 @@ function _renderMatchWon(engine, actions) {
     btnRow.appendChild(rematchBtn);
     btnRow.appendChild(backBtn);
     card.appendChild(btnRow);
-
     screen.appendChild(card);
     gameBoard.appendChild(screen);
 }

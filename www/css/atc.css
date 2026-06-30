@@ -1,0 +1,445 @@
+/* www/css/atc.css */
+
+/* =====================================================
+   AROUND THE CLOCK — home screen card
+   ===================================================== */
+
+.mode-card-atc {
+    border-color: rgba(234, 179, 8, 0.32);
+    background:
+        radial-gradient(circle at top left, rgba(234, 179, 8, 0.15), transparent 44%),
+        linear-gradient(180deg, rgba(24, 20, 4, 0.98), rgba(14, 14, 20, 0.98));
+}
+
+.mode-badge-atc {
+    color: #1a1200;
+    background: linear-gradient(180deg, #fde047, #ca8a04);
+    border: 1px solid rgba(234, 179, 8, 0.5);
+}
+
+/* =====================================================
+   ATC — shared layout
+   ===================================================== */
+
+.atc-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-bottom: 2rem;
+}
+
+.atc-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 14px;
+    padding: 1rem;
+}
+
+.atc-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 0.6rem;
+}
+
+/* =====================================================
+   ATC — setup
+   ===================================================== */
+
+.atc-mode-badge {
+    display: inline-block;
+    background: rgba(234, 179, 8, 0.15);
+    color: #fde047;
+    border: 1px solid rgba(234, 179, 8, 0.35);
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.55rem;
+    margin-bottom: 0.55rem;
+}
+
+.atc-setup-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.45;
+}
+
+.atc-player-list {
+    list-style: none;
+    margin: 0 0 0.6rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.atc-player-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.atc-player-name-input {
+    flex: 1;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    padding: 0.45rem 0.6rem;
+    font-family: inherit;
+}
+
+.atc-remove-btn {
+    background: transparent;
+    border: 1px solid var(--border-card);
+    color: var(--text-muted);
+    border-radius: 7px;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: inherit;
+}
+
+.atc-remove-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+
+.atc-add-btn {
+    background: transparent;
+    border: 1px dashed var(--border-card);
+    color: var(--text-muted);
+    border-radius: 9px;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 0.3rem;
+    font-family: inherit;
+    transition: color 0.12s, border-color 0.12s;
+}
+
+.atc-add-btn:hover {
+    color: var(--text-main);
+    border-color: rgba(234, 179, 8, 0.45);
+}
+
+.atc-start-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(180deg, #ca8a04, #a16207);
+    color: #fff8e1;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.03em;
+    transition: opacity 0.15s;
+}
+
+.atc-start-btn:hover {
+    opacity: 0.9;
+}
+
+/* =====================================================
+   ATC — game screen
+   ===================================================== */
+
+.atc-top-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.atc-undo-btn {
+    background: rgba(251, 146, 60, 0.12);
+    border: 1px solid rgba(251, 146, 60, 0.35);
+    color: #fb923c;
+    border-radius: 9px;
+    padding: 0.38rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.12s;
+}
+
+.atc-undo-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+/* Player card */
+.atc-player-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.atc-player-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.atc-darts-row {
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+}
+
+.atc-dart-pip {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(234, 179, 8, 0.4);
+    background: transparent;
+    transition: background 0.15s;
+}
+
+.atc-dart-pip.used {
+    background: rgba(234, 179, 8, 0.6);
+    border-color: rgba(234, 179, 8, 0.8);
+}
+
+/* Target card */
+.atc-target-card {
+    text-align: center;
+}
+
+.atc-target-big {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #fde047;
+    line-height: 1;
+    margin: 0.3rem 0 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.atc-progress-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0 0 0.5rem;
+}
+
+.atc-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.atc-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ca8a04, #fde047);
+    border-radius: 999px;
+    transition: width 0.3s;
+}
+
+/* Input card */
+.atc-input-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.atc-action-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.atc-hit-btn {
+    flex: 2;
+    padding: 0.9rem 0.5rem;
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.22), rgba(21, 128, 61, 0.22));
+    border: 1px solid rgba(34, 197, 94, 0.45);
+    color: #86efac;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: background 0.12s;
+}
+
+.atc-hit-btn:hover {
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.32), rgba(21, 128, 61, 0.32));
+}
+
+.atc-miss-btn {
+    flex: 1;
+    padding: 0.9rem 0.5rem;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: background 0.12s;
+}
+
+.atc-miss-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.atc-end-turn-btn {
+    width: 100%;
+    padding: 0.6rem;
+    background: transparent;
+    border: 1px solid var(--border-card);
+    color: var(--text-muted);
+    border-radius: 9px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.12s, border-color 0.12s;
+}
+
+.atc-end-turn-btn:hover {
+    color: var(--text-main);
+    border-color: rgba(234, 179, 8, 0.4);
+}
+
+/* Standings */
+.atc-standing-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.5rem;
+    border-radius: 8px;
+    margin-bottom: 0.2rem;
+    font-size: 0.88rem;
+}
+
+.atc-standing-row.atc-standing-active {
+    background: rgba(234, 179, 8, 0.1);
+    border: 1px solid rgba(234, 179, 8, 0.25);
+}
+
+.atc-standing-name {
+    font-weight: 700;
+    flex: 1;
+    color: var(--text-main);
+}
+
+.atc-standing-target {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.atc-standing-darts {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+/* Winner screen */
+.atc-winner-card {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.atc-winner-emoji {
+    font-size: 3rem;
+    margin: 0.3rem 0;
+}
+
+.atc-winner-title {
+    font-size: 1.6rem;
+    font-weight: 900;
+    margin: 0;
+    color: #fde047;
+}
+
+.atc-winner-stats {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0 0 0.5rem;
+}
+
+.atc-result-row {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: left;
+    width: 100%;
+    padding: 0.25rem 0;
+}
+
+/* =====================================================
+   ATC — reorder arrows & hit type buttons (polish)
+   ===================================================== */
+
+.atc-order-btn {
+    background: transparent;
+    border: 1px solid var(--border-card);
+    color: var(--text-muted);
+    border-radius: 7px;
+    padding: 0.28rem 0.5rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: inherit;
+    transition: color 0.12s, border-color 0.12s;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    min-width: 36px;
+    min-height: 36px;
+}
+
+.atc-order-btn:hover:not(:disabled) {
+    color: #fde047;
+    border-color: rgba(234, 179, 8, 0.5);
+}
+
+.atc-order-btn:disabled {
+    opacity: 0.2;
+    cursor: default;
+}
+
+.atc-hit-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.45rem;
+}
+
+.atc-hit-type-btn {
+    padding: 0.85rem 0.3rem;
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.2), rgba(21, 128, 61, 0.2));
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #86efac;
+    border-radius: 11px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+}
+
+.atc-hit-type-btn:hover {
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.32), rgba(21, 128, 61, 0.32));
+}
