@@ -536,6 +536,7 @@ body.theme-clean {
 body {
     margin: 0;
     padding: 0;
+    padding-top: env(safe-area-inset-top);
     font-family: 'Inter', Arial, sans-serif;
     background: var(--bg-main);
     color: var(--text-main);
@@ -1349,7 +1350,7 @@ button:disabled {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 2rem 1rem;
+    padding: calc(env(safe-area-inset-top) + 1rem) 1rem 2rem;
     overflow-y: auto;
     background: rgba(0, 0, 0, 0.55);
     box-sizing: border-box;
