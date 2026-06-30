@@ -40,7 +40,20 @@
 }
 
 /* ==================================================
-   02. THEME VARIABLES
+   02. SAFE-AREA INSETS  (iOS notch / Dynamic Island)
+   Use env() directly in calc() on the elements that need it;
+   CSS variables are defined here as a reference only.
+   ================================================== */
+
+:root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+}
+
+/* ==================================================
+   03. THEME VARIABLES
    ================================================== */
 
 body.theme-neon {
@@ -271,7 +284,9 @@ html {
 
 body {
     margin: 0;
-    min-height: 100vh;
+    min-height: 100dvh;
+    /* bottom padding keeps content above the iOS home indicator */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     font-family: "Inter", Arial, sans-serif;
     background: var(--bg-main);
     color: var(--text-main);
@@ -279,8 +294,8 @@ body {
 
 .container {
     width: min(520px, 94%);
-    min-height: 100vh;
-    margin: 0.75rem auto 1.5rem;
+    min-height: 100dvh;
+    margin: 0 auto 1.5rem;
 }
 
 .hidden {
@@ -380,6 +395,10 @@ button:disabled {
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 1rem;
+    /* Push Back/Title/Settings below the iOS notch and Dynamic Island.
+       env() evaluates to 0 on Android and desktop, so no extra spacing there. */
+    padding-top: calc(env(safe-area-inset-top) + 10px);
+    min-height: calc(56px + env(safe-area-inset-top));
 }
 
 .top-action-button {
@@ -445,6 +464,8 @@ button:disabled {
 .home-header {
     margin-bottom: 1rem;
     text-align: center;
+    /* Push logo below the iOS notch and Dynamic Island */
+    padding-top: calc(env(safe-area-inset-top) + 8px);
 }
 
 .home-logo-wrap {
@@ -1192,7 +1213,8 @@ button:disabled {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 2rem 1rem;
+    /* Top padding clears the iOS notch/Dynamic Island; bottom clears home indicator */
+    padding: calc(env(safe-area-inset-top) + 1rem) 1rem calc(env(safe-area-inset-bottom) + 1rem);
     overflow-y: auto;
     background: rgba(0, 0, 0, 0.55);
 }
