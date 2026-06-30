@@ -1,5 +1,8 @@
 // main.js opstartlogica en event listeners
 
+// Update checker — runs on startup and shows a modal when a newer version is available.
+import { checkForUpdates } from "./update-checker.js";
+
 // Game en chaos engine importeren
 import { KillerGame } from "./killer-game.js";
 
@@ -323,3 +326,6 @@ renderApp(game, {
     resetGameCompletely,
     showHomeScreen
 });
+
+// Check for app updates in the background after the initial render.
+checkForUpdates();
