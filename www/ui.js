@@ -2,8 +2,6 @@
 // DOM REFERENCES
 // =====================================================
 
-import { makeKeypad } from "./shared/custom-keypad.js";
-
 const setupPanel = document.getElementById("setupPanel");
 const gamePanel = document.getElementById("gamePanel");
 const playerNameInput = document.getElementById("playerName");
@@ -603,6 +601,14 @@ function renderNumberSelection(game, actions = {}) {
             Enter the number you hit.
         </p>
 
+        <input id="numberSelectionInput" class="number-selection-input" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="1-20" autocomplete="off" data-numeric-gameplay>
+
+        <div id="numberSelectionError" class="number-selection-error hidden"></div>
+
+        <button id="confirmNumberBtn" type="button" class="number-selection-button">
+            Confirm Number
+        </button>
+
         <div class="number-selection-list">
             ${game.players.map((listedPlayer, index) => {
                 const isCurrent = index === game.numberSelectionIndex;
@@ -617,27 +623,27 @@ function renderNumberSelection(game, actions = {}) {
         </div>
     `;
 
-    const kp = makeKeypad({
-        maxValue: 20,
-        maxDigits: 2,
-        minValue: 1,
-        showMiss: false,
-        emptyIsZero: false,
-        placeholder: "–",
-        submitLabel: "Confirm Number",
-        onSubmit: (number) => {
-            const result = game.confirmPlayerNumber(number);
-            if (!result.success) {
-                kp.showError(result.message);
-                return;
-            }
-            renderApp(game, actions);
-        },
-    });
-
-    const list = wrapper.querySelector(".number-selection-list");
-    wrapper.insertBefore(kp.el, list);
     gameBoard.appendChild(wrapper);
+
+    const input = document.getElementById("numberSelectionInput");
+    const confirmButton = document.getElementById("confirmNumberBtn");
+    const errorBox = document.getElementById("numberSelectionError");
+
+    function confirmNumber() {
+        const number = Number(input.value);
+        const result = game.confirmPlayerNumber(number);
+        if (!result.success) {
+            errorBox.textContent = result.message;
+            errorBox.classList.remove("hidden");
+            return;
+        }
+        renderApp(game, actions);
+    }
+
+    confirmButton.addEventListener("click", confirmNumber);
+    input.addEventListener("keydown", event => {
+        if (event.key === "Enter") confirmNumber();
+    });
 }
 
 function renderGameBoard(game, actions = {}) {
@@ -1458,23 +1464,40 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
         const totalArea = document.createElement("div");
         totalArea.classList.add("checkout-total-area");
 
-        const kp = makeKeypad({
-            maxValue: 180,
-            maxDigits: 3,
-            minValue: 0,
-            showMiss: false,
-            emptyIsZero: true,
-            placeholder: "–",
-            submitLabel: "Submit",
-            onSubmit: (score) => {
-                checkoutEngine.submitTotalScore(score);
-                renderCheckoutMode(checkoutEngine, actions);
-                scrollCheckoutToTop();
-            },
-        });
-        totalArea.appendChild(kp.el);
+        const totalRow = document.createElement("div");
+        totalRow.classList.add("checkout-total-row");
 
-        // Quick score shortcuts — setValue pre-fills the keypad; user still confirms
+        const totalInput = document.createElement("input");
+        totalInput.type = "tel";
+        totalInput.inputMode = "numeric";
+        totalInput.pattern = "[0-9]*";
+        totalInput.classList.add("checkout-total-input");
+        totalInput.placeholder = "0 – 180";
+        totalInput.autocomplete = "off";
+        totalInput.setAttribute("data-numeric-gameplay", "");
+
+        const submitBtn = document.createElement("button");
+        submitBtn.type = "button";
+        submitBtn.classList.add("checkout-submit-btn");
+        submitBtn.textContent = "Submit";
+
+        const handleSubmit = () => {
+            const raw = totalInput.value.trim();
+            const score = raw === "" ? 0 : Math.max(0, Math.min(180, Math.round(Number(raw) || 0)));
+            checkoutEngine.submitTotalScore(score);
+            totalInput.value = "";
+            renderCheckoutMode(checkoutEngine, actions);
+            scrollCheckoutToTop();
+        };
+
+        submitBtn.addEventListener("click", handleSubmit);
+        totalInput.addEventListener("keydown", e => { if (e.key === "Enter") handleSubmit(); });
+
+        totalRow.appendChild(totalInput);
+        totalRow.appendChild(submitBtn);
+        totalArea.appendChild(totalRow);
+
+        // Quick score shortcuts — fill the native input; user still taps Submit
         const quickBtns = document.createElement("div");
         quickBtns.classList.add("checkout-quick-btns");
         [0, 26, 41, 60, 100].forEach(val => {
@@ -1482,7 +1505,7 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
             btn.type = "button";
             btn.classList.add("checkout-quick-btn");
             btn.textContent = val;
-            btn.addEventListener("click", () => kp.setValue(val));
+            btn.addEventListener("click", () => { totalInput.value = val; });
             quickBtns.appendChild(btn);
         });
         totalArea.appendChild(quickBtns);

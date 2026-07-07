@@ -1,7 +1,5 @@
 // www/x01/x01-ui.js
 
-import { makeKeypad } from "../shared/custom-keypad.js";
-
 const setupPanel = document.getElementById("setupPanel");
 const gamePanel = document.getElementById("gamePanel");
 const gameBoard = document.getElementById("gameBoard");
@@ -605,25 +603,7 @@ function _renderGame(engine, actions) {
         screen.appendChild(_makeDartTracker(engine));
         screen.appendChild(_makeDartInputCard(engine, actions));
     } else {
-        const kp = makeKeypad({
-            maxValue: 180,
-            maxDigits: 3,
-            minValue: 0,
-            showMiss: true,
-            emptyIsZero: true,
-            placeholder: "–",
-            submitLabel: "Enter Score",
-            onSubmit: (val) => {
-                engine.submitScore(val);
-                if (typeof actions.onRender === "function") actions.onRender();
-            },
-            onUndo: () => {
-                engine.undo();
-                if (typeof actions.onRender === "function") actions.onRender();
-            },
-            undoDisabled: engine.history.length === 0,
-        });
-        screen.appendChild(kp.el);
+        screen.appendChild(_makeScoreInputCard(engine, actions));
     }
 
     if (engine.turnLog.length > 0) {
@@ -753,6 +733,70 @@ function _makeActivePlayerCard(engine) {
 
         card.appendChild(hint);
     }
+
+    return card;
+}
+
+// ─── TOTAL MODE: NATIVE SCORE INPUT ──────────────────────────────────────────
+
+function _makeScoreInputCard(engine, actions) {
+    const card = document.createElement("div");
+    card.className = "x01-input-card";
+
+    const input = document.createElement("input");
+    input.type = "tel";
+    input.inputMode = "numeric";
+    input.pattern = "[0-9]*";
+    input.className = "x01-score-input";
+    input.placeholder = "0 – 180";
+    input.autocomplete = "off";
+    input.setAttribute("data-numeric-gameplay", "");
+    card.appendChild(input);
+
+    const actionRow = document.createElement("div");
+    actionRow.className = "x01-action-row";
+
+    const missBtn = document.createElement("button");
+    missBtn.type = "button";
+    missBtn.className = "x01-btn-miss";
+    missBtn.textContent = "Miss";
+    missBtn.addEventListener("click", () => {
+        input.value = "";
+        engine.submitScore(0);
+        if (typeof actions.onRender === "function") actions.onRender();
+    });
+
+    const enterBtn = document.createElement("button");
+    enterBtn.type = "button";
+    enterBtn.className = "x01-btn-enter";
+    enterBtn.textContent = "Enter Score";
+
+    function doSubmit() {
+        const raw = input.value.trim();
+        const val = raw === "" ? 0 : Math.max(0, Math.min(180, parseInt(raw, 10) || 0));
+        input.value = "";
+        engine.submitScore(val);
+        if (typeof actions.onRender === "function") actions.onRender();
+    }
+
+    enterBtn.addEventListener("click", doSubmit);
+    input.addEventListener("keydown", e => { if (e.key === "Enter") doSubmit(); });
+
+    const undoBtn = document.createElement("button");
+    undoBtn.type = "button";
+    undoBtn.className = "x01-btn-undo";
+    undoBtn.textContent = "↶ Undo";
+    undoBtn.disabled = engine.history.length === 0;
+    undoBtn.addEventListener("click", () => {
+        input.value = "";
+        engine.undo();
+        if (typeof actions.onRender === "function") actions.onRender();
+    });
+
+    actionRow.appendChild(missBtn);
+    actionRow.appendChild(enterBtn);
+    actionRow.appendChild(undoBtn);
+    card.appendChild(actionRow);
 
     return card;
 }

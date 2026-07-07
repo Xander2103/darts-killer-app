@@ -315,7 +315,7 @@ textarea,
 /* Full-height flex column — becomes the app shell */
 .container {
     width: min(520px, 94%);
-    height: 100dvh;
+    height: 100svh; /* svh is stable — doesn't resize when iOS keyboard appears */
     display: flex;
     flex-direction: column;
     overflow: hidden;
