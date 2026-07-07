@@ -1,5 +1,7 @@
 // www/halveIt/halveItUi.js
 
+import { makeKeypad } from "../shared/custom-keypad.js";
+
 const setupPanel = document.getElementById("setupPanel");
 const gamePanel = document.getElementById("gamePanel");
 const gameBoard = document.getElementById("gameBoard");
@@ -100,34 +102,18 @@ function createPlayerContractCard(halveItGame, round, player, actions) {
             ${lastResultText}
         </div>
 
-        <form id="halveItScoreForm" class="halve-it-score-form">
-            <label for="halveItScoreInput">Score this round</label>
-            <div class="halve-it-score-input-row">
-                <input
-                    id="halveItScoreInput"
-                    type="tel"
-                    inputmode="numeric"
-                    pattern="[0-9]*"
-                    placeholder="0"
-                    autocomplete="off"
-                    data-numeric-gameplay
-                >
-                <button type="submit">Next</button>
-            </div>
-            <p class="halve-it-score-help">Leave empty or enter 0 if the contract failed. Any score above 0 counts as completed.</p>
-        </form>
+        <p class="halve-it-score-help">Leave empty or enter 0 if the contract failed. Any score above 0 counts as completed.</p>
     `;
 
-    const form = card.querySelector("#halveItScoreForm");
-    form.addEventListener("submit", event => {
-        event.preventDefault();
-        const input = card.querySelector("#halveItScoreInput");
-        const score = Number(input.value) || 0;
-        input.value = "";
-        if (typeof actions.onSubmitScore === "function") {
-            actions.onSubmitScore(score);
-        }
+    const kp = makeKeypad({
+        maxValue: 180, maxDigits: 3, minValue: 0,
+        showMiss: false, emptyIsZero: true, placeholder: "–",
+        submitLabel: "Next",
+        onSubmit: (score) => {
+            if (typeof actions.onSubmitScore === "function") actions.onSubmitScore(score);
+        },
     });
+    card.appendChild(kp.el);
 
     return card;
 }

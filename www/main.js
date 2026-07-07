@@ -1,7 +1,5 @@
 // main.js opstartlogica en event listeners
 
-import "./shared/ios-scroll-lock.js";
-
 // Game en chaos engine importeren
 import { KillerGame } from "./killer-game.js";
 

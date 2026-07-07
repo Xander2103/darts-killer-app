@@ -1,0 +1,164 @@
+/* www/css/custom-keypad.css
+   Shared in-app numeric keypad — used across gameplay screens.
+   No native <input>, no iOS keyboard, no viewport shift.
+   Layout: 1 2 3 / 4 5 6 / 7 8 9 / [Miss?] 0 ⌫
+*/
+
+.ck-keypad {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 14px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* ── Display ─────────────────────────────────────────────── */
+.ck-display {
+    min-height: 64px;
+    padding: 0.55rem 0.75rem;
+    font-size: 2.4rem;
+    font-weight: 800;
+    text-align: center;
+    background: transparent;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: -0.02em;
+    transition: color 0.08s;
+    box-sizing: border-box;
+    pointer-events: none;  /* never focusable */
+}
+
+.ck-display--empty {
+    color: var(--text-muted);
+    font-size: 1.6rem;
+    font-weight: 400;
+}
+
+/* ── Inline error ────────────────────────────────────────── */
+.ck-error {
+    color: #f87171;
+    font-size: 0.78rem;
+    min-height: 1em;
+    text-align: center;
+    padding: 0 0.2rem;
+}
+
+/* ── Digit grid: 3 columns ───────────────────────────────── */
+.ck-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.38rem;
+}
+
+/* ── All keypad buttons ──────────────────────────────────── */
+.ck-btn {
+    min-height: 52px;
+    padding: 0.5rem 0.2rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-main);
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background 0.08s, transform 0.06s;
+    box-sizing: border-box;
+}
+
+.ck-btn:active {
+    background: rgba(34, 197, 94, 0.20);
+    transform: scale(0.94);
+}
+
+/* Miss button */
+.ck-btn--miss {
+    border-color: rgba(248, 113, 113, 0.35);
+    background: rgba(248, 113, 113, 0.07);
+    color: #f87171;
+    font-size: 1rem;
+}
+.ck-btn--miss:active {
+    background: rgba(248, 113, 113, 0.24);
+    transform: scale(0.94);
+}
+
+/* Backspace button */
+.ck-btn--back {
+    border-color: rgba(251, 191, 36, 0.30);
+    background: rgba(251, 191, 36, 0.06);
+    color: #fbbf24;
+}
+.ck-btn--back:active {
+    background: rgba(251, 191, 36, 0.22);
+    transform: scale(0.94);
+}
+
+/* 0 spans 2 cols when Miss is hidden */
+.ck-btn--zero-wide {
+    grid-column: span 2;
+}
+
+/* ── Submit / Enter ──────────────────────────────────────── */
+.ck-submit {
+    width: 100%;
+    padding: 0.78rem;
+    font-size: 1rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 10px;
+    background: rgba(34, 197, 94, 0.85);
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background 0.1s;
+}
+.ck-submit:active  { background: rgba(34, 197, 94, 1); }
+.ck-submit:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+/* ── Undo ────────────────────────────────────────────────── */
+.ck-undo {
+    width: 100%;
+    padding: 0.65rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid var(--border-card);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background 0.1s, color 0.1s;
+}
+.ck-undo:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+.ck-undo:disabled {
+    opacity: 0.28;
+    cursor: default;
+}
