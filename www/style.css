@@ -278,24 +278,56 @@ body.theme-clean {
     box-sizing: border-box;
 }
 
+/* Lock the root and body so the OS rubber-band bounce has nothing to scroll.
+   Only .screen-body scrolls. */
 html {
-    min-height: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
 }
 
 body {
     margin: 0;
-    min-height: 100dvh;
-    /* bottom padding keeps content above the iOS home indicator */
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
     font-family: "Inter", Arial, sans-serif;
     background: var(--bg-main);
     color: var(--text-main);
 }
 
+/* Full-height flex column — becomes the app shell */
 .container {
     width: min(520px, 94%);
-    min-height: 100dvh;
-    margin: 0 auto 1.5rem;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+/* Each top-level screen fills the container and clips overflow */
+.home-screen,
+#classicScreen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* THE only scrolling element in the app.
+   Sits below the sticky header and above the home indicator. */
+.screen-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    /* top breathing room + bottom clears iOS home indicator */
+    padding: 0.75rem 0 calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+    box-sizing: border-box;
 }
 
 .hidden {
@@ -390,13 +422,14 @@ button:disabled {
    ================================================== */
 
 .top-bar {
+    flex-shrink: 0; /* never squeezed by the flex column layout */
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 1rem;
     /* Push Back/Title/Settings below the iOS notch and Dynamic Island.
-       env() evaluates to 0 on Android and desktop, so no extra spacing there. */
+       env() evaluates to 0 on Android and desktop so no extra spacing there. */
     padding-top: calc(env(safe-area-inset-top) + 10px);
     min-height: calc(56px + env(safe-area-inset-top));
 }
@@ -1884,7 +1917,7 @@ body.theme-clean .clickable-setting * {
 @media (max-width: 600px) {
     .container {
         width: 94%;
-        margin: 0.6rem auto 1rem;
+        margin: 0 auto;
     }
 
     .top-bar {
@@ -1930,7 +1963,7 @@ body.theme-clean .clickable-setting * {
 @media (min-width: 700px) {
     .container {
         width: min(760px, 86vw);
-        margin: 1.2rem auto 2rem;
+        margin: 0 auto;
     }
 
     .panel {
