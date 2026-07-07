@@ -774,6 +774,13 @@ function _makeKeypad(engine, actions) {
 
     card.appendChild(display);
 
+    // DEBUG — remove after iOS confirmation
+    const _dbg = document.createElement("div");
+    _dbg.id = "x01-keypad-debug";
+    _dbg.textContent = "✓ CUSTOM KEYPAD ACTIVE";
+    _dbg.style.cssText = "text-align:center;font-size:0.7rem;font-weight:800;letter-spacing:0.05em;color:#86efac;padding:2px 0 4px;";
+    card.appendChild(_dbg);
+
     // Digit grid: 1–9
     const grid = document.createElement("div");
     grid.className = "x01-keypad-grid";
