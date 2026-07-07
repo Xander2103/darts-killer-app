@@ -284,6 +284,8 @@ html {
     height: 100%;
     overflow: hidden;
     overscroll-behavior: none;
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -291,9 +293,23 @@ body {
     height: 100%;
     overflow: hidden;
     overscroll-behavior: none;
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
     font-family: "Inter", Arial, sans-serif;
     background: var(--bg-main);
     color: var(--text-main);
+}
+
+/* Prevent iOS double-tap-to-zoom on interactive elements */
+button,
+input,
+select,
+textarea,
+.mode-card,
+.panel,
+.top-action-button,
+.action-btn {
+    touch-action: manipulation;
 }
 
 /* Full-height flex column — becomes the app shell */
