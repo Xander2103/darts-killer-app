@@ -1,6 +1,7 @@
 // www/transitArena/transit-arena-ui.js
 
 import { getPowerUpById } from "./transit-arena-powerups.js";
+import { makeKeypad } from "../shared/custom-keypad.js";
 
 // ─── Local audio helpers ──────────────────────────────────────────────────────
 
@@ -106,23 +107,24 @@ function _renderNumberSelection(engine, actions) {
     help.textContent = "Throw one dart with your weak hand. Enter the number you hit — this becomes your target number.";
     card.appendChild(help);
 
-    const input = document.createElement("input");
-    input.type = "number";
-    input.min = "1";
-    input.max = "20";
-    input.placeholder = "1 – 20";
-    input.classList.add("ta-numsel-input");
-    input.inputMode = "numeric";
-    input.pattern = "[0-9]*";
-    card.appendChild(input);
-
-    const errorBox = _el("div", "ta-numsel-error");
-    card.appendChild(errorBox);
-
-    const confirmBtn = _el("button", "ta-numsel-confirm-btn");
-    confirmBtn.type = "button";
-    confirmBtn.textContent = "Confirm Number";
-    card.appendChild(confirmBtn);
+    const kp = makeKeypad({
+        maxValue: 20,
+        maxDigits: 2,
+        minValue: 1,
+        showMiss: false,
+        emptyIsZero: false,
+        placeholder: "–",
+        submitLabel: "Confirm Number",
+        onSubmit: (number) => {
+            const result = engine.confirmPlayerNumber(number);
+            if (!result.success) {
+                kp.showError(result.message);
+                return;
+            }
+            if (typeof actions.onNumberConfirmed === "function") actions.onNumberConfirmed();
+        },
+    });
+    card.appendChild(kp.el);
 
     if (engine.history.length > 0) {
         const undoLink = _el("button", "ta-numsel-undo-btn");
@@ -157,27 +159,6 @@ function _renderNumberSelection(engine, actions) {
 
     screen.appendChild(card);
     gameBoard.appendChild(screen);
-
-    function handleConfirm() {
-        const value = input.value.trim();
-        if (!value) {
-            errorBox.textContent = "Enter a number between 1 and 20.";
-            return;
-        }
-        const result = engine.confirmPlayerNumber(Number(value));
-        if (!result.success) {
-            errorBox.textContent = result.message;
-            input.select();
-            return;
-        }
-        errorBox.textContent = "";
-        input.value = "";
-        if (typeof actions.onNumberConfirmed === "function") actions.onNumberConfirmed();
-    }
-
-    confirmBtn.addEventListener("click", handleConfirm);
-    input.addEventListener("keydown", e => { if (e.key === "Enter") handleConfirm(); });
-    input.focus();
 }
 
 // ─── Playing screen ───────────────────────────────────────────────────────────

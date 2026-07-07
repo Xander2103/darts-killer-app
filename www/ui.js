@@ -2,6 +2,8 @@
 // DOM REFERENCES
 // =====================================================
 
+import { makeKeypad } from "./shared/custom-keypad.js";
+
 const setupPanel = document.getElementById("setupPanel");
 const gamePanel = document.getElementById("gamePanel");
 const playerNameInput = document.getElementById("playerName");
@@ -580,15 +582,9 @@ function isThrowButtonDisabled(game, multiplier) {
 // =====================================================
 
 function renderNumberSelection(game, actions = {}) {
-    if (!gameBoard) {
-        return;
-    }
-
+    if (!gameBoard) { return; }
     const player = game.players[game.numberSelectionIndex];
-
-    if (!player) {
-        return;
-    }
+    if (!player) { return; }
 
     gameBoard.innerHTML = "";
 
@@ -607,58 +603,41 @@ function renderNumberSelection(game, actions = {}) {
             Enter the number you hit.
         </p>
 
-        <input id="numberSelectionInput" class="number-selection-input" type="number" min="1" max="20" placeholder="1-20">
-
-        <div id="numberSelectionError" class="number-selection-error hidden"></div>
-
-        <button id="confirmNumberBtn" type="button" class="number-selection-button">
-            Confirm Number
-        </button>
-
         <div class="number-selection-list">
             ${game.players.map((listedPlayer, index) => {
-        const isCurrent = index === game.numberSelectionIndex;
-        const hasNumber = listedPlayer.number !== null;
-
-        return `
+                const isCurrent = index === game.numberSelectionIndex;
+                const hasNumber = listedPlayer.number !== null;
+                return `
                     <div class="number-selection-player ${isCurrent ? "current" : ""}">
                         <span>${index + 1}. ${listedPlayer.name}</span>
                         <strong>${hasNumber ? listedPlayer.number : isCurrent ? "Now" : "Waiting"}</strong>
                     </div>
                 `;
-    }).join("")}
+            }).join("")}
         </div>
     `;
 
-    gameBoard.appendChild(wrapper);
-
-    const input = document.getElementById("numberSelectionInput");
-    const confirmButton = document.getElementById("confirmNumberBtn");
-    const errorBox = document.getElementById("numberSelectionError");
-
-    input.focus();
-
-    function confirmNumber() {
-        const number = Number(input.value);
-        const result = game.confirmPlayerNumber(number);
-
-        if (!result.success) {
-            errorBox.textContent = result.message;
-            errorBox.classList.remove("hidden");
-            input.select();
-            return;
-        }
-
-        renderApp(game, actions);
-    }
-
-    confirmButton.addEventListener("click", confirmNumber);
-
-    input.addEventListener("keydown", event => {
-        if (event.key === "Enter") {
-            confirmNumber();
-        }
+    const kp = makeKeypad({
+        maxValue: 20,
+        maxDigits: 2,
+        minValue: 1,
+        showMiss: false,
+        emptyIsZero: false,
+        placeholder: "–",
+        submitLabel: "Confirm Number",
+        onSubmit: (number) => {
+            const result = game.confirmPlayerNumber(number);
+            if (!result.success) {
+                kp.showError(result.message);
+                return;
+            }
+            renderApp(game, actions);
+        },
     });
+
+    const list = wrapper.querySelector(".number-selection-list");
+    wrapper.insertBefore(kp.el, list);
+    gameBoard.appendChild(wrapper);
 }
 
 function renderGameBoard(game, actions = {}) {
@@ -1479,43 +1458,23 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
         const totalArea = document.createElement("div");
         totalArea.classList.add("checkout-total-area");
 
-        const totalRow = document.createElement("div");
-        totalRow.classList.add("checkout-total-row");
-
-        const totalInput = document.createElement("input");
-        totalInput.type = "number";
-        totalInput.classList.add("checkout-total-input");
-        totalInput.min = "0";
-        totalInput.max = "180";
-        totalInput.placeholder = "0 – 180";
-        totalInput.autocomplete = "off";
-        totalInput.inputMode = "numeric";
-        totalInput.pattern = "[0-9]*";
-
-        const submitBtn = document.createElement("button");
-        submitBtn.type = "button";
-        submitBtn.classList.add("checkout-submit-btn");
-        submitBtn.textContent = "Submit";
-
-        const handleSubmit = () => {
-            const raw = totalInput.value.trim();
-            const score = raw === "" ? 0 : Math.max(0, Math.min(180, Math.round(Number(raw) || 0)));
-            checkoutEngine.submitTotalScore(score);
-            totalInput.value = "";
-            renderCheckoutMode(checkoutEngine, actions);
-            scrollCheckoutToTop();
-        };
-
-        submitBtn.addEventListener("click", handleSubmit);
-        totalInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") handleSubmit();
+        const kp = makeKeypad({
+            maxValue: 180,
+            maxDigits: 3,
+            minValue: 0,
+            showMiss: false,
+            emptyIsZero: true,
+            placeholder: "–",
+            submitLabel: "Submit",
+            onSubmit: (score) => {
+                checkoutEngine.submitTotalScore(score);
+                renderCheckoutMode(checkoutEngine, actions);
+                scrollCheckoutToTop();
+            },
         });
+        totalArea.appendChild(kp.el);
 
-        totalRow.appendChild(totalInput);
-        totalRow.appendChild(submitBtn);
-        totalArea.appendChild(totalRow);
-
-        // Quick score shortcuts
+        // Quick score shortcuts — setValue pre-fills the keypad; user still confirms
         const quickBtns = document.createElement("div");
         quickBtns.classList.add("checkout-quick-btns");
         [0, 26, 41, 60, 100].forEach(val => {
@@ -1523,10 +1482,7 @@ function renderCheckoutMode(checkoutEngine, actions = {}) {
             btn.type = "button";
             btn.classList.add("checkout-quick-btn");
             btn.textContent = val;
-            btn.addEventListener("click", () => {
-                totalInput.value = val;
-                totalInput.focus();
-            });
+            btn.addEventListener("click", () => kp.setValue(val));
             quickBtns.appendChild(btn);
         });
         totalArea.appendChild(quickBtns);

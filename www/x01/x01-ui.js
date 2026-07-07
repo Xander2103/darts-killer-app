@@ -1,5 +1,7 @@
 // www/x01/x01-ui.js
 
+import { makeKeypad } from "../shared/custom-keypad.js";
+
 const setupPanel = document.getElementById("setupPanel");
 const gamePanel = document.getElementById("gamePanel");
 const gameBoard = document.getElementById("gameBoard");
@@ -9,7 +11,6 @@ let _setupState = null;
 let _inputModeDropdownOpen = false;
 let _addPlayerPendingTarget = null; // { type: "individual"|"team", teamIndex: number|null }
 let _addPlayerPendingName = "";
-let _typedScore = ""; // custom keypad state — no native input needed
 
 function freshSetupState() {
     return {
@@ -33,7 +34,6 @@ export function clearX01SetupState() {
     _addPlayerPendingTarget = null;
     _addPlayerPendingName = "";
     _inputModeDropdownOpen = false;
-    _typedScore = "";
 }
 
 export function renderX01Mode(engine, actions = {}) {
@@ -605,7 +605,25 @@ function _renderGame(engine, actions) {
         screen.appendChild(_makeDartTracker(engine));
         screen.appendChild(_makeDartInputCard(engine, actions));
     } else {
-        screen.appendChild(_makeKeypad(engine, actions));
+        const kp = makeKeypad({
+            maxValue: 180,
+            maxDigits: 3,
+            minValue: 0,
+            showMiss: true,
+            emptyIsZero: true,
+            placeholder: "–",
+            submitLabel: "Enter Score",
+            onSubmit: (val) => {
+                engine.submitScore(val);
+                if (typeof actions.onRender === "function") actions.onRender();
+            },
+            onUndo: () => {
+                engine.undo();
+                if (typeof actions.onRender === "function") actions.onRender();
+            },
+            undoDisabled: engine.history.length === 0,
+        });
+        screen.appendChild(kp.el);
     }
 
     if (engine.turnLog.length > 0) {
@@ -735,124 +753,6 @@ function _makeActivePlayerCard(engine) {
 
         card.appendChild(hint);
     }
-
-    return card;
-}
-
-// ─── TOTAL MODE: CUSTOM KEYPAD (no native input — prevents iOS keyboard/scroll) ─
-
-function _makeKeypad(engine, actions) {
-    const card = document.createElement("div");
-    card.className = "x01-keypad";
-
-    // Score display — a div, never focused, never triggers iOS keyboard
-    const display = document.createElement("div");
-    display.className = "x01-keypad-display" + (_typedScore ? "" : " x01-keypad-display-empty");
-    display.textContent = _typedScore || "–";
-
-    function refreshDisplay() {
-        display.textContent = _typedScore || "–";
-        display.className = "x01-keypad-display" + (_typedScore ? "" : " x01-keypad-display-empty");
-    }
-
-    function addDigit(digit) {
-        // Replace a lone "0" so we never get leading zeros (e.g. "01")
-        const candidate = (_typedScore === "0") ? digit : (_typedScore + digit);
-        const num = parseInt(candidate, 10);
-        if (candidate.length > 3 || num > 180) return;
-        _typedScore = candidate;
-        refreshDisplay();
-    }
-
-    function submit() {
-        const val = _typedScore === "" ? 0 : parseInt(_typedScore, 10);
-        if (isNaN(val) || val < 0 || val > 180) return;
-        _typedScore = "";
-        engine.submitScore(val);
-        if (typeof actions.onRender === "function") actions.onRender();
-    }
-
-    card.appendChild(display);
-
-    // DEBUG — remove after iOS confirmation
-    const _dbg = document.createElement("div");
-    _dbg.id = "x01-keypad-debug";
-    _dbg.textContent = "✓ CUSTOM KEYPAD ACTIVE";
-    _dbg.style.cssText = "text-align:center;font-size:0.7rem;font-weight:800;letter-spacing:0.05em;color:#86efac;padding:2px 0 4px;";
-    card.appendChild(_dbg);
-
-    // Digit grid: 1–9
-    const grid = document.createElement("div");
-    grid.className = "x01-keypad-grid";
-    for (const d of ["1","2","3","4","5","6","7","8","9"]) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "x01-keypad-btn";
-        btn.textContent = d;
-        btn.addEventListener("click", () => addDigit(d));
-        grid.appendChild(btn);
-    }
-    card.appendChild(grid);
-
-    // Bottom row: Miss | 0 | ⌫
-    const bottomRow = document.createElement("div");
-    bottomRow.className = "x01-keypad-grid";
-
-    const missBtn = document.createElement("button");
-    missBtn.type = "button";
-    missBtn.className = "x01-keypad-btn x01-keypad-miss-btn";
-    missBtn.textContent = "Miss";
-    missBtn.addEventListener("click", () => {
-        _typedScore = "";
-        engine.submitScore(0);
-        if (typeof actions.onRender === "function") actions.onRender();
-    });
-
-    const zeroBtn = document.createElement("button");
-    zeroBtn.type = "button";
-    zeroBtn.className = "x01-keypad-btn";
-    zeroBtn.textContent = "0";
-    zeroBtn.addEventListener("click", () => addDigit("0"));
-
-    const backBtn = document.createElement("button");
-    backBtn.type = "button";
-    backBtn.className = "x01-keypad-btn x01-keypad-backspace-btn";
-    backBtn.textContent = "⌫";
-    backBtn.addEventListener("click", () => {
-        _typedScore = _typedScore.slice(0, -1);
-        refreshDisplay();
-    });
-
-    bottomRow.appendChild(missBtn);
-    bottomRow.appendChild(zeroBtn);
-    bottomRow.appendChild(backBtn);
-    card.appendChild(bottomRow);
-
-    // Action row: Enter Score | Undo
-    const actionRow = document.createElement("div");
-    actionRow.className = "x01-action-row";
-    actionRow.style.marginTop = "0.4rem";
-
-    const enterBtn = document.createElement("button");
-    enterBtn.type = "button";
-    enterBtn.className = "x01-btn-enter";
-    enterBtn.textContent = "Enter Score";
-    enterBtn.addEventListener("click", submit);
-
-    const undoBtn = document.createElement("button");
-    undoBtn.type = "button";
-    undoBtn.className = "x01-btn-undo";
-    undoBtn.textContent = "↶ Undo";
-    undoBtn.disabled = engine.history.length === 0;
-    undoBtn.addEventListener("click", () => {
-        _typedScore = "";
-        engine.undo();
-        if (typeof actions.onRender === "function") actions.onRender();
-    });
-
-    actionRow.appendChild(enterBtn);
-    actionRow.appendChild(undoBtn);
-    card.appendChild(actionRow);
 
     return card;
 }

@@ -1,5 +1,7 @@
 // www/duel/duel-ui.js
 
+import { makeKeypad } from "../shared/custom-keypad.js";
+
 const setupPanel = document.getElementById("setupPanel");
 const gamePanel = document.getElementById("gamePanel");
 const gameBoard = document.getElementById("gameBoard");
@@ -63,21 +65,6 @@ function _renderNumberSelection(duelEngine, actions) {
     help.appendChild(document.createElement("br"));
     help.appendChild(document.createTextNode("Enter the number you hit."));
 
-    const input = document.createElement("input");
-    input.type = "number";
-    input.min = 1;
-    input.max = 20;
-    input.placeholder = "1–20";
-    input.classList.add("duel-number-input");
-
-    const errorBox = document.createElement("div");
-    errorBox.classList.add("duel-number-error", "hidden");
-
-    const confirmBtn = document.createElement("button");
-    confirmBtn.type = "button";
-    confirmBtn.classList.add("duel-confirm-button");
-    confirmBtn.textContent = "Confirm Number";
-
     const playerList = document.createElement("div");
     playerList.classList.add("duel-ns-list");
     duelEngine.players.forEach((p, i) => {
@@ -93,33 +80,33 @@ function _renderNumberSelection(duelEngine, actions) {
         playerList.appendChild(row);
     });
 
-    function doConfirm() {
-        const result = duelEngine.confirmPlayerNumber(input.value);
-        if (!result.success) {
-            errorBox.textContent = result.message;
-            errorBox.classList.remove("hidden");
-            input.select();
-            return;
-        }
-        if (typeof actions.onRender === "function") actions.onRender();
-    }
-
-    confirmBtn.addEventListener("click", doConfirm);
-    input.addEventListener("keydown", e => { if (e.key === "Enter") doConfirm(); });
+    const kp = makeKeypad({
+        maxValue: 20,
+        maxDigits: 2,
+        minValue: 1,
+        showMiss: false,
+        emptyIsZero: false,
+        placeholder: "–",
+        submitLabel: "Confirm Number",
+        onSubmit: (number) => {
+            const result = duelEngine.confirmPlayerNumber(number);
+            if (!result.success) {
+                kp.showError(result.message);
+                return;
+            }
+            if (typeof actions.onRender === "function") actions.onRender();
+        },
+    });
 
     card.appendChild(badgeRow);
     card.appendChild(progress);
     card.appendChild(heading);
     card.appendChild(help);
-    card.appendChild(input);
-    card.appendChild(errorBox);
-    card.appendChild(confirmBtn);
+    card.appendChild(kp.el);
     card.appendChild(playerList);
 
     screen.appendChild(card);
     gameBoard.appendChild(screen);
-
-    input.focus();
 }
 
 function _renderPlaying(duelEngine, actions) {
