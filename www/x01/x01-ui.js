@@ -9,6 +9,7 @@ let _setupState = null;
 let _inputModeDropdownOpen = false;
 let _addPlayerPendingTarget = null; // { type: "individual"|"team", teamIndex: number|null }
 let _addPlayerPendingName = "";
+let _typedScore = ""; // custom keypad state — no native input needed
 
 function freshSetupState() {
     return {
@@ -32,6 +33,7 @@ export function clearX01SetupState() {
     _addPlayerPendingTarget = null;
     _addPlayerPendingName = "";
     _inputModeDropdownOpen = false;
+    _typedScore = "";
 }
 
 export function renderX01Mode(engine, actions = {}) {
@@ -603,7 +605,7 @@ function _renderGame(engine, actions) {
         screen.appendChild(_makeDartTracker(engine));
         screen.appendChild(_makeDartInputCard(engine, actions));
     } else {
-        screen.appendChild(_makeInputCard(engine, actions));
+        screen.appendChild(_makeKeypad(engine, actions));
     }
 
     if (engine.turnLog.length > 0) {
@@ -611,11 +613,6 @@ function _renderGame(engine, actions) {
     }
 
     gameBoard.appendChild(screen);
-
-    if (engine.inputMode === "total" && !_inputModeDropdownOpen) {
-        const input = gameBoard.querySelector(".x01-score-input");
-        if (input) setTimeout(() => input.focus(), 60);
-    }
 }
 
 function _makeScorebar(engine) {
@@ -742,52 +739,92 @@ function _makeActivePlayerCard(engine) {
     return card;
 }
 
-// ─── TOTAL MODE INPUT ─────────────────────────────────────────────────────────
+// ─── TOTAL MODE: CUSTOM KEYPAD (no native input — prevents iOS keyboard/scroll) ─
 
-function _makeInputCard(engine, actions) {
+function _makeKeypad(engine, actions) {
     const card = document.createElement("div");
-    card.className = "x01-input-card";
+    card.className = "x01-keypad";
 
-    const input = document.createElement("input");
-    input.type = "number";
-    input.min = "0";
-    input.max = "180";
-    input.placeholder = "Score (0–180)";
-    input.className = "x01-score-input";
-    input.inputMode = "numeric";
-    input.pattern = "[0-9]*";
+    // Score display — a div, never focused, never triggers iOS keyboard
+    const display = document.createElement("div");
+    display.className = "x01-keypad-display" + (_typedScore ? "" : " x01-keypad-display-empty");
+    display.textContent = _typedScore || "–";
+
+    function refreshDisplay() {
+        display.textContent = _typedScore || "–";
+        display.className = "x01-keypad-display" + (_typedScore ? "" : " x01-keypad-display-empty");
+    }
+
+    function addDigit(digit) {
+        // Replace a lone "0" so we never get leading zeros (e.g. "01")
+        const candidate = (_typedScore === "0") ? digit : (_typedScore + digit);
+        const num = parseInt(candidate, 10);
+        if (candidate.length > 3 || num > 180) return;
+        _typedScore = candidate;
+        refreshDisplay();
+    }
 
     function submit() {
-        const raw = input.value.trim();
-        const val = raw === "" ? 0 : parseInt(raw, 10);
-        if (isNaN(val)) return;
+        const val = _typedScore === "" ? 0 : parseInt(_typedScore, 10);
+        if (isNaN(val) || val < 0 || val > 180) return;
+        _typedScore = "";
         engine.submitScore(val);
-        input.value = "";
         if (typeof actions.onRender === "function") actions.onRender();
     }
 
-    input.addEventListener("keydown", e => {
-        if (e.key === "Enter") submit();
+    card.appendChild(display);
+
+    // Digit grid: 1–9
+    const grid = document.createElement("div");
+    grid.className = "x01-keypad-grid";
+    for (const d of ["1","2","3","4","5","6","7","8","9"]) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "x01-keypad-btn";
+        btn.textContent = d;
+        btn.addEventListener("click", () => addDigit(d));
+        grid.appendChild(btn);
+    }
+    card.appendChild(grid);
+
+    // Bottom row: Miss | 0 | ⌫
+    const bottomRow = document.createElement("div");
+    bottomRow.className = "x01-keypad-grid";
+
+    const missBtn = document.createElement("button");
+    missBtn.type = "button";
+    missBtn.className = "x01-keypad-btn x01-keypad-miss-btn";
+    missBtn.textContent = "Miss";
+    missBtn.addEventListener("click", () => {
+        _typedScore = "";
+        engine.submitScore(0);
+        if (typeof actions.onRender === "function") actions.onRender();
     });
 
-    // On iOS/Capacitor the keyboard overlays content (KeyboardResize.None).
-    // After keyboard animation (~300ms), scroll the card into view so the
-    // input stays visible above the keyboard without jumping the whole layout.
-    const _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const _isNative = typeof window.Capacitor !== "undefined" && !!window.Capacitor.isNativePlatform?.();
-    if (_isIOS && _isNative) {
-        input.addEventListener("focus", () => {
-            setTimeout(() => {
-                card.scrollIntoView({ block: "center", behavior: "smooth" });
-            }, 350);
-        });
-    }
+    const zeroBtn = document.createElement("button");
+    zeroBtn.type = "button";
+    zeroBtn.className = "x01-keypad-btn";
+    zeroBtn.textContent = "0";
+    zeroBtn.addEventListener("click", () => addDigit("0"));
 
-    card.appendChild(input);
+    const backBtn = document.createElement("button");
+    backBtn.type = "button";
+    backBtn.className = "x01-keypad-btn x01-keypad-backspace-btn";
+    backBtn.textContent = "⌫";
+    backBtn.addEventListener("click", () => {
+        _typedScore = _typedScore.slice(0, -1);
+        refreshDisplay();
+    });
 
-    // Row 1: Enter + Miss
-    const row1 = document.createElement("div");
-    row1.className = "x01-action-row";
+    bottomRow.appendChild(missBtn);
+    bottomRow.appendChild(zeroBtn);
+    bottomRow.appendChild(backBtn);
+    card.appendChild(bottomRow);
+
+    // Action row: Enter Score | Undo
+    const actionRow = document.createElement("div");
+    actionRow.className = "x01-action-row";
+    actionRow.style.marginTop = "0.4rem";
 
     const enterBtn = document.createElement("button");
     enterBtn.type = "button";
@@ -795,38 +832,20 @@ function _makeInputCard(engine, actions) {
     enterBtn.textContent = "Enter Score";
     enterBtn.addEventListener("click", submit);
 
-    const missBtn = document.createElement("button");
-    missBtn.type = "button";
-    missBtn.className = "x01-btn-miss";
-    missBtn.textContent = "Miss (0)";
-    missBtn.addEventListener("click", () => {
-        engine.submitScore(0);
-        input.value = "";
-        if (typeof actions.onRender === "function") actions.onRender();
-    });
-
-    row1.appendChild(enterBtn);
-    row1.appendChild(missBtn);
-    card.appendChild(row1);
-
-    // Row 2: Undo only (Next Turn removed — empty Enter Score counts as 0)
-    const row2 = document.createElement("div");
-    row2.className = "x01-action-row";
-    row2.style.marginTop = "0.3rem";
-
     const undoBtn = document.createElement("button");
     undoBtn.type = "button";
     undoBtn.className = "x01-btn-undo";
     undoBtn.textContent = "↶ Undo";
     undoBtn.disabled = engine.history.length === 0;
     undoBtn.addEventListener("click", () => {
+        _typedScore = "";
         engine.undo();
-        input.value = "";
         if (typeof actions.onRender === "function") actions.onRender();
     });
 
-    row2.appendChild(undoBtn);
-    card.appendChild(row2);
+    actionRow.appendChild(enterBtn);
+    actionRow.appendChild(undoBtn);
+    card.appendChild(actionRow);
 
     return card;
 }
