@@ -3,6 +3,10 @@
   "appName": "Killer Darts",
   "webDir": "www",
   "plugins": {
+    "Keyboard": {
+      "resize": "none",
+      "resizeOnFullScreen": true
+    },
     "SplashScreen": {
       "launchShowDuration": 500,
       "launchAutoHide": true,

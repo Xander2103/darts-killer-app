@@ -770,6 +770,19 @@ function _makeInputCard(engine, actions) {
         if (e.key === "Enter") submit();
     });
 
+    // On iOS/Capacitor the keyboard overlays content (KeyboardResize.None).
+    // After keyboard animation (~300ms), scroll the card into view so the
+    // input stays visible above the keyboard without jumping the whole layout.
+    const _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const _isNative = typeof window.Capacitor !== "undefined" && !!window.Capacitor.isNativePlatform?.();
+    if (_isIOS && _isNative) {
+        input.addEventListener("focus", () => {
+            setTimeout(() => {
+                card.scrollIntoView({ block: "center", behavior: "smooth" });
+            }, 350);
+        });
+    }
+
     card.appendChild(input);
 
     // Row 1: Enter + Miss
