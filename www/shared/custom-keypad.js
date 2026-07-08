@@ -5,9 +5,9 @@
 // Returns { el, setValue, getValue, clear, showError }.
 //
 // PERFORMANCE CONTRACT:
-//   Digit taps / backspace / setValue  →  update ONLY the display div inside el.
-//   onSubmit / onUndo callbacks        →  caller decides whether to rerender.
-//   The keypad NEVER triggers a full-screen rerender on digit press.
+//   Digit / backspace / setValue  →  update ONLY display.textContent (O(1), no rerender).
+//   onSubmit / onUndo             →  caller decides whether to rerender the game screen.
+//   Submit lock                   →  blocks ONLY Submit/Miss/Undo, never digits or backspace.
 
 export function makeKeypad({
     maxValue     = 180,
@@ -25,15 +25,15 @@ export function makeKeypad({
         throw new Error("makeKeypad: onSubmit must be a function");
     }
 
-    // ── Internal state (closure — never stored on DOM) ────────────────────────
+    // ── Internal state ────────────────────────────────────────────────────────
     let _typed = "";
-    let _submitting = false; // submit-lock: prevents double-fire on fast tap
+    let _submitting = false; // blocks Submit/Miss/Undo only — never digits
 
     // ── Root element ──────────────────────────────────────────────────────────
     const el = document.createElement("div");
     el.className = "ck-keypad";
 
-    // ── Display (pointer-events: none in CSS, never focusable) ───────────────
+    // ── Display (pointer-events: none, never focusable) ───────────────────────
     const display = document.createElement("div");
     display.className = "ck-display ck-display--empty";
     display.textContent = placeholder;
@@ -48,8 +48,9 @@ export function makeKeypad({
     const grid = document.createElement("div");
     grid.className = "ck-grid";
     for (const d of ["1","2","3","4","5","6","7","8","9"]) {
-        const btn = _btn(d, "ck-btn");
-        btn.addEventListener("click", () => _addDigit(d));
+        const btn = _mkBtn(d, "ck-btn");
+        // pointerdown: fires the instant the finger touches — no 300ms click delay
+        _addFastHandler(btn, () => _addDigit(d));
         grid.appendChild(btn);
     }
     el.appendChild(grid);
@@ -59,7 +60,8 @@ export function makeKeypad({
     bottomRow.className = "ck-grid";
 
     if (showMiss) {
-        const missBtn = _btn("Miss", "ck-btn ck-btn--miss");
+        const missBtn = _mkBtn("Miss", "ck-btn ck-btn--miss");
+        // Miss submits a game action → keep click (prevents accidental fire during scroll)
         missBtn.addEventListener("click", () => {
             if (_submitting) return;
             _submitting = true;
@@ -71,12 +73,12 @@ export function makeKeypad({
         bottomRow.appendChild(missBtn);
     }
 
-    const zeroBtn = _btn("0", "ck-btn" + (showMiss ? "" : " ck-btn--zero-wide"));
-    zeroBtn.addEventListener("click", () => _addDigit("0"));
+    const zeroBtn = _mkBtn("0", "ck-btn" + (showMiss ? "" : " ck-btn--zero-wide"));
+    _addFastHandler(zeroBtn, () => _addDigit("0")); // digit — fast path
     bottomRow.appendChild(zeroBtn);
 
-    const backBtn = _btn("⌫", "ck-btn ck-btn--back");
-    backBtn.addEventListener("click", () => {
+    const backBtn = _mkBtn("⌫", "ck-btn ck-btn--back");
+    _addFastHandler(backBtn, () => {            // backspace — fast path
         _typed = _typed.slice(0, -1);
         _refreshDisplay();
         _clearError();
@@ -85,13 +87,13 @@ export function makeKeypad({
     el.appendChild(bottomRow);
 
     // ── Submit button ─────────────────────────────────────────────────────────
-    const submitBtn = _btn(submitLabel, "ck-submit");
+    const submitBtn = _mkBtn(submitLabel, "ck-submit");
     submitBtn.addEventListener("click", _doSubmit);
     el.appendChild(submitBtn);
 
     // ── Optional Undo button ──────────────────────────────────────────────────
     if (typeof onUndo === "function") {
-        const undoBtn = _btn("↶ Undo", "ck-undo");
+        const undoBtn = _mkBtn("↶ Undo", "ck-undo");
         undoBtn.disabled = undoDisabled;
         undoBtn.addEventListener("click", () => {
             if (_submitting) return;
@@ -108,11 +110,10 @@ export function makeKeypad({
 
     function _addDigit(d) {
         _clearError();
-        // Replace a lone "0" to prevent leading-zero strings like "01"
         const candidate = (_typed === "0") ? d : (_typed + d);
         if (candidate.length > maxDigits || parseInt(candidate, 10) > maxValue) return;
         _typed = candidate;
-        _refreshDisplay(); // updates ONE div — zero rerender cost
+        _refreshDisplay(); // single textContent write — no rerender
     }
 
     function _doSubmit() {
@@ -124,18 +125,14 @@ export function makeKeypad({
             return;
         }
         _submitting = true;
-        const snapshot = _typed;
         _typed = "";
         _refreshDisplay();
+        // Release lock after one microtask — blocks same-tick double-fire only
         try { onSubmit(n); } finally {
-            // Release after one microtask so a synchronous double-tap from the
-            // same event loop tick is swallowed, but normal fast tapping works.
             Promise.resolve().then(() => { _submitting = false; });
         }
-        void snapshot; // silence linter
     }
 
-    // Updates ONLY the display text — O(1), no DOM diffing, no rerender trigger
     function _refreshDisplay() {
         if (_typed) {
             display.textContent = _typed;
@@ -168,11 +165,34 @@ export function makeKeypad({
     return { el, setValue, getValue, clear, showError };
 }
 
-// ── Internal: create a button element ────────────────────────────────────────
-function _btn(label, className) {
+// ── Internal: create a <button type="button"> ─────────────────────────────────
+function _mkBtn(label, className) {
     const b = document.createElement("button");
     b.type = "button";
     b.className = className;
     b.textContent = label;
     return b;
+}
+
+// ── Internal: fast-response handler for digit/backspace buttons ───────────────
+//
+// Strategy: pointerdown fires the instant the finger touches the screen.
+// preventDefault() suppresses the 300ms tap-classification delay and prevents
+// focus changes. A dedup flag prevents double-fire when both pointerdown
+// and a subsequent click event both arrive (browser-dependent).
+//
+// For submit/miss/undo we keep plain click (avoids accidental fire during scroll).
+function _addFastHandler(btn, handler) {
+    let _handledByPointer = false;
+    btn.addEventListener("pointerdown", (e) => {
+        e.preventDefault();          // instant response; kills tap delay + focus change
+        _handledByPointer = true;
+        handler();
+    });
+    // Fallback: click fires if pointerdown didn't (old browsers / non-pointer envs)
+    // Also guards against browsers that fire click even after preventDefault on pointerdown.
+    btn.addEventListener("click", () => {
+        if (_handledByPointer) { _handledByPointer = false; return; }
+        handler();
+    });
 }

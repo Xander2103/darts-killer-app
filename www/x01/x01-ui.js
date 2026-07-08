@@ -627,6 +627,13 @@ function _renderGame(engine, actions) {
     }
 
     gameBoard.appendChild(screen);
+
+    // After every render, reset scroll to show the scorebar + keypad at the top.
+    // .screen-body is the only scrollable element; window.scrollTo has no effect here.
+    requestAnimationFrame(() => {
+        const sb = document.querySelector("#classicScreen .screen-body");
+        if (sb) sb.scrollTop = 0;
+    });
 }
 
 function _makeScorebar(engine) {

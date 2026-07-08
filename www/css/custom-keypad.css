@@ -1,26 +1,27 @@
 /* www/css/custom-keypad.css
-   Shared in-app numeric keypad — used across gameplay screens.
+   Shared in-app numeric keypad — used across all gameplay screens.
    No native <input>, no iOS keyboard, no viewport shift.
    Layout: 1 2 3 / 4 5 6 / 7 8 9 / [Miss?] 0 ⌫
+   Compact: smaller buttons/display to leave room for game scoreboard.
 */
 
 .ck-keypad {
     background: var(--bg-card);
     border: 1px solid var(--border-card);
     border-radius: 14px;
-    padding: 0.75rem;
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.28rem;
     user-select: none;
     -webkit-user-select: none;
 }
 
-/* ── Display ─────────────────────────────────────────────── */
+/* ── Display ──────────────────────────────────────────────── */
 .ck-display {
-    min-height: 64px;
-    padding: 0.55rem 0.75rem;
-    font-size: 2.4rem;
+    min-height: 46px;
+    padding: 0.25rem 0.6rem;
+    font-size: 1.85rem;
     font-weight: 800;
     text-align: center;
     background: transparent;
@@ -31,38 +32,40 @@
     align-items: center;
     justify-content: center;
     letter-spacing: -0.02em;
-    transition: color 0.08s;
     box-sizing: border-box;
     pointer-events: none;  /* never focusable */
 }
 
 .ck-display--empty {
     color: var(--text-muted);
-    font-size: 1.6rem;
+    font-size: 1.35rem;
     font-weight: 400;
 }
 
-/* ── Inline error ────────────────────────────────────────── */
+/* ── Inline error ─────────────────────────────────────────── */
 .ck-error {
     color: #f87171;
-    font-size: 0.78rem;
-    min-height: 1em;
+    font-size: 0.75rem;
     text-align: center;
     padding: 0 0.2rem;
+    min-height: 0;
+    line-height: 1.2;
+    /* zero height when empty — no wasted space */
 }
+.ck-error:empty { display: none; }
 
-/* ── Digit grid: 3 columns ───────────────────────────────── */
+/* ── Digit grid: 3 columns ────────────────────────────────── */
 .ck-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.38rem;
+    gap: 0.28rem;
 }
 
-/* ── All keypad buttons ──────────────────────────────────── */
+/* ── All keypad buttons ───────────────────────────────────── */
 .ck-btn {
-    min-height: 52px;
-    padding: 0.5rem 0.2rem;
-    font-size: 1.35rem;
+    min-height: 46px;
+    padding: 0.28rem 0.2rem;
+    font-size: 1.25rem;
     font-weight: 700;
     border: 1px solid var(--border-card);
     border-radius: 10px;
@@ -71,17 +74,20 @@
     cursor: pointer;
     font-family: inherit;
     text-align: center;
+    /* No transform in transition — transform causes GPU compositing overhead
+       that adds perceptible latency on iOS. Background-only is instant. */
+    transition: background 0.05s;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     -webkit-user-select: none;
-    transition: background 0.08s, transform 0.06s;
     box-sizing: border-box;
 }
 
 .ck-btn:active {
-    background: rgba(34, 197, 94, 0.20);
-    transform: scale(0.94);
+    background: rgba(34, 197, 94, 0.22);
+    /* NO transform: scale() — eliminated because it caused layout/compositing
+       overhead that made rapid digit taps feel delayed on iOS. */
 }
 
 /* Miss button */
@@ -89,12 +95,9 @@
     border-color: rgba(248, 113, 113, 0.35);
     background: rgba(248, 113, 113, 0.07);
     color: #f87171;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
-.ck-btn--miss:active {
-    background: rgba(248, 113, 113, 0.24);
-    transform: scale(0.94);
-}
+.ck-btn--miss:active { background: rgba(248, 113, 113, 0.24); }
 
 /* Backspace button */
 .ck-btn--back {
@@ -102,21 +105,18 @@
     background: rgba(251, 191, 36, 0.06);
     color: #fbbf24;
 }
-.ck-btn--back:active {
-    background: rgba(251, 191, 36, 0.22);
-    transform: scale(0.94);
-}
+.ck-btn--back:active { background: rgba(251, 191, 36, 0.22); }
 
 /* 0 spans 2 cols when Miss is hidden */
 .ck-btn--zero-wide {
     grid-column: span 2;
 }
 
-/* ── Submit / Enter ──────────────────────────────────────── */
+/* ── Submit / Enter ───────────────────────────────────────── */
 .ck-submit {
     width: 100%;
-    padding: 0.78rem;
-    font-size: 1rem;
+    padding: 0.58rem;
+    font-size: 0.95rem;
     font-weight: 800;
     border: none;
     border-radius: 10px;
@@ -124,23 +124,20 @@
     color: #fff;
     cursor: pointer;
     font-family: inherit;
+    transition: background 0.1s;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     -webkit-user-select: none;
-    transition: background 0.1s;
 }
 .ck-submit:active  { background: rgba(34, 197, 94, 1); }
-.ck-submit:disabled {
-    opacity: 0.45;
-    cursor: default;
-}
+.ck-submit:disabled { opacity: 0.45; cursor: default; }
 
-/* ── Undo ────────────────────────────────────────────────── */
+/* ── Undo ─────────────────────────────────────────────────── */
 .ck-undo {
     width: 100%;
-    padding: 0.65rem;
-    font-size: 0.85rem;
+    padding: 0.45rem;
+    font-size: 0.82rem;
     font-weight: 700;
     border: 1px solid var(--border-card);
     border-radius: 10px;
@@ -148,17 +145,14 @@
     color: var(--text-muted);
     cursor: pointer;
     font-family: inherit;
+    transition: background 0.1s, color 0.1s;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     -webkit-user-select: none;
-    transition: background 0.1s, color 0.1s;
 }
 .ck-undo:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-main);
 }
-.ck-undo:disabled {
-    opacity: 0.28;
-    cursor: default;
-}
+.ck-undo:disabled { opacity: 0.28; cursor: default; }

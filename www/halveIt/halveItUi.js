@@ -40,6 +40,7 @@ export function renderHalveItMode(halveItGame, actions = {}) {
     if (halveItGame.isFinished) {
         screen.appendChild(createFinishedPanel(halveItGame, actions));
         gameBoard.appendChild(screen);
+        _resetScroll();
         return;
     }
 
@@ -61,6 +62,17 @@ export function renderHalveItMode(halveItGame, actions = {}) {
     screen.appendChild(createMiniScoreboard(halveItGame));
 
     gameBoard.appendChild(screen);
+    _resetScroll();
+}
+
+// After every render, reset scroll so the player/round/total/contract cards
+// and keypad settle at the top. .screen-body is the only scrollable element
+// (shared by all game modes); window.scrollTo has no effect here.
+function _resetScroll() {
+    requestAnimationFrame(() => {
+        const sb = document.querySelector("#classicScreen .screen-body");
+        if (sb) sb.scrollTop = 0;
+    });
 }
 
 function createPlayerContractCard(halveItGame, round, player, actions) {
