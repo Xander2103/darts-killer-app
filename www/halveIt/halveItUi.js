@@ -29,6 +29,14 @@ export function renderHalveItMode(halveItGame, actions = {}) {
         };
     }
 
+    // Capture before wiping gameBoard: if an active round card is already
+    // showing, this render is a mid-game update (dart/submit/undo) and must
+    // NOT move the scroll position. Only a fresh entry into Halve It (from
+    // setup, or from the finished screen on a rematch) should settle at top.
+    // (.halve-it-main-card only exists during active play, not on the
+    // finished screen, so a rematch after finishing is still "fresh".)
+    const isFreshEntry = !gameBoard.querySelector(".halve-it-main-card");
+
     gameBoard.innerHTML = "";
 
     const round = actions.getCurrentHalveItRound(halveItGame);
@@ -62,12 +70,17 @@ export function renderHalveItMode(halveItGame, actions = {}) {
     screen.appendChild(createMiniScoreboard(halveItGame));
 
     gameBoard.appendChild(screen);
-    _resetScroll();
+
+    if (isFreshEntry) {
+        _resetScroll();
+    }
 }
 
-// After every render, reset scroll so the player/round/total/contract cards
-// and keypad settle at the top. .screen-body is the only scrollable element
-// (shared by all game modes); window.scrollTo has no effect here.
+// Reset scroll so the player/round/total/contract cards and keypad settle
+// at the top. Only called on fresh entry into Halve It (not on every
+// mid-game rerender) so submitting a score doesn't jump the screen.
+// .screen-body is the only scrollable element (shared by all game modes);
+// window.scrollTo has no effect here.
 function _resetScroll() {
     requestAnimationFrame(() => {
         const sb = document.querySelector("#classicScreen .screen-body");
