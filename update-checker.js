@@ -8,7 +8,7 @@
 //      name is known, e.g. https://play.google.com/store/apps/details?id=be.vanmalderstudio.dartskiller
 
 // APP_VERSION must match the version you ship in the stores.
-export const APP_VERSION = "1.0.0";
+export const APP_VERSION = "4.0.0";
 
 const UPDATE_JSON_URL = "https://vanmalderstudio.be/darts-killer/update.json";
 const DISMISSED_KEY = "dismissedUpdateVersion";
